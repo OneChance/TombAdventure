@@ -9,15 +9,21 @@ public class GroundGeneration : MonoBehaviour
 	public int maxBlockNum = 20;
 	public int maxItemNum = 10;
 	public int minItemNum = 3;
-
 	public GameObject[] groundPrefabs;
+	public GameObject[] itemPrefabs;
 	public Transform parent;
+	public Transform player;
 	private List<Vector3> ablePos;
 	private List<Vector3> addedPos;
 	private float blockX;
 	private float blockY;
 	private List<GameObject> blockList;
+	private List<GameObject> groundItemList;
 	private Vector3 genPos;
+	private float border = 2.5f;
+	private float playerWidth;
+	private float playerHeight;
+	private Vector3 playerPos;
 
 	void Awake ()
 	{
@@ -25,22 +31,76 @@ public class GroundGeneration : MonoBehaviour
 		addedPos = new List<Vector3> ();
 		blockList = new List<GameObject> ();
 		genPos = new Vector3 (0, 0, 0);
+		groundItemList = new List<GameObject> ();
+		playerPos = player.position;
+		playerWidth = player.GetComponent<SpriteRenderer> ().bounds.size.x;
+		playerHeight = player.GetComponent<SpriteRenderer> ().bounds.size.y;
 	}
 	
 	void Start ()
 	{
 		GenerateGround ();
 		ReplaceTex ();
-		GenerateGroundItem();
+		GenerateGroundItem ();
 	}
 
-	private void GenerateGroundItem(){
+	private void GenerateGroundItem ()
+	{
 		for (int i=0; i<blockList.Count; i++) {
 			GameObject block = blockList [i];			
 			Vector3 blockPos = block.transform.position;
 
+			//the num of the ground
+			int itemNum = Random.Range(minItemNum,maxItemNum);
 
+			for(int j=0;j<itemNum;j++){
+				//the item will to be generated
+				GameObject item = itemPrefabs[Random.Range (0, itemPrefabs.Length - 1)];
+				Vector3 itemPos = getRandomPos (blockPos, item);
+				GameObject itemO = Instantiate (item, itemPos, Quaternion.identity) as GameObject;
+				itemO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
+				groundItemList.Add(itemO);
+			}
 		}
+	}
+
+	private Vector3 getRandomPos (Vector3 blockPos, GameObject item)
+	{
+		Vector3 randomPos = getValidPos (blockPos, item);
+		while (randomPos==new Vector3(-999,-999,-999)) {
+			randomPos = getValidPos (blockPos,item);
+		}
+		return randomPos;
+	}
+
+	private Vector3 getValidPos (Vector3 blockPos, GameObject item)
+	{
+
+		float itemWidth = item.GetComponent<SpriteRenderer> ().bounds.size.x;
+		float itemHeight = item.GetComponent<SpriteRenderer> ().bounds.size.y;
+
+		float pX = Random.Range (blockPos.x - blockX / 2 + border, blockPos.x + blockX / 2 - border);
+		float pY = Random.Range (blockPos.x - blockX / 2 + border, blockPos.x + blockX / 2 - border);
+
+		Vector3 pos = new Vector3 (pX, pY, blockPos.z);
+
+		//check the pos is valid,there is no player,no ground item
+//		for (int i=0; i<groundItemList.Count; i++) {
+//			GameObject groundItem = groundItemList [i];
+//			Vector3 groundItemPos = groundItem.transform.position;
+//
+//			float groundItemWidth = groundItem.GetComponent<SpriteRenderer> ().bounds.size.x;
+//			float groundItemHeight = groundItem.GetComponent<SpriteRenderer> ().bounds.size.y;
+//
+//			if ((pos.x < groundItemPos.x + (groundItemWidth / 2 + itemWidth / 2) && pos.x > groundItemPos.x - (groundItemWidth / 2 + itemWidth / 2)) || 
+//				(pos.y < groundItemPos.y + (groundItemHeight / 2 + itemHeight / 2) && pos.y > groundItemPos.x - (groundItemHeight / 2 + itemHeight / 2))||
+//			    (pos.x < playerPos.x + (playerWidth / 2 + itemWidth / 2) && pos.x > playerPos.x - (playerWidth / 2 + itemWidth / 2)) || 
+//			    (pos.y < playerPos.y + (playerHeight / 2 + itemHeight / 2) && pos.y > playerPos.x - (playerHeight / 2 + itemHeight / 2))) {
+//				return new Vector3 (-999, -999, -999);
+//			}
+//		}
+
+		return pos;
 	}
 
 	private void ReplaceTex ()
