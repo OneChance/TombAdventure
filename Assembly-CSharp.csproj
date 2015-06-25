@@ -46,9 +46,10 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\_scripts\_game\EnemyAI.cs" />
      <Compile Include="Assets\_scripts\_game\FollowPlayer.cs" />
-     <Compile Include="Assets\_scripts\_game\GroundGeneration.cs" />
      <Compile Include="Assets\_scripts\_game\PlayerAction.cs" />
+     <Compile Include="Assets\_scripts\_game\SceneGen.cs" />
      <Compile Include="Assets\_scripts\_ui\UI_Input.cs" />
      <Compile Include="Assets\_scripts\_util\Zhstar_2D_Common.cs" />
      <Compile Include="Assets\_scripts\_util\Zhstar_MathUtil.cs" />
