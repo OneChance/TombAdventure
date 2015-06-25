@@ -1,7 +1,2 @@
-<<<<<<< HEAD
 unityRebuildLibraryVersion: 11
 unityForwardCompatibleVersion: 40
-=======
-unityRebuildLibraryVersion: 11
-unityForwardCompatibleVersion: 40
->>>>>>> df3a749793eb979342207fdc80a81c2e118ebf2d

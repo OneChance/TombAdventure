@@ -2,28 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class GroundGeneration : MonoBehaviour
+public class SceneGen: MonoBehaviour
 {
 
 	public GameObject groundBlock;
 	public int maxBlockNum = 20;
 	public int maxItemNum = 10;
 	public int minItemNum = 3;
+	public int level = 0;
+	public int typesOfEnemyInOneGroup = 1;
+	public int maxEnemyNum = 4;
+	public int minEnemyNum = 2;
+
 	public GameObject[] groundPrefabs;
 	public GameObject[] itemPrefabs;
-	public Transform parent;
+	public GameObject[] enemyPrefabs;
+	public Transform ground;
+	public Transform groundItem;
 	public Transform player;
+	public Transform enemys;
 	private List<Vector3> ablePos;
 	private List<Vector3> addedPos;
 	private float blockX;
 	private float blockY;
 	private List<GameObject> blockList;
-	private List<GameObject> groundItemList;
 	private Vector3 genPos;
 	private float border = 2.5f;
-	private float playerWidth;
-	private float playerHeight;
-	private Vector3 playerPos;
 
 	void Awake ()
 	{
@@ -31,76 +35,74 @@ public class GroundGeneration : MonoBehaviour
 		addedPos = new List<Vector3> ();
 		blockList = new List<GameObject> ();
 		genPos = new Vector3 (0, 0, 0);
-		groundItemList = new List<GameObject> ();
-		playerPos = player.position;
-		playerWidth = player.GetComponent<SpriteRenderer> ().bounds.size.x;
-		playerHeight = player.GetComponent<SpriteRenderer> ().bounds.size.y;
 	}
 	
 	void Start ()
 	{
 		GenerateGround ();
 		ReplaceTex ();
-		GenerateGroundItem ();
+		GenerateElements ();
 	}
 
-	private void GenerateGroundItem ()
+	private void GenerateElements ()
 	{
 		for (int i=0; i<blockList.Count; i++) {
 			GameObject block = blockList [i];			
 			Vector3 blockPos = block.transform.position;
 
-			//the num of the ground
-			int itemNum = Random.Range(minItemNum,maxItemNum);
+			//generate ground item
+			int itemNum = Random.Range (minItemNum, maxItemNum);
 
-			for(int j=0;j<itemNum;j++){
-				//the item will to be generated
-				GameObject item = itemPrefabs[Random.Range (0, itemPrefabs.Length - 1)];
+			for (int j=0; j<itemNum; j++) {
+				GameObject item = itemPrefabs [Random.Range (0, itemPrefabs.Length)];
 				Vector3 itemPos = getRandomPos (blockPos, item);
 				GameObject itemO = Instantiate (item, itemPos, Quaternion.identity) as GameObject;
 				itemO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
-				groundItemList.Add(itemO);
+				itemO.transform.parent = groundItem;
+			}
+
+			//generate enemy
+			int start = level * typesOfEnemyInOneGroup;
+			int end = start + typesOfEnemyInOneGroup;
+
+			int enemyNum = Random.Range (minEnemyNum, maxEnemyNum);
+			
+			for (int j=0; j<enemyNum; j++) {
+				GameObject enemy = enemyPrefabs [Random.Range (start, end)];
+				Vector3 enemyPos = getRandomPos (blockPos, enemy);
+				GameObject enemyO = Instantiate (enemy, enemyPos, Quaternion.identity) as GameObject;
+				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
+				enemyO.transform.parent = enemys;
 			}
 		}
 	}
 
-	private Vector3 getRandomPos (Vector3 blockPos, GameObject item)
+	private Vector3 getRandomPos (Vector3 blockPos, GameObject element)
 	{
-		Vector3 randomPos = getValidPos (blockPos, item);
+		Vector3 randomPos = getValidPos (blockPos, element);
 		while (randomPos==new Vector3(-999,-999,-999)) {
-			randomPos = getValidPos (blockPos,item);
+			randomPos = getValidPos (blockPos, element);
 		}
 		return randomPos;
 	}
 
-	private Vector3 getValidPos (Vector3 blockPos, GameObject item)
+	private Vector3 getValidPos (Vector3 blockPos, GameObject element)
 	{
 
-		float itemWidth = item.GetComponent<SpriteRenderer> ().bounds.size.x;
-		float itemHeight = item.GetComponent<SpriteRenderer> ().bounds.size.y;
+		float elementWidth = element.GetComponent<SpriteRenderer> ().bounds.size.x;
+		float elementHeight = element.GetComponent<SpriteRenderer> ().bounds.size.y;
 
-		float pX = Random.Range (blockPos.x - blockX / 2 + border, blockPos.x + blockX / 2 - border);
-		float pY = Random.Range (blockPos.x - blockX / 2 + border, blockPos.x + blockX / 2 - border);
+		float pX = Random.Range (blockPos.x - blockX / 2 + border + elementWidth / 2, blockPos.x + blockX / 2 - border - elementWidth / 2);
+		float pY = Random.Range (blockPos.y - blockY / 2 + border + elementHeight / 2, blockPos.y + blockY / 2 - border - elementHeight / 2);
 
 		Vector3 pos = new Vector3 (pX, pY, blockPos.z);
 
-		//check the pos is valid,there is no player,no ground item
-//		for (int i=0; i<groundItemList.Count; i++) {
-//			GameObject groundItem = groundItemList [i];
-//			Vector3 groundItemPos = groundItem.transform.position;
-//
-//			float groundItemWidth = groundItem.GetComponent<SpriteRenderer> ().bounds.size.x;
-//			float groundItemHeight = groundItem.GetComponent<SpriteRenderer> ().bounds.size.y;
-//
-//			if ((pos.x < groundItemPos.x + (groundItemWidth / 2 + itemWidth / 2) && pos.x > groundItemPos.x - (groundItemWidth / 2 + itemWidth / 2)) || 
-//				(pos.y < groundItemPos.y + (groundItemHeight / 2 + itemHeight / 2) && pos.y > groundItemPos.x - (groundItemHeight / 2 + itemHeight / 2))||
-//			    (pos.x < playerPos.x + (playerWidth / 2 + itemWidth / 2) && pos.x > playerPos.x - (playerWidth / 2 + itemWidth / 2)) || 
-//			    (pos.y < playerPos.y + (playerHeight / 2 + itemHeight / 2) && pos.y > playerPos.x - (playerHeight / 2 + itemHeight / 2))) {
-//				return new Vector3 (-999, -999, -999);
-//			}
-//		}
+		List<string> checkedTags = new List<string> ();
+		checkedTags.Add ("Player");
+		checkedTags.Add ("GroundItem");
+		checkedTags.Add ("Enemy");
 
-		return pos;
+		return Zhstar_2D_Common.checkPosValid (pos, checkedTags, elementWidth, elementHeight);
 	}
 
 	private void ReplaceTex ()
@@ -199,7 +201,7 @@ public class GroundGeneration : MonoBehaviour
 			}
 			 
 			block.GetComponent<SpriteRenderer> ().sortingOrder = order;
-			block.transform.parent = parent;
+			block.transform.parent = ground;
 		}
 	}
 
@@ -238,7 +240,7 @@ public class GroundGeneration : MonoBehaviour
 		List<PosInfo> round = GetRoundPos (block.transform.position);
 		addAblePos (round);
 
-		genPos = ablePos [Random.Range (0, ablePos.Count - 1)];
+		genPos = ablePos [Random.Range (0, ablePos.Count)];
 		ablePos.Remove (genPos);
 
 	}
@@ -283,7 +285,7 @@ public class GroundGeneration : MonoBehaviour
 		private Vector3 pos;
 		private Direction direction;
 
-		public PosInfo (Vector3 pos, global::GroundGeneration.Direction direction)
+		public PosInfo (Vector3 pos, global::SceneGen.Direction direction)
 		{
 			this.pos = pos;
 			this.direction = direction;
