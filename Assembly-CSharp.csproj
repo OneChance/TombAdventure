@@ -50,6 +50,7 @@
      <Compile Include="Assets\_scripts\_game\GroundGeneration.cs" />
      <Compile Include="Assets\_scripts\_game\PlayerAction.cs" />
      <Compile Include="Assets\_scripts\_ui\UI_Input.cs" />
+     <Compile Include="Assets\_scripts\_util\Zhstar_2D_Common.cs" />
      <Compile Include="Assets\_scripts\_util\Zhstar_MathUtil.cs" />
      <Compile Include="Assets\_scripts\_util\test.cs" />
  <Reference Include="UnityEngine.UI">

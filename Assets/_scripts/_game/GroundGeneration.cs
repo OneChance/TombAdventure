@@ -11,7 +11,8 @@ public class GroundGeneration : MonoBehaviour
 	public int minItemNum = 3;
 	public GameObject[] groundPrefabs;
 	public GameObject[] itemPrefabs;
-	public Transform parent;
+	public Transform ground;
+	public Transform groundItem;
 	public Transform player;
 	private List<Vector3> ablePos;
 	private List<Vector3> addedPos;
@@ -21,9 +22,6 @@ public class GroundGeneration : MonoBehaviour
 	private List<GameObject> groundItemList;
 	private Vector3 genPos;
 	private float border = 2.5f;
-	private float playerWidth;
-	private float playerHeight;
-	private Vector3 playerPos;
 
 	void Awake ()
 	{
@@ -32,9 +30,6 @@ public class GroundGeneration : MonoBehaviour
 		blockList = new List<GameObject> ();
 		genPos = new Vector3 (0, 0, 0);
 		groundItemList = new List<GameObject> ();
-		playerPos = player.position;
-		playerWidth = player.GetComponent<SpriteRenderer> ().bounds.size.x;
-		playerHeight = player.GetComponent<SpriteRenderer> ().bounds.size.y;
 	}
 	
 	void Start ()
@@ -51,15 +46,16 @@ public class GroundGeneration : MonoBehaviour
 			Vector3 blockPos = block.transform.position;
 
 			//the num of the ground
-			int itemNum = Random.Range(minItemNum,maxItemNum);
+			int itemNum = Random.Range (minItemNum, maxItemNum);
 
-			for(int j=0;j<itemNum;j++){
+			for (int j=0; j<itemNum; j++) {
 				//the item will to be generated
-				GameObject item = itemPrefabs[Random.Range (0, itemPrefabs.Length - 1)];
+				GameObject item = itemPrefabs [Random.Range (0, itemPrefabs.Length)];
 				Vector3 itemPos = getRandomPos (blockPos, item);
 				GameObject itemO = Instantiate (item, itemPos, Quaternion.identity) as GameObject;
 				itemO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
-				groundItemList.Add(itemO);
+				itemO.transform.parent = groundItem;
+				groundItemList.Add (itemO);
 			}
 		}
 	}
@@ -68,7 +64,7 @@ public class GroundGeneration : MonoBehaviour
 	{
 		Vector3 randomPos = getValidPos (blockPos, item);
 		while (randomPos==new Vector3(-999,-999,-999)) {
-			randomPos = getValidPos (blockPos,item);
+			randomPos = getValidPos (blockPos, item);
 		}
 		return randomPos;
 	}
@@ -79,28 +75,16 @@ public class GroundGeneration : MonoBehaviour
 		float itemWidth = item.GetComponent<SpriteRenderer> ().bounds.size.x;
 		float itemHeight = item.GetComponent<SpriteRenderer> ().bounds.size.y;
 
-		float pX = Random.Range (blockPos.x - blockX / 2 + border, blockPos.x + blockX / 2 - border);
-		float pY = Random.Range (blockPos.x - blockX / 2 + border, blockPos.x + blockX / 2 - border);
+		float pX = Random.Range (blockPos.x - blockX / 2 + border + itemWidth / 2, blockPos.x + blockX / 2 - border - itemWidth / 2);
+		float pY = Random.Range (blockPos.y - blockY / 2 + border + itemHeight / 2, blockPos.y + blockY / 2 - border - itemHeight / 2);
 
 		Vector3 pos = new Vector3 (pX, pY, blockPos.z);
 
 		//check the pos is valid,there is no player,no ground item
-//		for (int i=0; i<groundItemList.Count; i++) {
-//			GameObject groundItem = groundItemList [i];
-//			Vector3 groundItemPos = groundItem.transform.position;
-//
-//			float groundItemWidth = groundItem.GetComponent<SpriteRenderer> ().bounds.size.x;
-//			float groundItemHeight = groundItem.GetComponent<SpriteRenderer> ().bounds.size.y;
-//
-//			if ((pos.x < groundItemPos.x + (groundItemWidth / 2 + itemWidth / 2) && pos.x > groundItemPos.x - (groundItemWidth / 2 + itemWidth / 2)) || 
-//				(pos.y < groundItemPos.y + (groundItemHeight / 2 + itemHeight / 2) && pos.y > groundItemPos.x - (groundItemHeight / 2 + itemHeight / 2))||
-//			    (pos.x < playerPos.x + (playerWidth / 2 + itemWidth / 2) && pos.x > playerPos.x - (playerWidth / 2 + itemWidth / 2)) || 
-//			    (pos.y < playerPos.y + (playerHeight / 2 + itemHeight / 2) && pos.y > playerPos.x - (playerHeight / 2 + itemHeight / 2))) {
-//				return new Vector3 (-999, -999, -999);
-//			}
-//		}
-
-		return pos;
+		List<string> checkedTags = new List<string>();
+		checkedTags.Add("Player");
+		checkedTags.Add("GroundItem");
+		return Zhstar_2D_Common.checkPosValid(pos,checkedTags,itemWidth,itemHeight);
 	}
 
 	private void ReplaceTex ()
@@ -199,7 +183,7 @@ public class GroundGeneration : MonoBehaviour
 			}
 			 
 			block.GetComponent<SpriteRenderer> ().sortingOrder = order;
-			block.transform.parent = parent;
+			block.transform.parent = ground;
 		}
 	}
 
@@ -238,7 +222,7 @@ public class GroundGeneration : MonoBehaviour
 		List<PosInfo> round = GetRoundPos (block.transform.position);
 		addAblePos (round);
 
-		genPos = ablePos [Random.Range (0, ablePos.Count - 1)];
+		genPos = ablePos [Random.Range (0, ablePos.Count)];
 		ablePos.Remove (genPos);
 
 	}
