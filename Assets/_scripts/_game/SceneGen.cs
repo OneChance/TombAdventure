@@ -13,7 +13,6 @@ public class SceneGen: MonoBehaviour
 	public int typesOfEnemyInOneGroup = 1;
 	public int maxEnemyNum = 4;
 	public int minEnemyNum = 2;
-
 	public GameObject[] groundPrefabs;
 	public GameObject[] itemPrefabs;
 	public GameObject[] enemyPrefabs;
@@ -26,18 +25,39 @@ public class SceneGen: MonoBehaviour
 	private float blockX;
 	private float blockY;
 	private List<GameObject> blockList;
+	private List<GameObject> itemList;
 	private Vector3 genPos;
 	private float border = 2.5f;
+	private GlobalData gData;
 
 	void Awake ()
 	{
 		ablePos = new List<Vector3> ();
 		addedPos = new List<Vector3> ();
 		blockList = new List<GameObject> ();
+		itemList = new List<GameObject> ();
 		genPos = new Vector3 (0, 0, 0);
+		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 	}
 	
 	void Start ()
+	{
+		int currentFloor = gData.currentFloor;
+		int scenesNum = gData.scenes.Count;
+
+		if (scenesNum >= currentFloor + 1) {
+			GenerateSceneFromSceneInfo (gData.scenes [currentFloor]);
+		} else {
+			GenerateSceneRandom ();
+		}
+	}
+
+	void GenerateSceneFromSceneInfo (SceneInfo sceneInfo)
+	{
+
+	}
+
+	public void GenerateSceneRandom ()
 	{
 		GenerateGround ();
 		ReplaceTex ();
@@ -59,6 +79,7 @@ public class SceneGen: MonoBehaviour
 				GameObject itemO = Instantiate (item, itemPos, Quaternion.identity) as GameObject;
 				itemO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				itemO.transform.parent = groundItem;
+				itemList.Add (itemO);
 			}
 
 			//generate enemy
