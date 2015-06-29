@@ -26,6 +26,7 @@ public class SceneGen: MonoBehaviour
 	private float blockY;
 	private List<GameObject> blockList;
 	private List<GameObject> itemList;
+	private List<GameObject> enemyList;
 	private Vector3 genPos;
 	private float border = 2.5f;
 	private GlobalData gData;
@@ -36,6 +37,7 @@ public class SceneGen: MonoBehaviour
 		addedPos = new List<Vector3> ();
 		blockList = new List<GameObject> ();
 		itemList = new List<GameObject> ();
+		enemyList = new List<GameObject> ();
 		genPos = new Vector3 (0, 0, 0);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 	}
@@ -94,6 +96,7 @@ public class SceneGen: MonoBehaviour
 				GameObject enemyO = Instantiate (enemy, enemyPos, Quaternion.identity) as GameObject;
 				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				enemyO.transform.parent = enemys;
+				enemyList.Add (enemyO);
 			}
 		}
 	}
