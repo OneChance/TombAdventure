@@ -7,6 +7,7 @@ public class GlobalData : MonoBehaviour
 	public int currentFloor = 0;
 	public List<SceneInfo> scenes;
 	public string currentEnemy;
+	public List<Character> characterList;
 
 	void Awake ()
 	{
