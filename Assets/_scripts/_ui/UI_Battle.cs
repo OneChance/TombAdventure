@@ -32,12 +32,12 @@ public class UI_Battle : MonoBehaviour
 
 	public void AttackClick ()
 	{
-		battle.SendMessage("Act",Op.ATTACK);
+		battle.SendMessage ("Act", Op.ATTACK);
 	}
 
 	public void OkClick ()
 	{
-		
+		battle.SendMessage ("AddOp", Op.ATTACK);
 	}
 
 	public void ProClick ()
@@ -45,8 +45,8 @@ public class UI_Battle : MonoBehaviour
 		
 	}
 
-	public void Pos1Click ()
+	public void PosClick (GameObject clickGo)
 	{
-		battle.SendMessage("ChooseEnemy",gameObject);
+		battle.SendMessage ("ChooseTarget", clickGo);
 	}
 }
