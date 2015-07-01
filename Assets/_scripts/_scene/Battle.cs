@@ -18,6 +18,9 @@ public class Battle : MonoBehaviour
 	private Enemy currentEnemy;
 	private UI_Battle.Op currentOp;
 	private bool newTurnInit = false;
+	private List<Item> enemyAttackTypeList;
+	private bool battleStart = false;
+	private bool battleIng = false;
 
 	void Awake ()
 	{
@@ -34,6 +37,10 @@ public class Battle : MonoBehaviour
 		waitForAttack = new List<GameObject> ();
 		focusList = new List<GameObject> ();
 		opList = new List<BattleOp> ();
+		enemyAttackTypeList = new List<Item> ();
+
+		//init enemy attack type
+		enemyAttackTypeList.Add (new AttackItem ());
 	}
 
 	// Use this for initialization
@@ -66,10 +73,14 @@ public class Battle : MonoBehaviour
 	void Update ()
 	{
 
+		if (opList.Count == characterList.Count && !battleStart) {
+			battleStart = true;
+		}
+
+
 		//all of the command execute complete
 		if (opList.Count == 0 && !newTurnInit) {
 			//battle not over
-			Debug.Log ("new turn");
 			NewTurn ();
 		}
 
@@ -77,21 +88,49 @@ public class Battle : MonoBehaviour
 			Focus (focusList [i]);
 		}
 
-		if (opList.Count == characterList.Count) {
+		if (battleStart && !battleIng) {
 
-			for (int i=0; i<opList.Count; i++) {
-
-				Item item = opList [i].Item;
-
-				item.doSth (opList [i].From, opList [i].To);
-
-				UpdateHealthUI ();
-
-				opList.Remove (opList [i]);
-
-				i--;
+			//before start the battle,add the enmey's attack
+			for (int i=0; i<enemyPos.Length; i++) {
+				if (enemyPos [i].activeInHierarchy) {
+					EnemyAttack (enemyPos [i]);
+				}
 			}
+
+			StartCoroutine (BattleProcess ());
+
 		}
+	}
+
+	IEnumerator BattleProcess ()
+	{
+
+		battleIng = true;
+
+		for (int i=0; i<opList.Count; i++) {
+
+			// this 2s for simulate battle animation
+			yield return new WaitForSeconds (2.0f);
+			
+			Item item = opList [i].Item;
+			
+			List<BattleObj> toList = new List<BattleObj> ();
+			
+			//convert gameobject to battleobj
+			for (int j=0; j<opList[i].To.Count; j++) {
+				toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
+			}
+			
+			item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);
+			
+			UpdateHealthUI ();
+			
+			opList.Remove (opList [i]);
+			i--;
+		}
+
+		battleIng = false; // this turn is over
+		newTurnInit = false;//tell to init a new turn
 	}
 
 	void NewTurn ()
@@ -107,6 +146,7 @@ public class Battle : MonoBehaviour
 		focusList.Add (waitForAttack [0]);
 
 		newTurnInit = true;
+		battleStart = false;
 	}
 
 	void UpdateHealthUI ()
@@ -184,22 +224,66 @@ public class Battle : MonoBehaviour
 		}
 
 		GameObject from = waitForAttack [0];
-		Character character = (Character)from.GetComponent<PosChar> ().battleObj;
-
-		List<BattleObj> enemysAttacked = new List<BattleObj> (); 
+		List<GameObject> enemysAttacked = new List<GameObject> (); 
 
 		for (int i=0; i<focusList.Count; i++) {
-			enemysAttacked.Add ((Enemy)focusList [i].GetComponent<PosChar> ().battleObj);
+			enemysAttacked.Add (focusList [i]);
 		}
 
-		BattleOp bo = new BattleOp (character, enemysAttacked, chooseItem (currentOp));
+		BattleOp bo = new BattleOp (from, enemysAttacked, chooseItem (currentOp));
 		opList.Add (bo);
-		newTurnInit = false;
 
 		RecoverFocusList ();
 		waitForAttack.Remove (waitForAttack [0]);
 		if (waitForAttack.Count > 0) {
 			focusList.Add (waitForAttack [0]);
+		}
+	}
+
+
+
+	//enemy attack ai in battle
+	void EnemyAttack (GameObject from)
+	{
+		//choose a type of attack in a random way
+		Item item = enemyAttackTypeList [Random.Range (0, enemyAttackTypeList.Count)];
+		List<GameObject> attackList = new List<GameObject> ();
+
+		if (item.rt == Item.rangeType.SINGLE) {
+			//choose a player with the min health
+			GameObject minHealthChar = characterPos [0];
+			for (int i=1; i<characterPos.Length; i++) {
+
+				int thisHealth = characterPos [i].GetComponent<PosChar> ().battleObj.Health;
+				int currentHealth = minHealthChar.GetComponent<PosChar> ().battleObj.Health;
+
+				if (characterPos [i].activeInHierarchy && thisHealth < currentHealth) {
+					minHealthChar = characterPos [i];
+				}
+			}
+
+			attackList.Add (minHealthChar);
+		} else {
+
+			for (int i=1; i<characterPos.Length; i++) {
+				if (characterPos [i].activeInHierarchy) {
+					attackList.Add (characterPos [i]);
+				}
+			}
+		}
+
+		BattleOp bo = new BattleOp (from, attackList, item);
+		opList.Add (bo);
+	}
+
+	public void Undo ()
+	{
+		if (opList.Count > 0) {
+			BattleOp op = opList [opList.Count - 1];
+			RecoverFocusList ();
+			focusList.Add (op.From);
+			waitForAttack.Insert (0, op.From);
+			opList.Remove (op);
 		}
 	}
 }

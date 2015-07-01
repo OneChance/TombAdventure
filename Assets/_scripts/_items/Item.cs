@@ -4,16 +4,15 @@ using System.Collections.Generic;
 
 public abstract class Item
 {
-	public string name;
 
-	string Name {
-		get {
-			return this.name;
-		}
-		set {
-			name = value;
-		}
+	public enum rangeType
+	{
+		SINGLE,
+		MULTI
 	}
 
-	public abstract void doSth(BattleObj from,List<BattleObj> to); 
+	public string name;
+	public rangeType rt;
+
+	public abstract void doSth (BattleObj from, List<BattleObj> to); 
 }

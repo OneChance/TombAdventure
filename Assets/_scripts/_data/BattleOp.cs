@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 public class BattleOp
 {
-	private BattleObj from;
-	private List<BattleObj> to;
+	private GameObject from;
+	private List<GameObject> to;
 	private Item item;
 
-	public BattleOp (BattleObj from, List<BattleObj> to, Item item)
+	public BattleOp (GameObject from, List<GameObject> to, Item item)
 	{
 		this.from = from;
 		this.to = to;
 		this.item = item;
 	}
 	
-	public BattleObj From {
+	public GameObject From {
 		get {
 			return this.from;
 		}
@@ -24,7 +24,7 @@ public class BattleOp
 		}
 	}
 
-	public List<BattleObj> To {
+	public List<GameObject> To {
 		get {
 			return this.to;
 		}

@@ -49,4 +49,9 @@ public class UI_Battle : MonoBehaviour
 	{
 		battle.SendMessage ("ChooseTarget", clickGo);
 	}
+
+	public void UndoClick ()
+	{
+		battle.SendMessage ("Undo");
+	}
 }
