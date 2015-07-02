@@ -8,7 +8,9 @@ public class AttackItem : Item
 	public AttackItem ()
 	{
 		this.name = "AttackItem";
-		this.rt = rangeType.MULTI;
+		this.rt = RangeType.MULTI;
+		this.ct = CommonType.CONSUME;
+		this.ot = ObjType.Enemy;
 	}
 
 	public override void doSth (BattleObj from, List<BattleObj> to)

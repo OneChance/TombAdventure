@@ -9,10 +9,10 @@ public class Battle : MonoBehaviour
 	public int maxEnemyNum = 3;
 	public GameObject[] enemyPos;
 	public GameObject[] characterPos;
-	private GlobalData gData;
+	public GlobalData gData;
 	private Sprite enemySprite;
 	private List<Character> characterList;
-	private List<GameObject> waitForAttack;
+	public List<GameObject> waitForAttack;
 	private List<GameObject> focusList;
 	private List<BattleOp> opList;
 	private Enemy currentEnemy;
@@ -249,7 +249,7 @@ public class Battle : MonoBehaviour
 		Item item = enemyAttackTypeList [Random.Range (0, enemyAttackTypeList.Count)];
 		List<GameObject> attackList = new List<GameObject> ();
 
-		if (item.rt == Item.rangeType.SINGLE) {
+		if (item.rt == Item.RangeType.SINGLE) {
 			//choose a player with the min health
 			GameObject minHealthChar = characterPos [0];
 			for (int i=1; i<characterPos.Length; i++) {

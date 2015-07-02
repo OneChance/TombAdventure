@@ -16,4 +16,15 @@ public class Character:BattleObj
 		this.ObjName = objName;
 		this.PrefabName = prefabName;
 	}
+
+	public List<Item> ItemList {
+		get {
+			return this.itemList;
+		}
+		set {
+			itemList = value;
+		}
+	}
+
+
 }
