@@ -21,7 +21,7 @@ public class HealthItem : Item
 	public override void doSth (BattleObj from, List<BattleObj> to)
 	{
 		for (int i=0; i<to.Count; i++) {
-			to [i].Health = to [i].Health + heal;
+			to [i].Health = Mathf.Min(to [i].Health + heal,to[i].MaxHealth);
 		}
 	}
 }

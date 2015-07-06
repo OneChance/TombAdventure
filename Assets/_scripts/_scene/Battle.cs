@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 public class Battle : MonoBehaviour
 {
-	public int minEnemyNum = 2;
-	public int maxEnemyNum = 3;
+	public int minEnemyNum = 1;
+	public int maxEnemyNum = 2;
 	public GameObject[] enemyPos;
 	public GameObject[] characterPos;
 	public GlobalData gData;
@@ -16,11 +16,13 @@ public class Battle : MonoBehaviour
 	private List<GameObject> focusList;
 	private List<BattleOp> opList;
 	private Enemy currentEnemy;
-	private UI_Battle.Op currentOp;
+	private Action currentAct;
 	private bool newTurnInit = false;
-	private List<Item> enemyAttackTypeList;
+	private List<Baggrid> enemyAttackTypeList;
 	private bool battleStart = false;
 	private bool battleIng = false;
+	private bool dead;
+	private bool victory;
 
 	void Awake ()
 	{
@@ -37,10 +39,10 @@ public class Battle : MonoBehaviour
 		waitForAttack = new List<GameObject> ();
 		focusList = new List<GameObject> ();
 		opList = new List<BattleOp> ();
-		enemyAttackTypeList = new List<Item> ();
+		enemyAttackTypeList = new List<Baggrid> ();
 
 		//init enemy attack type
-		enemyAttackTypeList.Add (new AttackItem ());
+		enemyAttackTypeList.Add (new Baggrid(new AttackItem (),1));
 	}
 
 	// Use this for initialization
@@ -90,15 +92,13 @@ public class Battle : MonoBehaviour
 
 		if (battleStart && !battleIng) {
 
-			//before start the battle,add the enmey's attack
 			for (int i=0; i<enemyPos.Length; i++) {
-				if (enemyPos [i].activeInHierarchy) {
+				if (enemyPos [i].activeInHierarchy && enemyPos [i].GetComponent<PosChar> ().battleObj.Health>0) {
 					EnemyAttack (enemyPos [i]);
 				}
 			}
 
 			StartCoroutine (BattleProcess ());
-
 		}
 	}
 
@@ -111,23 +111,39 @@ public class Battle : MonoBehaviour
 
 			// this 2s for simulate battle animation
 			yield return new WaitForSeconds (2.0f);
-			
-			Item item = opList [i].Item;
-			
-			List<BattleObj> toList = new List<BattleObj> ();
-			
-			//convert gameobject to battleobj
-			for (int j=0; j<opList[i].To.Count; j++) {
-				toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
+
+			if(opList [i].From.GetComponent<PosChar> ().battleObj.Health>0){
+
+				Baggrid bg = opList [i].Bg;
+				
+				List<BattleObj> toList = new List<BattleObj> ();
+				
+				//convert gameobject to battleobj
+				for (int j=0; j<opList[i].To.Count; j++) {
+					toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
+				}
+				
+				bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);
+				bg.Num = bg.Num-1;
+				
+				UpdateUI ();
 			}
-			
-			item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);
-			
-			UpdateHealthUI ();
-			
+
 			opList.Remove (opList [i]);
 			i--;
 		}
+
+		dead = Dead ();
+		victory = Victory();
+
+		if (dead || victory) {
+			//back to main scene
+			gData.victory = !Dead();
+			DontDestroyOnLoad (gData);
+			Application.LoadLevel ("main");
+		}
+
+
 
 		battleIng = false; // this turn is over
 		newTurnInit = false;//tell to init a new turn
@@ -135,7 +151,6 @@ public class Battle : MonoBehaviour
 
 	void NewTurn ()
 	{
-
 		for (int i=0; i<characterList.Count; i++) {
 			Character character = characterList [i];
 			if (character.Health > 0) {
@@ -149,7 +164,7 @@ public class Battle : MonoBehaviour
 		battleStart = false;
 	}
 
-	void UpdateHealthUI ()
+	void UpdateUI ()
 	{
 		for (int i=0; i<enemyPos.Length; i++) {
 			if (enemyPos [i].activeInHierarchy) {
@@ -163,25 +178,85 @@ public class Battle : MonoBehaviour
 		}
 	}
 
-	void Act (UI_Battle.Op op)
+	//the action of character
+	void Act (Action act)
 	{
+		currentAct = act;
+		RecoverFocusList ();
+		//judge if the item: 
+		//is use to enemy of friend
+		//is multi or single
+		if (act.Bg.Item.ot == Item.ObjType.Enemy) {
+			if(act.Bg.Item.rt == Item.RangeType.SINGLE){
 
-		currentOp = op;
+				//choose the first alive enemy
+				for(int i=0;i<enemyPos.Length;i++){
+					if(enemyPos[i].activeInHierarchy && enemyPos [i].GetComponent<PosChar> ().battleObj.Health>0){
+						focusList.Add(enemyPos[i]);
+						break;
+					}
+				}
 
-		if (op == UI_Battle.Op.ATTACK) {
-			RecoverFocusList ();
-			focusList.Add (enemyPos [0]);
+			}else{
+				for(int i=0;i<enemyPos.Length;i++){
+					if(enemyPos[i].activeInHierarchy && enemyPos [i].GetComponent<PosChar> ().battleObj.Health>0){
+						focusList.Add(enemyPos[i]);
+					}
+				}
+			}
+		} else {
+			if(act.Bg.Item.rt == Item.RangeType.SINGLE){
+				focusList.Add (characterPos [0]);
+			}else{
+				for(int i=0;i<characterPos.Length;i++){
+					if(characterPos[i].activeInHierarchy){
+						focusList.Add(characterPos[i]);
+					}
+				}
+			}
 		}
 	}
 
-	void ChooseTarget (GameObject enemy)
+	void ChooseTarget (GameObject target)
 	{
-		//if use the item which can attack all of the object,ignore thie method 
-		//if condition
-		RecoverFocusList ();
-		focusList.Add (enemy);
+		//if there is no act choose,you can not choose target
+		if (currentAct == null) {
+			Debug.Log ("no act choose");
+			return;
+		} else {
+			Item item = currentAct.Bg.Item;
+
+			//if choose the target can not be apply the item,return
+			if(target.name.Contains("EPos")){
+				if(item.ot==Item.ObjType.Friend){
+					Debug.Log("the item can only be use to friend");
+					return;
+				}else if(target.GetComponent<PosChar> ().battleObj.Health<=0){
+					Debug.Log("can not use to a dead enemy");
+					return;
+				}
+			}else{
+				if(item.ot==Item.ObjType.Enemy){
+					Debug.Log("the item can only be use to enemy");
+					return;
+				}
+			}
+
+
+			//if use the item which can attack all of the object,do not change the focusList
+			if(item.rt == Item.RangeType.MULTI){
+				return;
+			}else{
+				RecoverFocusList ();
+				focusList.Add (target);
+			}
+		}
 	}
 
+
+	/*
+	 * focus the target,here is a alpha change effect,maybe there is a batter way 
+	 */
 	void Focus (GameObject go)
 	{
 		float lerp = Mathf.PingPong (Time.time, 0.5f) * 2f;  
@@ -193,6 +268,9 @@ public class Battle : MonoBehaviour
 		go.GetComponent<Image> ().color = Color.Lerp (fromC, toC, lerp);
 	}
 
+	/*
+	 *clear the focus list
+	 */
 	void RecoverFocusList ()
 	{
 		for (int i=0; i<focusList.Count; i++) {
@@ -202,24 +280,16 @@ public class Battle : MonoBehaviour
 		focusList.Clear ();
 	}
 
-	Item chooseItem (UI_Battle.Op op)
-	{
-		if (op == UI_Battle.Op.ATTACK) {
-			return new AttackItem ();
-		}
-
-		return null;
-	}
-
+	/*
+	 *add an battle operation
+	 */
 	void AddOp ()
 	{
 
-		if (currentOp == UI_Battle.Op.NOACT) {
-
+		if (currentAct==null) {
 			//no act,refocus
 			RecoverFocusList ();
 			focusList.Add (waitForAttack [0]);
-
 			return;
 		}
 
@@ -230,7 +300,7 @@ public class Battle : MonoBehaviour
 			enemysAttacked.Add (focusList [i]);
 		}
 
-		BattleOp bo = new BattleOp (from, enemysAttacked, chooseItem (currentOp));
+		BattleOp bo = new BattleOp (from, enemysAttacked, currentAct.Bg);
 		opList.Add (bo);
 
 		RecoverFocusList ();
@@ -238,6 +308,9 @@ public class Battle : MonoBehaviour
 		if (waitForAttack.Count > 0) {
 			focusList.Add (waitForAttack [0]);
 		}
+
+		//when add an operation,init the currentAct
+		currentAct = null;
 	}
 
 
@@ -246,14 +319,14 @@ public class Battle : MonoBehaviour
 	void EnemyAttack (GameObject from)
 	{
 		//choose a type of attack in a random way
-		Item item = enemyAttackTypeList [Random.Range (0, enemyAttackTypeList.Count)];
+		Baggrid bg = enemyAttackTypeList [Random.Range (0, enemyAttackTypeList.Count)];
 		List<GameObject> attackList = new List<GameObject> ();
 
-		if (item.rt == Item.RangeType.SINGLE) {
+		if (bg.Item.rt == Item.RangeType.SINGLE) {
 			//choose a player with the min health
 			GameObject minHealthChar = characterPos [0];
-			for (int i=1; i<characterPos.Length; i++) {
 
+			for (int i=1; i<characterList.Count; i++) {
 				int thisHealth = characterPos [i].GetComponent<PosChar> ().battleObj.Health;
 				int currentHealth = minHealthChar.GetComponent<PosChar> ().battleObj.Health;
 
@@ -272,7 +345,7 @@ public class Battle : MonoBehaviour
 			}
 		}
 
-		BattleOp bo = new BattleOp (from, attackList, item);
+		BattleOp bo = new BattleOp (from, attackList, bg);
 		opList.Add (bo);
 	}
 
@@ -285,5 +358,32 @@ public class Battle : MonoBehaviour
 			waitForAttack.Insert (0, op.From);
 			opList.Remove (op);
 		}
+	}
+
+
+	bool Victory(){
+		bool victory = true;
+		for (int i=0; i<enemyPos.Length; i++) {
+			if (enemyPos [i].activeInHierarchy) {
+				if(enemyPos [i].GetComponent<PosChar> ().battleObj.Health>0){
+					victory = false;
+					break;
+				}
+			}
+		}
+		return victory;
+	}
+
+	bool Dead(){
+		bool dead = true;
+		for (int i=0; i<characterPos.Length; i++) {
+			if (characterPos [i].activeInHierarchy) {
+				if(characterPos [i].GetComponent<PosChar> ().battleObj.Health>0){
+					dead = false;
+					break;
+				}
+			}
+		}
+		return dead;
 	}
 }

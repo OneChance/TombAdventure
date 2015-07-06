@@ -5,11 +5,12 @@ using System.Collections.Generic;
 public class Character:BattleObj
 {
 
-	private List<Item> itemList;
+	private List<Baggrid> bgList;
 
-	public Character (int health, int attack, int def, int dodge, string objName, string prefabName)
+	public Character (int health,int attack, int def, int dodge, string objName, string prefabName)
 	{
 		this.Health = health;
+		this.MaxHealth = health;
 		this.Attack = attack;
 		this.Def = def;
 		this.Dodge = dodge;
@@ -17,12 +18,12 @@ public class Character:BattleObj
 		this.PrefabName = prefabName;
 	}
 
-	public List<Item> ItemList {
+	public List<Baggrid> BgList {
 		get {
-			return this.itemList;
+			return this.bgList;
 		}
 		set {
-			itemList = value;
+			bgList = value;
 		}
 	}
 

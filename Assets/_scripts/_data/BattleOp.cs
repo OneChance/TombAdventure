@@ -6,13 +6,13 @@ public class BattleOp
 {
 	private GameObject from;
 	private List<GameObject> to;
-	private Item item;
+	private Baggrid bg;
 
-	public BattleOp (GameObject from, List<GameObject> to, Item item)
+	public BattleOp (GameObject from, List<GameObject> to, Baggrid bg)
 	{
 		this.from = from;
 		this.to = to;
-		this.item = item;
+		this.bg = bg;
 	}
 	
 	public GameObject From {
@@ -33,12 +33,12 @@ public class BattleOp
 		}
 	}
 
-	public Item Item {
+	public Baggrid Bg {
 		get {
-			return this.item;
+			return this.bg;
 		}
 		set {
-			item = value;
+			bg = value;
 		}
 	}
 }

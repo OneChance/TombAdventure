@@ -27,26 +27,36 @@ public class SceneGen: MonoBehaviour
 	private List<GameObject> blockList;
 	private List<GameObject> itemList;
 	private List<GameObject> enemyList;
+
+	private List<ElementData> itemData;
+	private List<ElementData> blockData;
+	private List<ElementData> enemyData;
+
 	private Vector3 genPos;
 	private float border = 2.5f;
 	private GlobalData gData;
+	private SceneInfo currentSceneInfo;
 
-	void Awake ()
+	void Start ()
 	{
+		currentSceneInfo = new SceneInfo ();
+
 		ablePos = new List<Vector3> ();
 		addedPos = new List<Vector3> ();
+
 		blockList = new List<GameObject> ();
 		itemList = new List<GameObject> ();
 		enemyList = new List<GameObject> ();
+
+		blockData = new List<ElementData> ();
+		itemData = new List<ElementData> ();
+		enemyData = new List<ElementData> ();
+
 		genPos = new Vector3 (0, 0, 0);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
-	}
-	
-	void Start ()
-	{
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.scenes.Count;
-
+		
 		if (scenesNum >= currentFloor + 1) {
 			GenerateSceneFromSceneInfo (gData.scenes [currentFloor]);
 		} else {
@@ -54,8 +64,32 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
+
 	void GenerateSceneFromSceneInfo (SceneInfo sceneInfo)
 	{
+		currentSceneInfo = sceneInfo;
+
+		blockData = currentSceneInfo.BlockData;
+		itemData = currentSceneInfo.ItemData;
+		enemyData = currentSceneInfo.EnemyData;
+
+		for (int i=0; i<blockData.Count; i++) {
+			string prefabName = blockData[i].ObjName.Replace("(Clone)","");
+			object obj = Resources.Load (prefabName, typeof(GameObject));
+			GameObject blockObj = obj as GameObject;
+			GameObject block = Instantiate (blockObj, blockData[i].Pos, Quaternion.identity) as GameObject;
+			block.transform.parent = ground;
+		}
+
+//		for (int i=0; i<itemList.Count; i++) {
+//			GameObject item = Instantiate (itemList[i], itemList[i].transform.position, Quaternion.identity) as GameObject;
+//			item.transform.parent = groundItem;
+//		}
+//
+//		for (int i=0; i<enemyList.Count; i++) {
+//			GameObject enemy = Instantiate (enemyList[i], enemyList[i].transform.position, Quaternion.identity) as GameObject;
+//			enemy.transform.parent = enemys;
+//		}
 
 	}
 
@@ -64,6 +98,7 @@ public class SceneGen: MonoBehaviour
 		GenerateGround ();
 		ReplaceTex ();
 		GenerateElements ();
+		gData.scenes.Add (new SceneInfo());
 	}
 
 	private void GenerateElements ()
@@ -81,7 +116,7 @@ public class SceneGen: MonoBehaviour
 				GameObject itemO = Instantiate (item, itemPos, Quaternion.identity) as GameObject;
 				itemO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				itemO.transform.parent = groundItem;
-				itemList.Add (itemO);
+				itemList.Add(itemO);
 			}
 
 			//generate enemy
@@ -96,9 +131,37 @@ public class SceneGen: MonoBehaviour
 				GameObject enemyO = Instantiate (enemy, enemyPos, Quaternion.identity) as GameObject;
 				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				enemyO.transform.parent = enemys;
-				enemyList.Add (enemyO);
+				enemyList.Add(enemyO);
 			}
 		}
+	}
+
+	//record scene info
+	public void RecScene(){
+		for (int i=0; i<blockList.Count; i++) {
+			GameObject blockO = blockList[i];
+			ElementData ed = new ElementData(blockO.transform.position,blockO.name);
+			blockData.Add(ed);
+		}
+		currentSceneInfo.BlockData = blockData;
+
+		for (int i=0; i<itemList.Count; i++) {
+			GameObject itemO = itemList[i];
+			itemO.name = "item@"+i;
+			ElementData ed = new ElementData(itemO.transform.position,itemO.name);
+			itemData.Add(ed);
+		}
+		currentSceneInfo.ItemData = itemData;
+
+		for (int i=0; i<enemyList.Count; i++) {
+			GameObject enemyO = enemyList[i];
+			enemyO.name = "enemy@"+i;
+			ElementData ed = new ElementData(enemyO.transform.position,enemyO.name);
+			enemyData.Add(ed);
+		}
+		currentSceneInfo.EnemyData = enemyData;
+		gData.scenes[gData.currentFloor] = currentSceneInfo;
+	
 	}
 
 	private Vector3 getRandomPos (Vector3 blockPos, GameObject element)
@@ -226,6 +289,7 @@ public class SceneGen: MonoBehaviour
 			 
 			block.GetComponent<SpriteRenderer> ().sortingOrder = order;
 			block.transform.parent = ground;
+			blockList[i] = block;
 		}
 	}
 

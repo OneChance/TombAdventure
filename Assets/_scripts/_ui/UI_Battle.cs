@@ -7,7 +7,6 @@ public class UI_Battle : MonoBehaviour
 
 	private Battle battle;
 	private GlobalData gData;
-
 	public GameObject bag;
 
 	void Awake ()
@@ -25,11 +24,18 @@ public class UI_Battle : MonoBehaviour
 		PRO
 	}
 
+	public void UseItem(Baggrid bg){
+		bag.SetActive (false);
+		Action act = new Action (Op.ITEM,bg);
+		battle.SendMessage ("Act", act);
+	}
+
 	public void ItemClick ()
 	{
-		bag.SetActive (true);
+		bag.SetActive (!bag.activeInHierarchy);
 		Character currentC = (Character)battle.waitForAttack [0].GetComponent<PosChar> ().battleObj;
-		bag.SendMessage ("InitBag",currentC);
+		if(bag.activeInHierarchy)
+			bag.SendMessage ("InitBag",currentC);
 	}
 
 	public void WaitClick ()
@@ -40,12 +46,13 @@ public class UI_Battle : MonoBehaviour
 	public void AttackClick ()
 	{
 		bag.SetActive (false);
-		battle.SendMessage ("Act", Op.ATTACK);
+		Action act = new Action (Op.ATTACK,new Baggrid (new AttackItem (), 1));
+		battle.SendMessage ("Act", act);
 	}
 
 	public void OkClick ()
 	{
-		battle.SendMessage ("AddOp", Op.ATTACK);
+		battle.SendMessage ("AddOp");
 	}
 
 	public void ProClick ()

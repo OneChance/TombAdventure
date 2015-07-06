@@ -8,6 +8,7 @@ public class GlobalData : MonoBehaviour
 	public List<SceneInfo> scenes;
 	public Enemy currentEnemy;
 	public List<Character> characterList;
+	public bool victory = true;
 
 	void Awake ()
 	{

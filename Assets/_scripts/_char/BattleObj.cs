@@ -7,9 +7,19 @@ public class BattleObj
 	private string objName;
 	private string prefabName;
 	private int health = 100;
+	private int maxHealth = 100;
 	private int def = 0;
 	private int attack = 5;
 	private float dodge = 0.0f;
+
+	public int MaxHealth {
+		get {
+			return this.maxHealth;
+		}
+		set {
+			maxHealth = value;
+		}
+	}
 
 	public int Health {
 		get {

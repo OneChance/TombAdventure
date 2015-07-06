@@ -8,7 +8,7 @@ public class AttackItem : Item
 	public AttackItem ()
 	{
 		this.name = "AttackItem";
-		this.rt = RangeType.MULTI;
+		this.rt = RangeType.SINGLE;
 		this.ct = CommonType.CONSUME;
 		this.ot = ObjType.Enemy;
 	}

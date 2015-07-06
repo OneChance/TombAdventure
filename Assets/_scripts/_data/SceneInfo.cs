@@ -4,34 +4,34 @@ using System.Collections.Generic;
 
 public class SceneInfo
 {
-	private List<GameObject> blockList;
-	private List<GameObject> itemList;
-	private List<GameObject> enemyList;
+	private List<ElementData> blockData;
+	private List<ElementData> itemData;
+	private List<ElementData> enemyData;
 
-	List<GameObject> EnemyList {
+	public List<ElementData> EnemyData {
 		get {
-			return this.enemyList;
+			return this.enemyData;
 		}
 		set {
-			enemyList = value;
+			enemyData = value;
 		}
 	}
 	
-	List<GameObject> BlockList {
+	public List<ElementData> BlockData {
 		get {
-			return this.blockList;
+			return this.blockData;
 		}
 		set {
-			blockList = value;
+			blockData = value;
 		}
 	}
 	
-	List<GameObject> ItemList {
+	public List<ElementData> ItemData {
 		get {
-			return this.itemList;
+			return this.itemData;
 		}
 		set {
-			itemList = value;
+			itemData = value;
 		}
 	}
 }
