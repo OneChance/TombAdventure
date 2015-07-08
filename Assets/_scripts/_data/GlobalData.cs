@@ -9,6 +9,7 @@ public class GlobalData : MonoBehaviour
 	public Enemy currentEnemy;
 	public List<Character> characterList;
 	public bool victory = true;
+	public string currentEnemyName;
 
 	void Awake ()
 	{

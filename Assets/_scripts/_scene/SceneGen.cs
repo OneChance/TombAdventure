@@ -78,19 +78,33 @@ public class SceneGen: MonoBehaviour
 			object obj = Resources.Load (prefabName, typeof(GameObject));
 			GameObject blockObj = obj as GameObject;
 			GameObject block = Instantiate (blockObj, blockData[i].Pos, Quaternion.identity) as GameObject;
+			block.transform.eulerAngles = blockData[i].EulerAngles;
+			block.GetComponent<SpriteRenderer>().sortingOrder = blockData[i].Order;
 			block.transform.parent = ground;
 		}
 
-//		for (int i=0; i<itemList.Count; i++) {
-//			GameObject item = Instantiate (itemList[i], itemList[i].transform.position, Quaternion.identity) as GameObject;
-//			item.transform.parent = groundItem;
-//		}
-//
-//		for (int i=0; i<enemyList.Count; i++) {
-//			GameObject enemy = Instantiate (enemyList[i], enemyList[i].transform.position, Quaternion.identity) as GameObject;
-//			enemy.transform.parent = enemys;
-//		}
+		for (int i=0; i<itemData.Count; i++) {
+			string prefabName = itemData[i].ObjName.Replace("(Clone)","");
+			object obj = Resources.Load (prefabName, typeof(GameObject));
+			GameObject itemObj = obj as GameObject;
+			GameObject item = Instantiate (itemObj, itemData[i].Pos, Quaternion.identity) as GameObject;
+			item.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].Order;
+			item.transform.parent = groundItem;
+		}
 
+		for (int i=0; i<enemyData.Count; i++) {
+			if(!gData.victory || !gData.currentEnemyName.Equals(enemyData[i].ObjName)){
+				string prefabName = enemyData[i].ObjName.Replace("@"+i,"").Replace("(Clone)","");
+				object obj = Resources.Load (prefabName, typeof(GameObject));
+				GameObject enemyObj = obj as GameObject;
+				GameObject enemy = Instantiate (enemyObj, enemyData[i].Pos, Quaternion.identity) as GameObject;
+				enemy.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].Order;
+				enemy.transform.parent = enemys;
+			}else if(gData.victory && gData.currentEnemyName.Equals(enemyData[i].ObjName)){
+				enemyData.Remove(enemyData[i]);
+				i--;
+			}
+		}
 	}
 
 	public void GenerateSceneRandom ()
@@ -103,6 +117,9 @@ public class SceneGen: MonoBehaviour
 
 	private void GenerateElements ()
 	{
+
+		int num = 0; //the sequence of enemy
+
 		for (int i=0; i<blockList.Count; i++) {
 			GameObject block = blockList [i];			
 			Vector3 blockPos = block.transform.position;
@@ -124,14 +141,16 @@ public class SceneGen: MonoBehaviour
 			int end = start + typesOfEnemyInOneGroup;
 
 			int enemyNum = Random.Range (minEnemyNum, maxEnemyNum);
-			
+
 			for (int j=0; j<enemyNum; j++) {
 				GameObject enemy = enemyPrefabs [Random.Range (start, end)];
 				Vector3 enemyPos = getRandomPos (blockPos, enemy);
 				GameObject enemyO = Instantiate (enemy, enemyPos, Quaternion.identity) as GameObject;
+				enemyO.name = enemyO.name + "@"+num;
 				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				enemyO.transform.parent = enemys;
 				enemyList.Add(enemyO);
+				num++;
 			}
 		}
 	}
@@ -140,23 +159,21 @@ public class SceneGen: MonoBehaviour
 	public void RecScene(){
 		for (int i=0; i<blockList.Count; i++) {
 			GameObject blockO = blockList[i];
-			ElementData ed = new ElementData(blockO.transform.position,blockO.name);
+			ElementData ed = new ElementData(blockO.transform.position,blockO.name,blockO.transform.eulerAngles,blockO.GetComponent<SpriteRenderer>().sortingOrder);
 			blockData.Add(ed);
 		}
 		currentSceneInfo.BlockData = blockData;
 
 		for (int i=0; i<itemList.Count; i++) {
 			GameObject itemO = itemList[i];
-			itemO.name = "item@"+i;
-			ElementData ed = new ElementData(itemO.transform.position,itemO.name);
+			ElementData ed = new ElementData(itemO.transform.position,itemO.name,itemO.transform.eulerAngles,itemO.GetComponent<SpriteRenderer>().sortingOrder);
 			itemData.Add(ed);
 		}
 		currentSceneInfo.ItemData = itemData;
 
 		for (int i=0; i<enemyList.Count; i++) {
 			GameObject enemyO = enemyList[i];
-			enemyO.name = "enemy@"+i;
-			ElementData ed = new ElementData(enemyO.transform.position,enemyO.name);
+			ElementData ed = new ElementData(enemyO.transform.position,enemyO.name,enemyO.transform.eulerAngles,enemyO.GetComponent<SpriteRenderer>().sortingOrder);
 			enemyData.Add(ed);
 		}
 		currentSceneInfo.EnemyData = enemyData;

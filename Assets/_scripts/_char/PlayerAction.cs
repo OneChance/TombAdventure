@@ -25,19 +25,17 @@ public class PlayerAction : MonoBehaviour
 		c.BgList = bgList;
 		characterList.Add (c);
 
-
 		Character c2 = new Character (100, 50, 0, 0, "unity", gameObject.name);
 		List<Baggrid> bgList2 = new List<Baggrid> ();
 		c2.BgList = bgList2;
 		characterList.Add (c2);
-
-
 	}
 
 	void OnCollisionEnter2D (Collision2D coll)
 	{
 		if (coll.gameObject.tag == "Enemy") {
 			gData.currentEnemy = coll.gameObject.GetComponent<EnemyAI> ().Enemy;
+			gData.currentEnemyName = coll.gameObject.name;
 			gData.characterList = characterList;
 			//tell gdata to record current enemies'pos
 			sceneGen.SendMessage("RecScene");
