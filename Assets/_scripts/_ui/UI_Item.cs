@@ -3,12 +3,13 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class UI_Item : MonoBehaviour {
-
-	private UI_Battle ui_Battle;
+	
+	private GameObject itemInfo;
+	private GlobalData gData;
 
 	void Awake ()
 	{
-		ui_Battle = GameObject.FindGameObjectWithTag ("UI").GetComponent<UI_Battle> ();
+		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		Button btn = gameObject.GetComponent<Button>();
 		btn.onClick.AddListener(delegate() {
 			this.OnClick(); 
@@ -16,6 +17,12 @@ public class UI_Item : MonoBehaviour {
 	}
 		
 	public void OnClick(){
-		ui_Battle.SendMessage ("UseItem",gameObject.GetComponent<GridContainer>().bg);
+		itemInfo = GameObject.FindGameObjectWithTag("BagContainer").transform.FindChild("ItemInfo").gameObject;
+		itemInfo.SetActive (true);
+		Baggrid bg = GetComponent<GridContainer> ().bg;
+		gData.currentItem = bg;
+		itemInfo.transform.FindChild("Pic").GetComponent<Image>().sprite = Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
+		itemInfo.transform.FindChild ("ItemName").GetComponent<Text> ().text = bg.Item.name;
+		itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = bg.Item.note;
 	}
 }

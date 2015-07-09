@@ -46,16 +46,17 @@ public class BagInit : MonoBehaviour {
 		for (int i=0; i<bgList.Count; i++) {
 			Baggrid bg = bgList[i];
 			if(bg.Num>0){
-				GameObject itemPrefab = Resources.Load (bg.Item.prefabName, typeof(GameObject)) as GameObject;
+
+				GameObject itemPrefab = Resources.Load ("item", typeof(GameObject)) as GameObject;
 				GameObject itemO = Instantiate (itemPrefab, new Vector3(grids[i].transform.position.x,grids[i].transform.position.y,0), Quaternion.identity) as GameObject;
+
+				itemO.GetComponent<Image>().sprite =  Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
 				itemO.GetComponent<GridContainer>().bg = bg;
 				itemO.transform.FindChild("Num").GetComponent<Text>().text = bg.Num.ToString();
 				itemO.transform.SetParent(grids[i].transform);
 			}else{
 				bgList.Remove(bg);
 			}
-
 		}
-
 	}	
 }

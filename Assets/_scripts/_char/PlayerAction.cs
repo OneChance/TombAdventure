@@ -6,7 +6,7 @@ public class PlayerAction : MonoBehaviour
 {
 
 	private GlobalData gData;
-	private List<Character> characterList;
+	public List<Character> characterList;
 	private SceneGen sceneGen;
 
 	void Start ()
@@ -16,19 +16,23 @@ public class PlayerAction : MonoBehaviour
 		//init data from server
 		//character & item
 		characterList = new List<Character> ();
-		Character c = new Character (100, 50, 0, 0, "zhouhui", gameObject.name);
 
-		HealthItem item = new HealthItem (Item.RangeType.SINGLE,10,"1","单体治疗药剂");
-		List<Baggrid> bgList = new List<Baggrid> ();
-		Baggrid bg = new Baggrid (item,2);
-		bgList.Add (bg);
-		c.BgList = bgList;
-		characterList.Add (c);
+		if (gData.characterList == null || gData.characterList.Count == 0) {
 
-		Character c2 = new Character (100, 50, 0, 0, "unity", gameObject.name);
-		List<Baggrid> bgList2 = new List<Baggrid> ();
-		c2.BgList = bgList2;
-		characterList.Add (c2);
+			Character c = new Character (100, 50, 0, 0, "zhouhui", gameObject.name, false,100);
+			
+			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂");
+			List<Baggrid> bgList = new List<Baggrid> ();
+			Baggrid bg = new Baggrid (item, 2);
+			bgList.Add (bg);
+			c.BgList = bgList;
+			characterList.Add (c);
+			
+			Character c2 = new Character (100, 50, 0, 0, "unity", gameObject.name, false,100);
+			characterList.Add (c2);
+		} else {
+			characterList = gData.characterList;
+		}
 	}
 
 	void OnCollisionEnter2D (Collision2D coll)
@@ -37,6 +41,7 @@ public class PlayerAction : MonoBehaviour
 			gData.currentEnemy = coll.gameObject.GetComponent<EnemyAI> ().Enemy;
 			gData.currentEnemyName = coll.gameObject.name;
 			gData.characterList = characterList;
+			gData.playerPos = transform.position;
 			//tell gdata to record current enemies'pos
 			sceneGen.SendMessage("RecScene");
 			DontDestroyOnLoad (gData);

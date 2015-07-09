@@ -9,9 +9,10 @@ public class Battle : MonoBehaviour
 	public int maxEnemyNum = 2;
 	public GameObject[] enemyPos;
 	public GameObject[] characterPos;
+	public GameObject actionButton;
 	public GlobalData gData;
 	private Sprite enemySprite;
-	private List<Character> characterList;
+	public List<Character> characterList;
 	public List<GameObject> waitForAttack;
 	private List<GameObject> focusList;
 	private List<BattleOp> opList;
@@ -75,6 +76,7 @@ public class Battle : MonoBehaviour
 	void Update ()
 	{
 
+		//如果战斗未开始且战斗指令数量已经等于玩家数量了，即战斗开始
 		if (opList.Count == characterList.Count && !battleStart) {
 			battleStart = true;
 		}
@@ -105,6 +107,9 @@ public class Battle : MonoBehaviour
 	IEnumerator BattleProcess ()
 	{
 
+		//when the battle start,hide the action button
+		actionButton.SetActive (false);			
+
 		battleIng = true;
 
 		for (int i=0; i<opList.Count; i++) {
@@ -122,8 +127,9 @@ public class Battle : MonoBehaviour
 				for (int j=0; j<opList[i].To.Count; j++) {
 					toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
 				}
-				
-				bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);
+
+				bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
+
 				bg.Num = bg.Num-1;
 				
 				UpdateUI ();
@@ -143,17 +149,16 @@ public class Battle : MonoBehaviour
 			Application.LoadLevel ("main");
 		}
 
-
-
 		battleIng = false; // this turn is over
 		newTurnInit = false;//tell to init a new turn
+		actionButton.SetActive (true);	
 	}
 
 	void NewTurn ()
 	{
 		for (int i=0; i<characterList.Count; i++) {
 			Character character = characterList [i];
-			if (character.Health > 0) {
+			if (character.Health > 0 && !character.IsOnLinePlayer) {
 				waitForAttack.Add (characterPos [i]);
 			}
 		}
@@ -305,6 +310,7 @@ public class Battle : MonoBehaviour
 
 		RecoverFocusList ();
 		waitForAttack.Remove (waitForAttack [0]);
+
 		if (waitForAttack.Count > 0) {
 			focusList.Add (waitForAttack [0]);
 		}

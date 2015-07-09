@@ -65,6 +65,7 @@ public class SceneGen: MonoBehaviour
 	}
 
 
+	//recreate the scene info(ground,item,enemy) saved from the lasttime
 	void GenerateSceneFromSceneInfo (SceneInfo sceneInfo)
 	{
 		currentSceneInfo = sceneInfo;
@@ -72,6 +73,9 @@ public class SceneGen: MonoBehaviour
 		blockData = currentSceneInfo.BlockData;
 		itemData = currentSceneInfo.ItemData;
 		enemyData = currentSceneInfo.EnemyData;
+
+		//when reload from the saved scene,the pos of player is not the center of the map
+		player.position = gData.playerPos;
 
 		for (int i=0; i<blockData.Count; i++) {
 			string prefabName = blockData[i].ObjName.Replace("(Clone)","");
@@ -83,6 +87,7 @@ public class SceneGen: MonoBehaviour
 			block.transform.parent = ground;
 		}
 
+
 		for (int i=0; i<itemData.Count; i++) {
 			string prefabName = itemData[i].ObjName.Replace("(Clone)","");
 			object obj = Resources.Load (prefabName, typeof(GameObject));
@@ -92,18 +97,25 @@ public class SceneGen: MonoBehaviour
 			item.transform.parent = groundItem;
 		}
 
+		//if the last scene is balttle , and the battle result is victory,remove the enmey
+		ElementData enemyNeedToRemove = null; 
+
 		for (int i=0; i<enemyData.Count; i++) {
 			if(!gData.victory || !gData.currentEnemyName.Equals(enemyData[i].ObjName)){
-				string prefabName = enemyData[i].ObjName.Replace("@"+i,"").Replace("(Clone)","");
+				string prefabName = enemyData[i].ObjName.Replace("(Clone)","").Split(new char[]{'@'})[0];
 				object obj = Resources.Load (prefabName, typeof(GameObject));
 				GameObject enemyObj = obj as GameObject;
 				GameObject enemy = Instantiate (enemyObj, enemyData[i].Pos, Quaternion.identity) as GameObject;
+				enemy.name = enemyData[i].ObjName;
 				enemy.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].Order;
 				enemy.transform.parent = enemys;
 			}else if(gData.victory && gData.currentEnemyName.Equals(enemyData[i].ObjName)){
-				enemyData.Remove(enemyData[i]);
-				i--;
+				enemyNeedToRemove = enemyData[i];
 			}
+		}
+
+		if(enemyNeedToRemove!=null){
+			enemyData.Remove(enemyNeedToRemove);
 		}
 	}
 
@@ -157,28 +169,31 @@ public class SceneGen: MonoBehaviour
 
 	//record scene info
 	public void RecScene(){
-		for (int i=0; i<blockList.Count; i++) {
-			GameObject blockO = blockList[i];
-			ElementData ed = new ElementData(blockO.transform.position,blockO.name,blockO.transform.eulerAngles,blockO.GetComponent<SpriteRenderer>().sortingOrder);
-			blockData.Add(ed);
-		}
-		currentSceneInfo.BlockData = blockData;
 
-		for (int i=0; i<itemList.Count; i++) {
-			GameObject itemO = itemList[i];
-			ElementData ed = new ElementData(itemO.transform.position,itemO.name,itemO.transform.eulerAngles,itemO.GetComponent<SpriteRenderer>().sortingOrder);
-			itemData.Add(ed);
-		}
-		currentSceneInfo.ItemData = itemData;
+		//when the gdata do not have the data of the currnet floor
+		if (currentSceneInfo.BlockData == null || currentSceneInfo.BlockData.Count == 0) {
+			for (int i=0; i<blockList.Count; i++) {
+				GameObject blockO = blockList[i];
+				ElementData ed = new ElementData(blockO.transform.position,blockO.name,blockO.transform.eulerAngles,blockO.GetComponent<SpriteRenderer>().sortingOrder);
+				blockData.Add(ed);
+			}
+			currentSceneInfo.BlockData = blockData;
 
-		for (int i=0; i<enemyList.Count; i++) {
-			GameObject enemyO = enemyList[i];
-			ElementData ed = new ElementData(enemyO.transform.position,enemyO.name,enemyO.transform.eulerAngles,enemyO.GetComponent<SpriteRenderer>().sortingOrder);
-			enemyData.Add(ed);
+			for (int i=0; i<itemList.Count; i++) {
+				GameObject itemO = itemList[i];
+				ElementData ed = new ElementData(itemO.transform.position,itemO.name,itemO.transform.eulerAngles,itemO.GetComponent<SpriteRenderer>().sortingOrder);
+				itemData.Add(ed);
+			}
+			currentSceneInfo.ItemData = itemData;
+
+			for (int i=0; i<enemyList.Count; i++) {
+				GameObject enemyO = enemyList[i];
+				ElementData ed = new ElementData(enemyO.transform.position,enemyO.name,enemyO.transform.eulerAngles,enemyO.GetComponent<SpriteRenderer>().sortingOrder);
+				enemyData.Add(ed);
+			}
+			currentSceneInfo.EnemyData = enemyData;
+			gData.scenes[gData.currentFloor] = currentSceneInfo;
 		}
-		currentSceneInfo.EnemyData = enemyData;
-		gData.scenes[gData.currentFloor] = currentSceneInfo;
-	
 	}
 
 	private Vector3 getRandomPos (Vector3 blockPos, GameObject element)

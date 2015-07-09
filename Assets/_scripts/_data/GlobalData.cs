@@ -10,6 +10,8 @@ public class GlobalData : MonoBehaviour
 	public List<Character> characterList;
 	public bool victory = true;
 	public string currentEnemyName;
+	public Vector3 playerPos; //record the pos of player when battle start
+	public Baggrid currentItem;
 
 	void Awake ()
 	{
