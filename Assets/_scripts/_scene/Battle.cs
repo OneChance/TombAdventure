@@ -62,10 +62,7 @@ public class Battle : MonoBehaviour
 		for (int i=0; i<characterList.Count; i++) {
 			characterPos [i].SetActive (true);
 			Character character = characterList [i];
-
-			object obj = Resources.Load (character.PrefabName, typeof(GameObject));
-			GameObject c = obj as GameObject;
-			characterPos [i].GetComponent<Image> ().sprite = c.GetComponent<SpriteRenderer> ().sprite;
+			characterPos [i].GetComponent<Image> ().sprite = Resources.Load<Sprite>("_images/_game/"+character.PrefabName);
 			characterPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = character.Health.ToString ();
 			characterPos [i].transform.FindChild ("Name").GetComponent<Text> ().text = character.ObjName;
 			characterPos [i].GetComponent<PosChar> ().battleObj = character;

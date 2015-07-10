@@ -9,7 +9,6 @@ public class UI_Input : MonoBehaviour
 	public Transform itemMenu;
 	public Transform player;
 	public float moveDistance = 0.5f;
-	private bool menuUnfold = false;
 	public GameObject bagContainer;
 	public GameObject bag;
 	public GameObject itemInfo;
@@ -27,6 +26,7 @@ public class UI_Input : MonoBehaviour
 	private GameObject proname;
 	private GameObject health;
 	private GameObject stamina;
+	private List<GameObject> assList;
 
 	void Awake(){
 		avatar = charInfo.transform.FindChild ("Avatar").gameObject;
@@ -41,6 +41,10 @@ public class UI_Input : MonoBehaviour
 		proname = charInfo.transform.FindChild ("Proname").gameObject;
 		health = charInfo.transform.FindChild ("Health").gameObject;
 		stamina = charInfo.transform.FindChild ("Stamina").gameObject;
+		assList = new List<GameObject> ();
+		assList.Add (ass_1);
+		assList.Add (ass_2);
+		assList.Add (ass_3);
 	}
 
 	public void left ()
@@ -65,20 +69,33 @@ public class UI_Input : MonoBehaviour
 
 	public void Equip ()
 	{
-		closeBag ();
 		charInfo.SetActive (!charInfo.activeInHierarchy);
 
 		List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
 
 		if (charInfo.activeInHierarchy) {
+			//玩家角色信息
 			name.GetComponent<Text>().text = cList[0].ObjName;
 			proname.GetComponent<Text>().text = cList[0].Pro.proname;
 			avatar.GetComponent<Image>().sprite = Resources.Load<Sprite>("_images/_game/"+cList[0].PrefabName);
 			avatar.GetComponent<Image>().color = Color.white;
-
 			health.GetComponent<Text>().text = cList[0].Health.ToString();
+			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
+			//助手角色信息
+			for(int i=1;i<cList.Count;i++){
+				GameObject ass = assList[i-1];
+				GameObject info = ass.transform.FindChild("Info").gameObject;
+				info.SetActive(true);
+				ass.GetComponent<Image>().sprite = Resources.Load<Sprite>("_images/_game/"+cList[i].PrefabName);
+				ass.GetComponent<Image>().color = Color.white;
+				info.transform.FindChild("H").GetComponent<Text>().text = cList[i].Health.ToString();
+				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
+				info.transform.FindChild("Name").GetComponent<Text>().text = cList[i].ObjName;
+				info.transform.FindChild("Pro").GetComponent<Text>().text = cList[i].Pro.proname;
+			}
 		}
 	}
+
 
 	void closeBag(){
 		itemInfo.SetActive (false);
@@ -93,7 +110,6 @@ public class UI_Input : MonoBehaviour
 
 	public void Item ()
 	{
-		charInfo.SetActive (false);
 		itemInfo.SetActive (false);
 		bagContainer.SetActive (!bagContainer.activeInHierarchy);
 		Character currentC = player.GetComponent<PlayerAction>().characterList[0];

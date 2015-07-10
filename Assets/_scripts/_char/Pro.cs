@@ -4,5 +4,6 @@ using System.Collections.Generic;
 
 public class Pro  {
 	public string proname;
+	public string prefabname;
 	public List<Item> skills;
 }

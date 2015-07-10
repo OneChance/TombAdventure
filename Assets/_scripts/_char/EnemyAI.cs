@@ -117,4 +117,13 @@ public class EnemyAI : MonoBehaviour
 			currentStatus = StatusType.Trace;
 		}
 	}
+
+	void OnTriggerExit2D(Collider2D other) {
+		if (other.gameObject.tag == "Player") {
+			Patrol ();
+			currentStatus = StatusType.Patrol;
+		}
+	}
+
+
 }

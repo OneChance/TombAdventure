@@ -10,7 +10,7 @@ public class Character:BattleObj
 	private int stamina;
 	public Pro Pro;
 
-	public Character (int health,int attack, int def, int dodge, string objName, string prefabName,bool isOnLinePlayer,int stamina,Pro pro)
+	public Character (int health,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,Pro pro)
 	{
 		this.Health = health;
 		this.MaxHealth = health;
@@ -18,7 +18,7 @@ public class Character:BattleObj
 		this.Def = def;
 		this.Dodge = dodge;
 		this.ObjName = objName;
-		this.PrefabName = prefabName;
+		this.PrefabName = pro.prefabname;
 		this.isOnLinePlayer = isOnLinePlayer;
 		this.stamina = stamina;
 		this.Pro = pro;
