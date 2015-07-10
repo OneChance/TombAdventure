@@ -8,8 +8,9 @@ public class Character:BattleObj
 	private List<Baggrid> bgList;
 	private bool isOnLinePlayer;
 	private int stamina;
+	public Pro Pro;
 
-	public Character (int health,int attack, int def, int dodge, string objName, string prefabName,bool isOnLinePlayer,int stamina)
+	public Character (int health,int attack, int def, int dodge, string objName, string prefabName,bool isOnLinePlayer,int stamina,Pro pro)
 	{
 		this.Health = health;
 		this.MaxHealth = health;
@@ -20,6 +21,7 @@ public class Character:BattleObj
 		this.PrefabName = prefabName;
 		this.isOnLinePlayer = isOnLinePlayer;
 		this.stamina = stamina;
+		this.Pro = pro;
 	}
 
 	public int Stamina {

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class UI_Input : MonoBehaviour
 {
@@ -11,6 +13,35 @@ public class UI_Input : MonoBehaviour
 	public GameObject bagContainer;
 	public GameObject bag;
 	public GameObject itemInfo;
+	public GameObject charInfo;
+
+	private GameObject avatar;
+	private GameObject head;
+	private GameObject hand;
+	private GameObject clothes;
+	private GameObject foot;
+	private GameObject ass_1;
+	private GameObject ass_2;
+	private GameObject ass_3;
+	private GameObject name;
+	private GameObject proname;
+	private GameObject health;
+	private GameObject stamina;
+
+	void Awake(){
+		avatar = charInfo.transform.FindChild ("Avatar").gameObject;
+		head = charInfo.transform.FindChild ("Head").gameObject;
+		hand = charInfo.transform.FindChild ("Hand").gameObject;
+		clothes = charInfo.transform.FindChild ("Clothes").gameObject;
+		foot = charInfo.transform.FindChild ("Foot").gameObject;
+		ass_1 = charInfo.transform.FindChild ("Ass_1").gameObject;
+		ass_2 = charInfo.transform.FindChild ("Ass_2").gameObject;
+		ass_3 = charInfo.transform.FindChild ("Ass_3").gameObject;
+		name = charInfo.transform.FindChild ("Name").gameObject;
+		proname = charInfo.transform.FindChild ("Proname").gameObject;
+		health = charInfo.transform.FindChild ("Health").gameObject;
+		stamina = charInfo.transform.FindChild ("Stamina").gameObject;
+	}
 
 	public void left ()
 	{
@@ -32,24 +63,37 @@ public class UI_Input : MonoBehaviour
 		player.Translate (Vector2.down * moveDistance);
 	}
 
-	public void Menu ()
+	public void Equip ()
 	{
+		closeBag ();
+		charInfo.SetActive (!charInfo.activeInHierarchy);
 
-		if (!menuUnfold) {
-			itemMenu.gameObject.SetActive (true);
-			itemMenu.position = new Vector3 (itemMenu.position.x, itemMenu.position.y + itemMenu.GetComponent<RectTransform> ().sizeDelta.y, itemMenu.position.z);
-			menuUnfold = true;
-		} else {
+		List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
 
-			itemMenu.gameObject.SetActive (false);
-			itemMenu.position = new Vector3 (itemMenu.position.x, itemMenu.position.y - itemMenu.GetComponent<RectTransform> ().sizeDelta.y, itemMenu.position.z);
+		if (charInfo.activeInHierarchy) {
+			name.GetComponent<Text>().text = cList[0].ObjName;
+			proname.GetComponent<Text>().text = cList[0].Pro.proname;
+			avatar.GetComponent<Image>().sprite = Resources.Load<Sprite>("_images/_game/"+cList[0].PrefabName);
+			avatar.GetComponent<Image>().color = Color.white;
 
-			menuUnfold = false;
+			health.GetComponent<Text>().text = cList[0].Health.ToString();
 		}
+	}
+
+	void closeBag(){
+		itemInfo.SetActive (false);
+		bagContainer.SetActive (false);	
+	}
+
+	public void Dig ()
+	{
+		charInfo.SetActive (false);
+		closeBag ();
 	}
 
 	public void Item ()
 	{
+		charInfo.SetActive (false);
 		itemInfo.SetActive (false);
 		bagContainer.SetActive (!bagContainer.activeInHierarchy);
 		Character currentC = player.GetComponent<PlayerAction>().characterList[0];
