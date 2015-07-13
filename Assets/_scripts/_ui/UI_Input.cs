@@ -47,6 +47,10 @@ public class UI_Input : MonoBehaviour
 		assList.Add (ass_3);
 	}
 
+	void MinusStamina(){
+		player.SendMessage ("PlayerMove");
+	}
+
 	public void left ()
 	{
 		player.Translate (Vector2.left * moveDistance);

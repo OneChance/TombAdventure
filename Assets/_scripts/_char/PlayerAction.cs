@@ -48,4 +48,11 @@ public class PlayerAction : MonoBehaviour
 			Application.LoadLevel ("battle");
 		}
 	}
+
+	public void PlayerMove(){
+		//队长移动一次，减少一个体能；成员移动三次，减少一个体能
+		for (int i=0; i<characterList.Count; i++) {
+			
+		}
+	}
 }
