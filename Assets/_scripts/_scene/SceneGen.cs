@@ -24,13 +24,16 @@ public class SceneGen: MonoBehaviour
 	private List<Vector3> addedPos;
 	private float blockX;
 	private float blockY;
+
 	private List<GameObject> blockList;
 	private List<GameObject> itemList;
 	private List<GameObject> enemyList;
+	private List<GameObject> digList;
 
 	private List<ElementData> itemData;
 	private List<ElementData> blockData;
 	private List<ElementData> enemyData;
+	private List<ElementData> digData;
 
 	private Vector3 genPos;
 	private float border = 2.5f;
@@ -47,10 +50,12 @@ public class SceneGen: MonoBehaviour
 		blockList = new List<GameObject> ();
 		itemList = new List<GameObject> ();
 		enemyList = new List<GameObject> ();
+		digList = new List<GameObject> ();
 
 		blockData = new List<ElementData> ();
 		itemData = new List<ElementData> ();
 		enemyData = new List<ElementData> ();
+		digData = new List<ElementData> ();
 
 		genPos = new Vector3 (0, 0, 0);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
@@ -64,8 +69,12 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
+	public void DigInMap(){
 
-	//recreate the scene info(ground,item,enemy) saved from the lasttime
+	}
+
+
+	//从保存的数据中加载场景
 	void GenerateSceneFromSceneInfo (SceneInfo sceneInfo)
 	{
 		currentSceneInfo = sceneInfo;
@@ -74,7 +83,7 @@ public class SceneGen: MonoBehaviour
 		itemData = currentSceneInfo.ItemData;
 		enemyData = currentSceneInfo.EnemyData;
 
-		//when reload from the saved scene,the pos of player is not the center of the map
+		//修改玩家位置为保存的位置
 		player.position = gData.playerPos;
 
 		for (int i=0; i<blockData.Count; i++) {
@@ -97,7 +106,7 @@ public class SceneGen: MonoBehaviour
 			item.transform.parent = groundItem;
 		}
 
-		//if the last scene is balttle , and the battle result is victory,remove the enmey
+		//如果是从战斗场景回来,如果胜利,则移除敌人
 		ElementData enemyNeedToRemove = null; 
 
 		for (int i=0; i<enemyData.Count; i++) {
@@ -136,7 +145,7 @@ public class SceneGen: MonoBehaviour
 			GameObject block = blockList [i];			
 			Vector3 blockPos = block.transform.position;
 
-			//generate ground item
+			//生成场景景物
 			int itemNum = Random.Range (minItemNum, maxItemNum);
 
 			for (int j=0; j<itemNum; j++) {
@@ -148,7 +157,7 @@ public class SceneGen: MonoBehaviour
 				itemList.Add(itemO);
 			}
 
-			//generate enemy
+			//生成敌人
 			int start = level * typesOfEnemyInOneGroup;
 			int end = start + typesOfEnemyInOneGroup;
 
@@ -167,10 +176,8 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
-	//record scene info
+	//如果全局数据里没有当前层的场景数据,记录场景信息
 	public void RecScene(){
-
-		//when the gdata do not have the data of the currnet floor
 		if (currentSceneInfo.BlockData == null || currentSceneInfo.BlockData.Count == 0) {
 			for (int i=0; i<blockList.Count; i++) {
 				GameObject blockO = blockList[i];
@@ -205,6 +212,7 @@ public class SceneGen: MonoBehaviour
 		return randomPos;
 	}
 
+	//获取有效的位置,用于生成场景元素
 	private Vector3 getValidPos (Vector3 blockPos, GameObject element)
 	{
 
@@ -223,7 +231,8 @@ public class SceneGen: MonoBehaviour
 
 		return Zhstar_2D_Common.checkPosValid (pos, checkedTags, elementWidth, elementHeight);
 	}
-
+	
+	//根据场景地砖的位置，替换贴图，旋转得到正确的位置
 	private void ReplaceTex ()
 	{
 
@@ -325,7 +334,7 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
-	//find out if blockList contains the block pos passed in,and return the direction of the pos
+	//判断该位置有没有砖块，如果有，返回这个位置的方位
 	private Direction haveBlock (PosInfo pi)
 	{
 		for (int i=0; i<blockList.Count; i++) {
@@ -336,6 +345,8 @@ public class SceneGen: MonoBehaviour
 		return Direction.Error;
 	}
 
+
+	//生成地图
 	private void GenerateGround ()
 	{
 		for (int i=0; i<maxBlockNum; i++) {
@@ -343,6 +354,7 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
+	//生成砖块
 	private void GenerateBlock (Vector3 pos)
 	{
 
@@ -365,6 +377,7 @@ public class SceneGen: MonoBehaviour
 
 	}
 
+	//添加砖块到可使用位置列表，用于后续生成
 	void addAblePos (List<PosInfo> newPosList)
 	{
 		for (int i=0; i<newPosList.Count; i++) {

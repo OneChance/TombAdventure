@@ -86,7 +86,7 @@ public class Battle : MonoBehaviour
 		}
 
 		for (int i=0; i<focusList.Count; i++) {
-			Focus (focusList [i]);
+			GameUtil.Focus(focusList [i]);
 		}
 
 		if (battleStart && !battleIng) {
@@ -255,23 +255,8 @@ public class Battle : MonoBehaviour
 		}
 	}
 
-
 	/*
-	 * focus the target,here is a alpha change effect,maybe there is a batter way 
-	 */
-	void Focus (GameObject go)
-	{
-		float lerp = Mathf.PingPong (Time.time, 0.5f) * 2f;  
-
-		Color c = go.GetComponent<Image> ().color;
-		Color fromC = new Color (c.r, c.g, c.b, 1f);
-		Color toC = new Color (c.r, c.g, c.b, 0.3f);
-
-		go.GetComponent<Image> ().color = Color.Lerp (fromC, toC, lerp);
-	}
-
-	/*
-	 *clear the focus list
+	 *  清除焦点列表 
 	 */
 	void RecoverFocusList ()
 	{
@@ -283,7 +268,7 @@ public class Battle : MonoBehaviour
 	}
 
 	/*
-	 *add an battle operation
+	 *  添加战斗指令
 	 */
 	void AddOp ()
 	{

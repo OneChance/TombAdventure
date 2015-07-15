@@ -8,11 +8,11 @@ public class UI_Input : MonoBehaviour
 
 	public Transform itemMenu;
 	public Transform player;
-	public float moveDistance = 0.5f;
 	public GameObject bagContainer;
 	public GameObject bag;
 	public GameObject itemInfo;
 	public GameObject charInfo;
+	public GameObject buttons;
 
 	private GameObject avatar;
 	private GameObject head;
@@ -27,8 +27,10 @@ public class UI_Input : MonoBehaviour
 	private GameObject health;
 	private GameObject stamina;
 	private List<GameObject> assList;
-
-	void Awake(){
+	private GlobalData gData;
+	private List<GameObject> focusList;
+	
+	void Start(){
 		avatar = charInfo.transform.FindChild ("Avatar").gameObject;
 		head = charInfo.transform.FindChild ("Head").gameObject;
 		hand = charInfo.transform.FindChild ("Hand").gameObject;
@@ -45,39 +47,55 @@ public class UI_Input : MonoBehaviour
 		assList.Add (ass_1);
 		assList.Add (ass_2);
 		assList.Add (ass_3);
-	}
-
-	void MinusStamina(){
-		player.SendMessage ("PlayerMove");
+		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+		focusList = new List<GameObject>();
 	}
 
 	public void left ()
 	{
-		player.Translate (Vector2.left * moveDistance);
+		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.LEFT);
 	}
 
 	public void right ()
 	{
-		player.Translate (Vector2.right * moveDistance);
+		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.RIGHT);
 	}
 
 	public void up ()
 	{
-		player.Translate (Vector2.up * moveDistance);
+		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.UP);
 	}
 
 	public void down ()
 	{
-		player.Translate (Vector2.down * moveDistance);
+		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.DOWN);
 	}
 
-	public void Equip ()
-	{
-		charInfo.SetActive (!charInfo.activeInHierarchy);
+	void Update(){
+		UpdateUIInfo();
+		for (int i=0; i<focusList.Count; i++) {
+			GameUtil.Focus(focusList [i]);
+		}
+	}
 
+	public void UpdateUIInfo(){
 		List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
-
+		
 		if (charInfo.activeInHierarchy) {
+			//玩家角色信息
+			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
+			//助手角色信息
+			for(int i=1;i<cList.Count;i++){
+				GameObject ass = assList[i-1];
+				GameObject info = ass.transform.FindChild("Info").gameObject;
+				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
+			}
+		}
+	}
+
+	void InitCharInfo(){
+		List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
+		if(name.GetComponent<Text>().text.Equals("")){
 			//玩家角色信息
 			name.GetComponent<Text>().text = cList[0].ObjName;
 			proname.GetComponent<Text>().text = cList[0].Pro.proname;
@@ -100,6 +118,14 @@ public class UI_Input : MonoBehaviour
 		}
 	}
 
+	public void Equip ()
+	{
+		charInfo.SetActive (!charInfo.activeInHierarchy);
+		if (charInfo.activeInHierarchy) {
+			InitCharInfo();
+		}
+	}
+
 
 	void closeBag(){
 		itemInfo.SetActive (false);
@@ -110,6 +136,28 @@ public class UI_Input : MonoBehaviour
 	{
 		charInfo.SetActive (false);
 		closeBag ();
+
+		//隐藏UI上除了停止按钮意外的其他元素
+		for(int i=0;i<buttons.transform.childCount;i++){
+			if(buttons.transform.GetChild(i).name!="DigStop"){
+				buttons.transform.GetChild(i).gameObject.SetActive(false);
+			}else{
+				buttons.transform.GetChild(i).gameObject.SetActive(true);
+			}
+		}
+
+		player.SendMessage ("PlayerDig");
+	}
+
+	public void DigStop(){
+		//隐藏停止,显示UI上除了停止按钮意外的其他元素
+		for(int i=0;i<buttons.transform.childCount;i++){
+			if(buttons.transform.GetChild(i).name!="DigStop"){
+				buttons.transform.GetChild(i).gameObject.SetActive(true);
+			}else{
+				buttons.transform.GetChild(i).gameObject.SetActive(false);
+			}
+		}
 	}
 
 	public void Item ()
@@ -122,6 +170,25 @@ public class UI_Input : MonoBehaviour
 	}
 
 	public void UseItem(){
-		Debug.Log ("use item");
+		//关闭背包窗口
+		closeBag();
+		//打开人物属性面板
+		charInfo.SetActive(true);
+		InitCharInfo();
+		//获取道具信息
+		Baggrid bg = gData.currentItem;
+		Item item = bg.Item;
+
+		if(item.ct == global::Item.CommonType.CONSUME){
+			//人物格闪动
+			focusList.Add(avatar);
+			List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
+			for(int i=1;i<cList.Count;i++){
+				GameObject ass = assList[i-1];
+				focusList.Add(ass);
+			}
+		}else if(item.ct == global::Item.CommonType.EQUIPMENT){
+			//装备格闪动
+		}
 	}
 }
