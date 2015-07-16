@@ -33,6 +33,7 @@ public class UI_Battle : MonoBehaviour
 	public void UseItem(){
 		closeBag ();
 		Action act = new Action (Op.ITEM,battle.gData.currentItem);
+		battle.gData.currentItem = null;
 		battle.SendMessage ("Act", act);
 	}
 

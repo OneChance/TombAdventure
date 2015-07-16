@@ -18,7 +18,7 @@ public class HealthItem : Item
 		this.note = "恢复"+this.targetNote+"友军"+this.heal+"点生命力";
 	}
 
-	public override void doSth (BattleObj from, List<BattleObj> to)
+	public  override void doSth <T>(T from, List<T> to)
 	{
 		for (int i=0; i<to.Count; i++) {
 			to [i].Health = Mathf.Min(to [i].Health + heal,to[i].MaxHealth);

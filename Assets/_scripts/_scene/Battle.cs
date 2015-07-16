@@ -180,18 +180,16 @@ public class Battle : MonoBehaviour
 		}
 	}
 
-	//the action of character
+	//玩家动作
 	void Act (Action act)
 	{
 		currentAct = act;
 		RecoverFocusList ();
-		//judge if the item: 
-		//is use to enemy of friend
-		//is multi or single
+		//判断道具属性，使用于敌方还是友方，单体还是多体
 		if (act.Bg.Item.ot == Item.ObjType.Enemy) {
 			if(act.Bg.Item.rt == Item.RangeType.SINGLE){
 
-				//choose the first alive enemy
+				//如果是单体，选择第一个活着的敌人
 				for(int i=0;i<enemyPos.Length;i++){
 					if(enemyPos[i].activeInHierarchy && enemyPos [i].GetComponent<PosChar> ().battleObj.Health>0){
 						focusList.Add(enemyPos[i]);
@@ -281,13 +279,13 @@ public class Battle : MonoBehaviour
 		}
 
 		GameObject from = waitForAttack [0];
-		List<GameObject> enemysAttacked = new List<GameObject> (); 
+		List<GameObject> to = new List<GameObject> (); 
 
 		for (int i=0; i<focusList.Count; i++) {
-			enemysAttacked.Add (focusList [i]);
+			to.Add (focusList [i]);
 		}
 
-		BattleOp bo = new BattleOp (from, enemysAttacked, currentAct.Bg);
+		BattleOp bo = new BattleOp (from, to, currentAct.Bg);
 		opList.Add (bo);
 
 		RecoverFocusList ();

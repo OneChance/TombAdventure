@@ -6,6 +6,7 @@ public class UI_Item : MonoBehaviour {
 	
 	private GameObject itemInfo;
 	private GlobalData gData;
+	public Baggrid bg;
 
 	void Awake ()
 	{
@@ -19,7 +20,6 @@ public class UI_Item : MonoBehaviour {
 	public void OnClick(){
 		itemInfo = GameObject.FindGameObjectWithTag("BagContainer").transform.FindChild("ItemInfo").gameObject;
 		itemInfo.SetActive (true);
-		Baggrid bg = GetComponent<GridContainer> ().bg;
 		gData.currentItem = bg;
 		itemInfo.transform.FindChild("Pic").GetComponent<Image>().sprite = Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
 		itemInfo.transform.FindChild ("ItemName").GetComponent<Text> ().text = bg.Item.name;

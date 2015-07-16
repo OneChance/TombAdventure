@@ -49,11 +49,11 @@ public class BagInit : MonoBehaviour {
 
 				GameObject itemPrefab = Resources.Load ("item", typeof(GameObject)) as GameObject;
 				GameObject itemO = Instantiate (itemPrefab, new Vector3(grids[i].transform.position.x,grids[i].transform.position.y,0), Quaternion.identity) as GameObject;
-
 				itemO.GetComponent<Image>().sprite =  Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
-				itemO.GetComponent<GridContainer>().bg = bg;
+				itemO.GetComponent<UI_Item>().bg = bg;
 				itemO.transform.FindChild("Num").GetComponent<Text>().text = bg.Num.ToString();
 				itemO.transform.SetParent(grids[i].transform);
+
 			}else{
 				bgList.Remove(bg);
 			}

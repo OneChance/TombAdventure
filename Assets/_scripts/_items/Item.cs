@@ -51,6 +51,6 @@ public abstract class Item
 			}
 		}
 	} 
-
-	public abstract void doSth (BattleObj from, List<BattleObj> to); 
+	
+	public abstract void doSth <T>(T from, List<T> to) where T:BattleObj; 
 }

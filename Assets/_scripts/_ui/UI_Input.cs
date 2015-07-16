@@ -8,7 +8,6 @@ public class UI_Input : MonoBehaviour
 
 	public Transform itemMenu;
 	public Transform player;
-	public GameObject bagContainer;
 	public GameObject bag;
 	public GameObject itemInfo;
 	public GameObject charInfo;
@@ -84,11 +83,13 @@ public class UI_Input : MonoBehaviour
 		if (charInfo.activeInHierarchy) {
 			//玩家角色信息
 			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
+			health.GetComponent<Text>().text = cList[0].Health.ToString();
 			//助手角色信息
 			for(int i=1;i<cList.Count;i++){
 				GameObject ass = assList[i-1];
 				GameObject info = ass.transform.FindChild("Info").gameObject;
 				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
+				info.transform.FindChild("H").GetComponent<Text>().text = cList[i].Health.ToString();
 			}
 		}
 	}
@@ -99,17 +100,28 @@ public class UI_Input : MonoBehaviour
 			//玩家角色信息
 			name.GetComponent<Text>().text = cList[0].ObjName;
 			proname.GetComponent<Text>().text = cList[0].Pro.proname;
-			avatar.GetComponent<Image>().sprite = Resources.Load<Sprite>("_images/_game/"+cList[0].PrefabName);
-			avatar.GetComponent<Image>().color = Color.white;
+
+			//生成玩家
+			GameObject uiCharP = Resources.Load ("UIChar", typeof(GameObject)) as GameObject;
+			GameObject uiCharAvatar = Instantiate (uiCharP, new Vector3(avatar.transform.position.x,avatar.transform.position.y,0), Quaternion.identity) as GameObject;
+			uiCharAvatar.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_game/"+cList[0].PrefabName);
+			uiCharAvatar.GetComponent<UI_Player>().c = cList[0];
+			uiCharAvatar.transform.SetParent(avatar.transform);
+
 			health.GetComponent<Text>().text = cList[0].Health.ToString();
 			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
+
 			//助手角色信息
 			for(int i=1;i<cList.Count;i++){
 				GameObject ass = assList[i-1];
 				GameObject info = ass.transform.FindChild("Info").gameObject;
 				info.SetActive(true);
-				ass.GetComponent<Image>().sprite = Resources.Load<Sprite>("_images/_game/"+cList[i].PrefabName);
-				ass.GetComponent<Image>().color = Color.white;
+
+				GameObject uiCharAss = Instantiate (uiCharP, new Vector3(ass.transform.position.x,ass.transform.position.y,0), Quaternion.identity) as GameObject;
+				uiCharAss.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_game/"+cList[i].PrefabName);
+				uiCharAss.transform.SetParent(ass.transform);
+				uiCharAss.GetComponent<UI_Player>().c = cList[i];
+
 				info.transform.FindChild("H").GetComponent<Text>().text = cList[i].Health.ToString();
 				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
 				info.transform.FindChild("Name").GetComponent<Text>().text = cList[i].ObjName;
@@ -129,7 +141,7 @@ public class UI_Input : MonoBehaviour
 
 	void closeBag(){
 		itemInfo.SetActive (false);
-		bagContainer.SetActive (false);	
+		bag.SetActive (false);	
 	}
 
 	public void Dig ()
@@ -163,9 +175,9 @@ public class UI_Input : MonoBehaviour
 	public void Item ()
 	{
 		itemInfo.SetActive (false);
-		bagContainer.SetActive (!bagContainer.activeInHierarchy);
+		bag.SetActive (!bag.activeInHierarchy);
 		Character currentC = player.GetComponent<PlayerAction>().characterList[0];
-		if(bagContainer.activeInHierarchy)
+		if(bag.activeInHierarchy)
 			bag.SendMessage ("InitBag",currentC);
 	}
 
@@ -187,8 +199,22 @@ public class UI_Input : MonoBehaviour
 				GameObject ass = assList[i-1];
 				focusList.Add(ass);
 			}
+
+			//如果是群体道具，直接应用，否则等待点击玩家后使用
+			if(item.rt == global::Item.RangeType.MULTI){
+				bg.Item.doSth(cList[0],cList);
+				//用完减少数量并移除
+				gData.currentItem.Num--;
+				gData.currentItem = null;
+				ItemUseComplete();
+			}
+
 		}else if(item.ct == global::Item.CommonType.EQUIPMENT){
 			//装备格闪动
 		}
+	}
+
+	public void ItemUseComplete(){
+		focusList.Clear();
 	}
 }

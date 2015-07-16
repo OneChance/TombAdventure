@@ -39,6 +39,7 @@ public class SceneGen: MonoBehaviour
 	private float border = 2.5f;
 	private GlobalData gData;
 	private SceneInfo currentSceneInfo;
+	private GameObject digPrefab;
 
 	void Start ()
 	{
@@ -67,10 +68,24 @@ public class SceneGen: MonoBehaviour
 		} else {
 			GenerateSceneRandom ();
 		}
+
+		digPrefab =  Resources.Load ("Dig", typeof(GameObject)) as GameObject;
+	}
+
+	//
+	public GameObject getDig(Vector3 playerPos){
+
 	}
 
 	public void DigInMap(){
+		//在当前位置开始挖掘
+		//如果当前位置已有坑，加载当前位置坑信息，如果没有，生成新坑
 
+
+		//生成挖掘点
+		GameObject dig = Instantiate (digPrefab, player.position, Quaternion.identity) as GameObject;
+		//生成信息
+		digList.Add(dig);
 	}
 
 
