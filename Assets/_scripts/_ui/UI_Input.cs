@@ -170,6 +170,7 @@ public class UI_Input : MonoBehaviour
 				buttons.transform.GetChild(i).gameObject.SetActive(false);
 			}
 		}
+		player.SendMessage ("StopDig");
 	}
 
 	public void Item ()

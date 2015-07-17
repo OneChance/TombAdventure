@@ -7,6 +7,7 @@ public class SceneInfo
 	private List<ElementData> blockData;
 	private List<ElementData> itemData;
 	private List<ElementData> enemyData;
+	private List<ElementData> digData;
 
 	public List<ElementData> EnemyData {
 		get {
@@ -32,6 +33,15 @@ public class SceneInfo
 		}
 		set {
 			itemData = value;
+		}
+	}
+
+	public List<ElementData> DigData {
+		get {
+			return this.digData;
+		}
+		set {
+			digData = value;
 		}
 	}
 }

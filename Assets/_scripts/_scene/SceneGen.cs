@@ -20,6 +20,7 @@ public class SceneGen: MonoBehaviour
 	public Transform groundItem;
 	public Transform player;
 	public Transform enemys;
+	public Transform digs;
 	private List<Vector3> ablePos;
 	private List<Vector3> addedPos;
 	private float blockX;
@@ -40,9 +41,17 @@ public class SceneGen: MonoBehaviour
 	private GlobalData gData;
 	private SceneInfo currentSceneInfo;
 	private GameObject digPrefab;
+	private float digSide;
+	private float playerSide;
+	private List<Character> cList;
+	private GameObject currentDigging;
+	private bool digging;
+	private float digTimer;
+	private UI_Input uiInput;
 
 	void Start ()
 	{
+
 		currentSceneInfo = new SceneInfo ();
 
 		ablePos = new List<Vector3> ();
@@ -62,30 +71,108 @@ public class SceneGen: MonoBehaviour
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.scenes.Count;
+
+		digPrefab =  Resources.Load ("Dig", typeof(GameObject)) as GameObject;
+		digSide = digPrefab.GetComponent<SpriteRenderer>().bounds.size.x;
+		playerSide = player.GetComponent<SpriteRenderer>().bounds.size.x;
+		uiInput  = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input>();
 		
-		if (scenesNum >= currentFloor + 1) {
-			GenerateSceneFromSceneInfo (gData.scenes [currentFloor]);
+		if (scenesNum >= currentFloor) {
+			GenerateSceneFromSceneInfo (gData.scenes [currentFloor-1]);
 		} else {
 			GenerateSceneRandom ();
 		}
-
-		digPrefab =  Resources.Load ("Dig", typeof(GameObject)) as GameObject;
 	}
 
-	//
+
 	public GameObject getDig(Vector3 playerPos){
 
+		for(int i=0;i<digList.Count;i++){
+			float dX = Mathf.Abs(playerPos.x - digList[i].transform.position.x);
+			float dY = Mathf.Abs(playerPos.y - digList[i].transform.position.y);
+
+			//如果所在位置有坑，返回这个坑
+			if(dX<digSide*0.5+playerSide*0.5 && dY<digSide*0.5+playerSide*0.5){
+				return digList[i];
+			}
+			//如果所在位置限制范围内有坑，返回空
+			if(dX<digSide && dY<digSide){
+				return null;
+			}
+		}
+
+		//如果位置不违反规则，返回新的坑对象
+		GameObject dig = Instantiate (digPrefab, player.position, Quaternion.identity) as GameObject;
+		dig.transform.SetParent(digs);
+		//生成挖掘点信息
+		DigInfo di = dig.GetComponent<DigInfo>();
+		di.currentDeep = 0;
+		di.texType = 0;
+		//根据当前层数,随机生成深度
+		di.deep = Random.Range(gData.currentFloor*10,gData.currentFloor*20);
+		digList.Add(dig);
+		return dig;
 	}
 
-	public void DigInMap(){
+	public void DigInMap(List<Character> cList){
+
+		this.cList = cList;
+
 		//在当前位置开始挖掘
-		//如果当前位置已有坑，加载当前位置坑信息，如果没有，生成新坑
+		GameObject dig = getDig(player.transform.position);
 
+		if(dig==null){
+			Debug.Log("此处貌似有坚硬的石块，换个地方试试吧");
+			uiInput.SendMessage("DigStop");
+		}else{
+			//开始挖掘
+			currentDigging = dig;
+			digging = true;
+		}
+	}
 
-		//生成挖掘点
-		GameObject dig = Instantiate (digPrefab, player.position, Quaternion.identity) as GameObject;
-		//生成信息
-		digList.Add(dig);
+	public void Digging(){
+		int sumStrength = 0;
+		for(int i=0;i<cList.Count;i++){
+			if(cList[i].Stamina>0){
+				sumStrength+=cList[i].strength;
+			}
+		}
+		//一点力量挖掘一个深度
+		DigInfo di = currentDigging.GetComponent<DigInfo>();
+		di.currentDeep += sumStrength;
+		if(di.currentDeep>(di.texType+1)*(di.deep*0.3333)){
+			di.texType++;
+			currentDigging.GetComponent<SpriteRenderer>().sprite = Resources.Load <Sprite>("_images/_game/dig_"+Mathf.Min(2,di.texType));
+		}
+
+		//一次挖掘扣除3点体能
+		for(int i=0;i<cList.Count;i++){
+			if(cList[i].Stamina>0){
+				cList[i].Stamina = Mathf.Max(0,cList[i].Stamina - 3);
+			}
+		}
+
+		if(di.currentDeep>=di.deep){
+			digging = false;
+			Debug.Log("挖到底了.............");
+			uiInput.SendMessage("DigStop");
+		}
+	}
+
+	//UI点击停止挖掘，传递给这个函数
+	public void StopDigInMap(){
+		digging = false;
+	}
+
+	void Update(){
+
+		digTimer+=Time.deltaTime;
+
+		if(digging && digTimer>3){
+			Digging();
+			digTimer = 0;
+		}
 	}
 
 
@@ -97,27 +184,28 @@ public class SceneGen: MonoBehaviour
 		blockData = currentSceneInfo.BlockData;
 		itemData = currentSceneInfo.ItemData;
 		enemyData = currentSceneInfo.EnemyData;
+		digData = currentSceneInfo.DigData;
 
 		//修改玩家位置为保存的位置
 		player.position = gData.playerPos;
 
 		for (int i=0; i<blockData.Count; i++) {
-			string prefabName = blockData[i].ObjName.Replace("(Clone)","");
+			string prefabName = blockData[i].objName.Replace("(Clone)","");
 			object obj = Resources.Load (prefabName, typeof(GameObject));
 			GameObject blockObj = obj as GameObject;
-			GameObject block = Instantiate (blockObj, blockData[i].Pos, Quaternion.identity) as GameObject;
-			block.transform.eulerAngles = blockData[i].EulerAngles;
-			block.GetComponent<SpriteRenderer>().sortingOrder = blockData[i].Order;
+			GameObject block = Instantiate (blockObj, blockData[i].pos, Quaternion.identity) as GameObject;
+			block.transform.eulerAngles = blockData[i].eulerAngles;
+			block.GetComponent<SpriteRenderer>().sortingOrder = blockData[i].order;
 			block.transform.parent = ground;
 		}
 
 
 		for (int i=0; i<itemData.Count; i++) {
-			string prefabName = itemData[i].ObjName.Replace("(Clone)","");
+			string prefabName = itemData[i].objName.Replace("(Clone)","");
 			object obj = Resources.Load (prefabName, typeof(GameObject));
 			GameObject itemObj = obj as GameObject;
-			GameObject item = Instantiate (itemObj, itemData[i].Pos, Quaternion.identity) as GameObject;
-			item.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].Order;
+			GameObject item = Instantiate (itemObj, itemData[i].pos, Quaternion.identity) as GameObject;
+			item.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].order;
 			item.transform.parent = groundItem;
 		}
 
@@ -125,21 +213,36 @@ public class SceneGen: MonoBehaviour
 		ElementData enemyNeedToRemove = null; 
 
 		for (int i=0; i<enemyData.Count; i++) {
-			if(!gData.victory || !gData.currentEnemyName.Equals(enemyData[i].ObjName)){
-				string prefabName = enemyData[i].ObjName.Replace("(Clone)","").Split(new char[]{'@'})[0];
+			if(!gData.victory || !gData.currentEnemyName.Equals(enemyData[i].objName)){
+				string prefabName = enemyData[i].objName.Replace("(Clone)","").Split(new char[]{'@'})[0];
 				object obj = Resources.Load (prefabName, typeof(GameObject));
 				GameObject enemyObj = obj as GameObject;
-				GameObject enemy = Instantiate (enemyObj, enemyData[i].Pos, Quaternion.identity) as GameObject;
-				enemy.name = enemyData[i].ObjName;
-				enemy.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].Order;
+				GameObject enemy = Instantiate (enemyObj, enemyData[i].pos, Quaternion.identity) as GameObject;
+				enemy.name = enemyData[i].objName;
+				enemy.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].order;
 				enemy.transform.parent = enemys;
-			}else if(gData.victory && gData.currentEnemyName.Equals(enemyData[i].ObjName)){
+			}else if(gData.victory && gData.currentEnemyName.Equals(enemyData[i].objName)){
 				enemyNeedToRemove = enemyData[i];
 			}
 		}
 
 		if(enemyNeedToRemove!=null){
 			enemyData.Remove(enemyNeedToRemove);
+		}
+
+		//加载挖掘点		
+		for (int i=0; i<digData.Count; i++) {
+			GameObject dig = Instantiate (digPrefab, digData[i].pos, Quaternion.identity) as GameObject;
+			dig.GetComponent<SpriteRenderer>().sortingOrder = itemData[i].order;
+			DigInfo di = dig.GetComponent<DigInfo>();
+			di.deep = ((DigData)digData[i]).deep;
+			di.currentDeep = ((DigData)digData[i]).currentDeep;
+			di.texType =  ((DigData)digData[i]).texType;
+			//更换贴图
+			dig.GetComponent<SpriteRenderer>().sprite = Resources.Load <Sprite>("_images/_game/dig_"+di.texType);
+			dig.transform.parent = digs;
+			//为了用于可挖掘位置的判断
+			digList.Add(dig);
 		}
 	}
 
@@ -191,8 +294,10 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
-	//如果全局数据里没有当前层的场景数据,记录场景信息
+	//记录场景信息
 	public void RecScene(){
+
+		//场景切换之间不会有变动的数据，只在首次保存层时记录
 		if (currentSceneInfo.BlockData == null || currentSceneInfo.BlockData.Count == 0) {
 			for (int i=0; i<blockList.Count; i++) {
 				GameObject blockO = blockList[i];
@@ -208,14 +313,34 @@ public class SceneGen: MonoBehaviour
 			}
 			currentSceneInfo.ItemData = itemData;
 
+
 			for (int i=0; i<enemyList.Count; i++) {
 				GameObject enemyO = enemyList[i];
 				ElementData ed = new ElementData(enemyO.transform.position,enemyO.name,enemyO.transform.eulerAngles,enemyO.GetComponent<SpriteRenderer>().sortingOrder);
 				enemyData.Add(ed);
 			}
 			currentSceneInfo.EnemyData = enemyData;
-			gData.scenes[gData.currentFloor] = currentSceneInfo;
 		}
+
+		//挖掘点数据在从主场景切换到战斗场景的过程中,贴图会发生变动，所以每次记录场景时都要更新
+		//先清除原数据(由于digList和digData之间没有关联，所以不方便在更新dig贴图时，同时更新digData的数据，这里在保存场景时全部重新保存)
+		digData.Clear();
+		for (int i=0; i<digList.Count; i++) {
+			GameObject digO = digList[i];
+			AddNewDigData(digO);
+		}
+
+		Debug.Log(digData.Count);
+
+		currentSceneInfo.DigData = digData;
+		
+		gData.scenes[gData.currentFloor-1] = currentSceneInfo;
+	}
+
+	void AddNewDigData(GameObject digO){
+		DigInfo di = digO.GetComponent<DigInfo>();
+		DigData dd = new DigData(digO.transform.position,digO.name,digO.transform.eulerAngles,digO.GetComponent<SpriteRenderer>().sortingOrder,di.deep,di.currentDeep,di.texType);
+		digData.Add(dd);
 	}
 
 	private Vector3 getRandomPos (Vector3 blockPos, GameObject element)

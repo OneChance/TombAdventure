@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class GlobalData : MonoBehaviour
 {
-	public int currentFloor = 0;
+	public int currentFloor = 1;
 	public List<SceneInfo> scenes;
 	public Enemy currentEnemy;
 	public List<Character> characterList;

@@ -6,4 +6,6 @@ public class Pro  {
 	public string proname;
 	public string prefabname;
 	public List<Item> skills;
+
+	public int strengthFactor;
 }

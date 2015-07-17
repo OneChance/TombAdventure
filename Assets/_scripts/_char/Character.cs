@@ -10,8 +10,10 @@ public class Character:BattleObj
 	private int stamina;
 	private int maxStamina;
 	public Pro Pro;
+	public int level;
+	public int strength;
 
-	public Character (int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro)
+	public Character (int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level)
 	{
 		this.Health = health;
 		this.MaxHealth = maxHealth;
@@ -24,6 +26,8 @@ public class Character:BattleObj
 		this.stamina = stamina;
 		this.maxStamina = maxStamina;
 		this.Pro = pro;
+		this.level = level;
+		this.strength = this.level * this.Pro.strengthFactor;
 	}
 
 	public int Stamina {
