@@ -8,6 +8,7 @@ public class SceneInfo
 	private List<ElementData> itemData;
 	private List<ElementData> enemyData;
 	private List<ElementData> digData;
+	public ElementData nextEntry;
 
 	public List<ElementData> EnemyData {
 		get {

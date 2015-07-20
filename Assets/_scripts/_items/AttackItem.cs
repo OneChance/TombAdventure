@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class AttackItem : Item
 {
 
-	public AttackItem ()
+	public AttackItem ():base("noprefab")
 	{
 		this.name = "AttackItem";
 		this.rt = RangeType.SINGLE;

@@ -7,5 +7,6 @@ public class Geomancer : Pro {
 		this.proname = "风水师";
 		this.prefabname = "Geomancer_"+image_name;
 		this.strengthFactor = 1;
+		this.intelligenceFactor =2;
 	}
 }

@@ -8,4 +8,5 @@ public class Pro  {
 	public List<Item> skills;
 
 	public int strengthFactor;
+	public int intelligenceFactor;
 }

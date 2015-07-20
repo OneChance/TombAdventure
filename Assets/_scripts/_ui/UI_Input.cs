@@ -111,6 +111,8 @@ public class UI_Input : MonoBehaviour
 			health.GetComponent<Text>().text = cList[0].Health.ToString();
 			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
 
+			//加载装备
+
 			//助手角色信息
 			for(int i=1;i<cList.Count;i++){
 				GameObject ass = assList[i-1];
@@ -136,6 +138,11 @@ public class UI_Input : MonoBehaviour
 		if (charInfo.activeInHierarchy) {
 			InitCharInfo();
 		}
+	}
+
+	public void Detect ()
+	{
+		player.SendMessage ("PlayerDetect");
 	}
 
 

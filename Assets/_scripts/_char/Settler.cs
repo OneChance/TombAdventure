@@ -7,5 +7,6 @@ public class Settler : Pro {
 		this.proname = "拓荒者";
 		this.prefabname = "Settler_"+image_name;
 		this.strengthFactor = 2;
+		this.intelligenceFactor = 1;
 	}
 }

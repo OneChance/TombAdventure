@@ -21,6 +21,12 @@ public class SceneGen: MonoBehaviour
 	public Transform player;
 	public Transform enemys;
 	public Transform digs;
+
+	//边界墙的厚度
+	public float wallSize = 1.5f;
+	//下层入口的半径
+	public float entryRadius = 3f;
+
 	private List<Vector3> ablePos;
 	private List<Vector3> addedPos;
 	private float blockX;
@@ -35,6 +41,7 @@ public class SceneGen: MonoBehaviour
 	private List<ElementData> blockData;
 	private List<ElementData> enemyData;
 	private List<ElementData> digData;
+	private ElementData nextEntry;
 
 	private Vector3 genPos;
 	private float border = 2.5f;
@@ -84,7 +91,6 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
-
 	public GameObject getDig(Vector3 playerPos){
 
 		for(int i=0;i<digList.Count;i++){
@@ -114,20 +120,26 @@ public class SceneGen: MonoBehaviour
 		return dig;
 	}
 
+	//挖掘
 	public void DigInMap(List<Character> cList){
 
-		this.cList = cList;
-
-		//在当前位置开始挖掘
-		GameObject dig = getDig(player.transform.position);
-
-		if(dig==null){
-			Debug.Log("此处貌似有坚硬的石块，换个地方试试吧");
-			uiInput.SendMessage("DigStop");
+		if(!checkBlockSide()){
+			this.cList = cList;
+			
+			//在当前位置开始挖掘
+			GameObject dig = getDig(player.transform.position);
+			
+			if(dig==null){
+				Debug.Log("此处貌似有坚硬的石块，换个地方试试吧");
+				uiInput.SendMessage("DigStop");
+			}else{
+				//开始挖掘
+				currentDigging = dig;
+				digging = true;
+			}
 		}else{
-			//开始挖掘
-			currentDigging = dig;
-			digging = true;
+			Debug.Log("靠着墙的位置不太好挖啊......，换个地方试试吧");
+			uiInput.SendMessage("DigStop");
 		}
 	}
 
@@ -138,25 +150,42 @@ public class SceneGen: MonoBehaviour
 				sumStrength+=cList[i].strength;
 			}
 		}
-		//一点力量挖掘一个深度
-		DigInfo di = currentDigging.GetComponent<DigInfo>();
-		di.currentDeep += sumStrength;
-		if(di.currentDeep>(di.texType+1)*(di.deep*0.3333)){
-			di.texType++;
-			currentDigging.GetComponent<SpriteRenderer>().sprite = Resources.Load <Sprite>("_images/_game/dig_"+Mathf.Min(2,di.texType));
-		}
 
-		//一次挖掘扣除3点体能
-		for(int i=0;i<cList.Count;i++){
-			if(cList[i].Stamina>0){
-				cList[i].Stamina = Mathf.Max(0,cList[i].Stamina - 3);
-			}
-		}
+		Debug.Log("当前力量总值："+sumStrength);
 
-		if(di.currentDeep>=di.deep){
+		if(sumStrength==0){
+			Debug.Log("没有体能挖掘了......");
 			digging = false;
-			Debug.Log("挖到底了.............");
-			uiInput.SendMessage("DigStop");
+		}else{
+			DigInfo di = currentDigging.GetComponent<DigInfo>();
+			di.currentDeep += sumStrength;    //一点力量挖掘一个深度
+			if(di.currentDeep>(di.texType+1)*(di.deep*0.3333)){
+				di.texType++;
+				currentDigging.GetComponent<SpriteRenderer>().sprite = Resources.Load <Sprite>("_images/_game/dig_"+Mathf.Min(2,di.texType));
+			}
+			
+			//一次挖掘扣除3点体能
+			for(int i=0;i<cList.Count;i++){
+				if(cList[i].Stamina>0){
+					cList[i].Stamina = Mathf.Max(0,cList[i].Stamina - 3);
+				}
+			}
+			
+			if(di.currentDeep>=di.deep){
+				digging = false;
+				
+				float digPosX = currentDigging.transform.position.x;
+				float digPosY = currentDigging.transform.position.y;
+				
+				if(digPosX<(currentSceneInfo.nextEntry.pos.x+entryRadius) && digPosX > (currentSceneInfo.nextEntry.pos.x-entryRadius) &&
+				   digPosY<(currentSceneInfo.nextEntry.pos.y+entryRadius) && digPosY > (currentSceneInfo.nextEntry.pos.y-entryRadius) ){
+					//挖掘地点在入口半径之内
+					
+				}else{
+					Debug.Log("挖到底了.............");
+				}
+				uiInput.SendMessage("DigStop");
+			}
 		}
 	}
 
@@ -166,9 +195,7 @@ public class SceneGen: MonoBehaviour
 	}
 
 	void Update(){
-
 		digTimer+=Time.deltaTime;
-
 		if(digging && digTimer>3){
 			Digging();
 			digTimer = 0;
@@ -185,6 +212,7 @@ public class SceneGen: MonoBehaviour
 		itemData = currentSceneInfo.ItemData;
 		enemyData = currentSceneInfo.EnemyData;
 		digData = currentSceneInfo.DigData;
+		nextEntry = currentSceneInfo.nextEntry;
 
 		//修改玩家位置为保存的位置
 		player.position = gData.playerPos;
@@ -246,12 +274,32 @@ public class SceneGen: MonoBehaviour
 		}
 	}
 
+	//随机生成场景
 	public void GenerateSceneRandom ()
 	{
+		//生成地砖
 		GenerateGround ();
+		//替换，旋转材质
 		ReplaceTex ();
+		//创建地图元素，场景，敌人
 		GenerateElements ();
-		gData.scenes.Add (new SceneInfo());
+		//生成通往下一层的入口
+		GenerateNextEntry();
+		//添加场景信息到全局数据对象
+		gData.scenes.Add (currentSceneInfo);
+	}
+
+	void GenerateNextEntry(){
+		//随机获取一个砖块
+		GameObject block = blockList[Random.Range(0,blockList.Count)];
+		float blockPosX = block.transform.position.x;
+		float blockPosY = block.transform.position.y;
+		//随机获取一个位置
+		float pX = Random.Range (blockPosX - blockX * 0.5f + border + entryRadius, blockPosX + blockX * 0.5f - border - entryRadius);
+		float pY = Random.Range (blockPosY - blockY * 0.5f  + border + entryRadius, blockPosY + blockY * 0.5f- border - entryRadius); 
+		ElementData nextEntry = new ElementData(new Vector3(pX,pY,0), "NextEntry",new Vector3(0,0,0),0);
+		currentSceneInfo.nextEntry = nextEntry;
+		Debug.Log(nextEntry.pos.x + ":"+nextEntry.pos.y);
 	}
 
 	private void GenerateElements ()
@@ -359,8 +407,8 @@ public class SceneGen: MonoBehaviour
 		float elementWidth = element.GetComponent<SpriteRenderer> ().bounds.size.x;
 		float elementHeight = element.GetComponent<SpriteRenderer> ().bounds.size.y;
 
-		float pX = Random.Range (blockPos.x - blockX / 2 + border + elementWidth / 2, blockPos.x + blockX / 2 - border - elementWidth / 2);
-		float pY = Random.Range (blockPos.y - blockY / 2 + border + elementHeight / 2, blockPos.y + blockY / 2 - border - elementHeight / 2);
+		float pX = Random.Range (blockPos.x - blockX * 0.5f + border + elementWidth * 0.5f, blockPos.x + blockX * 0.5f - border - elementWidth * 0.5f);
+		float pY = Random.Range (blockPos.y - blockY * 0.5f + border + elementHeight * 0.5f, blockPos.y + blockY * 0.5f - border - elementHeight * 0.5f);
 
 		Vector3 pos = new Vector3 (pX, pY, blockPos.z);
 
@@ -485,6 +533,71 @@ public class SceneGen: MonoBehaviour
 		return Direction.Error;
 	}
 
+	//判断是否靠近了墙壁而无法挖掘
+	private bool checkBlockSide ()
+	{
+		RaycastHit2D[] hitsUp =  Physics2D.RaycastAll(player.position, Vector2.up);
+		RaycastHit2D[] hitsLeft =  Physics2D.RaycastAll(player.position, Vector2.left);
+		RaycastHit2D[] hitsDown =  Physics2D.RaycastAll(player.position, Vector2.down);
+		RaycastHit2D[] hitsRight =  Physics2D.RaycastAll(player.position, Vector2.right);
+
+		if(getCollideBlock(hitsUp)!=null && isBlockSide(getCollideBlock(hitsUp),Direction.Up)){
+			return true;
+		}else if(getCollideBlock(hitsLeft)!=null && isBlockSide(getCollideBlock(hitsLeft),Direction.Left)){
+			return true;
+		}else if(getCollideBlock(hitsDown)!=null && isBlockSide(getCollideBlock(hitsDown),Direction.Down)){
+			return true;
+		}else if(getCollideBlock(hitsRight)!=null && isBlockSide(getCollideBlock(hitsRight),Direction.Right)){
+			return true;
+		}
+
+		return false;
+	}
+
+	//获得射线碰到的砖块	
+	private GameObject getCollideBlock(RaycastHit2D[] hits){
+
+		GameObject block = null;
+
+		for(int i=0;i<hits.Length;i++){
+			if(hits[i].collider.gameObject.name.Contains("ground-")){
+				block = hits[i].collider.gameObject;
+				break;
+			}
+		}
+	
+		return block;
+	}
+
+	//检测玩家在dir方向上，与blockGo的边缘距离是否满足创建坑,wallSize是边界墙的厚度，根据图片内容，可在面板中调节
+	private bool isBlockSide(GameObject blockGo,Direction dir){
+
+		Vector3 blockPos = blockGo.transform.position;
+		Vector3 playerPos = player.position;
+		float sideDis = 10;
+
+		switch(dir){
+		case Direction.Up:
+			sideDis = Mathf.Abs((playerPos.y+playerSide*0.5f) - (blockPos.y+blockY*0.5f));
+			break;
+		case Direction.Left:
+			sideDis = Mathf.Abs((playerPos.x-playerSide*0.5f) - (blockPos.x-blockX*0.5f));
+			break;
+		case Direction.Down:
+			sideDis = Mathf.Abs((playerPos.y-playerSide*0.5f) - (blockPos.y-blockY*0.5f));
+			break;
+		case Direction.Right:
+			sideDis = Mathf.Abs((playerPos.x+playerSide*0.5f) - (blockPos.x+blockY*0.5f));
+			break;
+		}
+
+		if(sideDis<wallSize){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 
 	//生成地图
 	private void GenerateGround ()
@@ -542,6 +655,83 @@ public class SceneGen: MonoBehaviour
 		round.Add (new PosInfo (down, Direction.Down));
 
 		return round;
+	}
+
+	//根据探测等级返回提示消息
+	public void getDetectorResult(int detectLevel){
+		
+		Debug.Log(gData.scenes[gData.currentFloor-1].nextEntry);
+		
+		Vector3 nextEntry = gData.scenes[gData.currentFloor-1].nextEntry.pos;
+		
+		float distance = Vector3.Distance(player.position,nextEntry);
+
+		if(distance<entryRadius){
+			Debug.Log(StringCollection.TRYTODIG);
+		}else{
+			if(detectLevel<10){
+				//这个级别只提示模糊的信息
+				if(distance>entryRadius*4){
+					Debug.Log(StringCollection.DISTANCEFAR);
+				}else if(distance>entryRadius*2){
+					Debug.Log(StringCollection.DISTANCENEAR);
+				}else if(distance>entryRadius){
+					Debug.Log(StringCollection.DISTANCECLOSE);
+				}
+			}else if(detectLevel<20){
+				//这个级别提示方位
+				string x = "";
+				string y = "";
+
+				if(Mathf.Abs(nextEntry.x-player.position.x)>entryRadius){
+					if(nextEntry.x>player.position.x){
+						x = StringCollection.RIGHT;
+					}else{
+						x = StringCollection.LEFT;
+					}
+				}
+				
+				if(Mathf.Abs(nextEntry.y-player.position.y)>entryRadius){
+					if(nextEntry.y>player.position.y){
+						y = "上";
+					}else{
+						y = "下";
+					}
+				}
+				
+				Debug.Log("入口位置大约位于"+x+y+"方");
+				
+			}else{
+				//这个级别提示具体距离
+				string x = "";
+				string y = "";
+				
+				if(Mathf.Abs(nextEntry.x-player.position.x)>entryRadius){
+					if(nextEntry.x>player.position.x){
+						x = "往右";
+					}else{
+						x = "往左";
+					}
+
+					Debug.Log((Mathf.Abs(nextEntry.x-player.position.x)/playerSide));
+
+					x = x + (int)(Mathf.Abs(nextEntry.x-player.position.x)/playerSide)+"步";
+				}
+				
+				if(Mathf.Abs(nextEntry.y-player.position.y)>entryRadius){
+					if(nextEntry.y>player.position.y){
+						y = "上";
+					}else{
+						y = "下";
+					}
+
+					Debug.Log((Mathf.Abs(nextEntry.y-player.position.y)/playerSide));
+
+					y = y + (int)(Mathf.Abs(nextEntry.y-player.position.y)/playerSide)+"步";
+				}
+				Debug.Log("入口位置大约位于"+x+y+"方的地方");
+			}
+		}
 	}
 
 	public enum Direction
