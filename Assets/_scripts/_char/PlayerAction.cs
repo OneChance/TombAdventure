@@ -10,6 +10,7 @@ public class PlayerAction : MonoBehaviour
 	private SceneGen sceneGen;
 	private int stepCounter;
 	public float moveDistance = 0.5f;
+	private UI_Input uiInput;
 
 	public enum MOVEDIRECTION{
 		LEFT,
@@ -23,13 +24,14 @@ public class PlayerAction : MonoBehaviour
 		stepCounter = 0;
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		sceneGen = GameObject.FindGameObjectWithTag ("GameController").GetComponent<SceneGen>();
+		uiInput = GameObject.FindGameObjectWithTag("GameController").GetComponent<UI_Input>();
 
 		//从服务器端获取玩家数据初始化
 		characterList = new List<Character> ();
 
 		if (gData.characterList == null || gData.characterList.Count == 0) {
 
-			Character c = new Character (30,100, 50, 0, 0, "zhouhui", false,100,100,ProFactory.getPro("Geomancer","1"),1,0);
+			Character c = new Character (30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0);
 			
 			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂");
 			List<Baggrid> bgList = new List<Baggrid> ();
@@ -40,6 +42,7 @@ public class PlayerAction : MonoBehaviour
 
 			Character c2 = new Character (40, 100,50, 0, 0, "unity", false,100,100,ProFactory.getPro("Settler","1"),1,0);
 			characterList.Add (c2);
+			gData.characterList = characterList;
 		} else {
 			characterList = gData.characterList;
 		}
@@ -47,10 +50,9 @@ public class PlayerAction : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D coll)
 	{
-		if (coll.gameObject.tag == "Enemy") {
+		if (coll.gameObject.tag.Equals("Enemy")) {
 			gData.currentEnemy = coll.gameObject.GetComponent<EnemyAI> ().Enemy;
 			gData.currentEnemyName = coll.gameObject.name;
-			gData.characterList = characterList;
 			gData.playerPos = transform.position;
 			//tell gdata to record current enemies'pos
 			sceneGen.SendMessage("RecScene");
@@ -71,7 +73,10 @@ public class PlayerAction : MonoBehaviour
 			}
 			
 			stepCounter++;
-			
+
+			//通知UI更新
+			uiInput.SendMessage("UpdateUIInfo");
+
 			//队长移动一次，减少一个体能；成员移动三次，减少一个体能
 			characterList[0].Stamina = Mathf.Max(0,characterList[0].Stamina-1);
 			
@@ -82,7 +87,7 @@ public class PlayerAction : MonoBehaviour
 				stepCounter = 0;
 			}
 		}else{
-			Debug.Log("队长已经没有体力了!");
+			Debug.Log(StringCollection.LEADERNOSTAMINA);
 		}
 	}
 
@@ -102,20 +107,23 @@ public class PlayerAction : MonoBehaviour
 	public void PlayerDetect(){
 		bool haveGeomancer = false;
 
-		int sumIntelligence = 0;
+		int sumArcheology = 0;
 
 		for(int i=0;i<characterList.Count;i++){
-			if(characterList[i].Pro.proname.Equals("风水师")){
+			if(characterList[i].Pro.proname.Equals(StringCollection.GEOMANCER)){
 				haveGeomancer = true;
+				sumArcheology+=characterList[i].archeology;
 			}
-			sumIntelligence+=characterList[i].intelligence;
 		}
 
 		if(!haveGeomancer){
-			Debug.Log("队伍中没有风水师,无法进行探测");
+			Debug.Log(StringCollection.NOGEO);
 		}else{
 			//根据总智力属性,消耗一定的挖掘探测工具,给出信息（信息准确度由智力属性，当前挖掘层数决定）
-			int detectLevel = sumIntelligence - 3 * gData.currentFloor;
+
+			//消耗探测工具的逻辑未实现(未实现道具 铁椎)
+
+			int detectLevel = sumArcheology - 3 * gData.currentFloor;
 			sceneGen.SendMessage("getDetectorResult",45);
 		}
 	}

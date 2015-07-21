@@ -12,6 +12,8 @@ public class GlobalData : MonoBehaviour
 	public string currentEnemyName;
 	public Vector3 playerPos; //record the pos of player when battle start
 	public Baggrid currentItem;
+	public string tombName = StringCollection.KINGOFLU;
+	public Vector3 preDigPos;
 
 	void Awake ()
 	{

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class SceneGen: MonoBehaviour
 {
@@ -48,6 +49,7 @@ public class SceneGen: MonoBehaviour
 	private GlobalData gData;
 	private SceneInfo currentSceneInfo;
 	private GameObject digPrefab;
+	private GameObject preEntryPrefab;
 	private float digSide;
 	private float playerSide;
 	private List<Character> cList;
@@ -58,22 +60,20 @@ public class SceneGen: MonoBehaviour
 
 	void Start ()
 	{
+		blockX = groundPrefabs[0].GetComponent<SpriteRenderer> ().bounds.size.x * 15 / 16;
+		blockY = groundPrefabs[0].GetComponent<SpriteRenderer> ().bounds.size.y * 15 / 16;
 
 		currentSceneInfo = new SceneInfo ();
-
 		ablePos = new List<Vector3> ();
 		addedPos = new List<Vector3> ();
-
 		blockList = new List<GameObject> ();
 		itemList = new List<GameObject> ();
 		enemyList = new List<GameObject> ();
 		digList = new List<GameObject> ();
-
 		blockData = new List<ElementData> ();
 		itemData = new List<ElementData> ();
 		enemyData = new List<ElementData> ();
 		digData = new List<ElementData> ();
-
 		genPos = new Vector3 (0, 0, 0);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		int currentFloor = gData.currentFloor;
@@ -83,12 +83,27 @@ public class SceneGen: MonoBehaviour
 		digSide = digPrefab.GetComponent<SpriteRenderer>().bounds.size.x;
 		playerSide = player.GetComponent<SpriteRenderer>().bounds.size.x;
 		uiInput  = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input>();
-		
+
+		preEntryPrefab = Resources.Load ("PreEntry", typeof(GameObject)) as GameObject;
+
+		//不论是新的场景或是原来保存的场景，通往上一层的入口的位置总是在玩家(0,0,0)的位置，所以这个数据不用保存到全局数据的场景数据里
+		if(gData.currentFloor>1){
+			//在玩家位置生成上一层入口,由于该位置处不应该有敌人或场景物品，所以放在其他元素之前生成
+			GameObject preEntry = Instantiate (preEntryPrefab, player.position, Quaternion.identity) as GameObject;
+		}
+
 		if (scenesNum >= currentFloor) {
 			GenerateSceneFromSceneInfo (gData.scenes [currentFloor-1]);
 		} else {
 			GenerateSceneRandom ();
 		}
+
+
+		//场景信息
+		Transform sceneInfoUI = GameObject.FindGameObjectWithTag ("UI").transform.FindChild("SceneInfo");
+		sceneInfoUI.FindChild("TombName").GetComponent<Text>().text = gData.tombName;
+		sceneInfoUI.FindChild("FloorLable").GetComponent<Text>().text = StringCollection.FLOOR;
+		sceneInfoUI.FindChild("Floor").GetComponent<Text>().text = gData.currentFloor.ToString();
 	}
 
 	public GameObject getDig(Vector3 playerPos){
@@ -130,15 +145,23 @@ public class SceneGen: MonoBehaviour
 			GameObject dig = getDig(player.transform.position);
 			
 			if(dig==null){
-				Debug.Log("此处貌似有坚硬的石块，换个地方试试吧");
+				Debug.Log(StringCollection.CANNOTDIG);
 				uiInput.SendMessage("DigStop");
 			}else{
-				//开始挖掘
-				currentDigging = dig;
-				digging = true;
+
+				//如果这个坑已经挖到底
+				DigInfo di = dig.GetComponent<DigInfo>();
+				if(di.currentDeep>=di.deep){
+					Debug.Log(StringCollection.DIGOVER);
+					uiInput.SendMessage("DigStop");
+				}else{
+					//开始挖掘
+					currentDigging = dig;
+					digging = true;
+				}
 			}
 		}else{
-			Debug.Log("靠着墙的位置不太好挖啊......，换个地方试试吧");
+			Debug.Log(StringCollection.ALONGWALL);
 			uiInput.SendMessage("DigStop");
 		}
 	}
@@ -151,10 +174,8 @@ public class SceneGen: MonoBehaviour
 			}
 		}
 
-		Debug.Log("当前力量总值："+sumStrength);
-
 		if(sumStrength==0){
-			Debug.Log("没有体能挖掘了......");
+			Debug.Log(StringCollection.NOSTAMINA);
 			digging = false;
 		}else{
 			DigInfo di = currentDigging.GetComponent<DigInfo>();
@@ -180,12 +201,20 @@ public class SceneGen: MonoBehaviour
 				if(digPosX<(currentSceneInfo.nextEntry.pos.x+entryRadius) && digPosX > (currentSceneInfo.nextEntry.pos.x-entryRadius) &&
 				   digPosY<(currentSceneInfo.nextEntry.pos.y+entryRadius) && digPosY > (currentSceneInfo.nextEntry.pos.y-entryRadius) ){
 					//挖掘地点在入口半径之内
-					
+					di.texType = 3;
+					currentDigging.GetComponent<SpriteRenderer>().sprite = Resources.Load <Sprite>("_images/_game/dig_"+di.texType); //换成下层入口贴图
+					currentSceneInfo.digToNextPos = player.position;//记录位置
+					RecScene();
+					gData.currentFloor++;
+					Application.LoadLevel ("main");
 				}else{
-					Debug.Log("挖到底了.............");
+					Debug.Log(StringCollection.DIGNOTHING);
 				}
 				uiInput.SendMessage("DigStop");
 			}
+
+			//更新耐力变化
+			uiInput.SendMessage("UpdateUIInfo");
 		}
 	}
 
@@ -216,6 +245,7 @@ public class SceneGen: MonoBehaviour
 
 		//修改玩家位置为保存的位置
 		player.position = gData.playerPos;
+		gData.playerPos = new Vector3(0,0,0);
 
 		for (int i=0; i<blockData.Count; i++) {
 			string prefabName = blockData[i].objName.Replace("(Clone)","");
@@ -299,7 +329,10 @@ public class SceneGen: MonoBehaviour
 		float pY = Random.Range (blockPosY - blockY * 0.5f  + border + entryRadius, blockPosY + blockY * 0.5f- border - entryRadius); 
 		ElementData nextEntry = new ElementData(new Vector3(pX,pY,0), "NextEntry",new Vector3(0,0,0),0);
 		currentSceneInfo.nextEntry = nextEntry;
-		Debug.Log(nextEntry.pos.x + ":"+nextEntry.pos.y);
+		//测试
+		if(gData.currentFloor==1){
+			player.position = nextEntry.pos;
+		}
 	}
 
 	private void GenerateElements ()
@@ -318,7 +351,6 @@ public class SceneGen: MonoBehaviour
 				GameObject item = itemPrefabs [Random.Range (0, itemPrefabs.Length)];
 				Vector3 itemPos = getRandomPos (blockPos, item);
 				GameObject itemO = Instantiate (item, itemPos, Quaternion.identity) as GameObject;
-				itemO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				itemO.transform.parent = groundItem;
 				itemList.Add(itemO);
 			}
@@ -378,10 +410,8 @@ public class SceneGen: MonoBehaviour
 			AddNewDigData(digO);
 		}
 
-		Debug.Log(digData.Count);
-
 		currentSceneInfo.DigData = digData;
-		
+
 		gData.scenes[gData.currentFloor-1] = currentSceneInfo;
 	}
 
@@ -587,7 +617,7 @@ public class SceneGen: MonoBehaviour
 			sideDis = Mathf.Abs((playerPos.y-playerSide*0.5f) - (blockPos.y-blockY*0.5f));
 			break;
 		case Direction.Right:
-			sideDis = Mathf.Abs((playerPos.x+playerSide*0.5f) - (blockPos.x+blockY*0.5f));
+			sideDis = Mathf.Abs((playerPos.x+playerSide*0.5f) - (blockPos.x+blockX*0.5f));
 			break;
 		}
 
@@ -616,11 +646,6 @@ public class SceneGen: MonoBehaviour
 		GameObject block = Instantiate (groundBlock, pos, Quaternion.identity) as GameObject;
 
 		blockList.Add (block);
-
-		if (blockX == 0 || blockY == 0) {
-			blockX = block.GetComponent<SpriteRenderer> ().bounds.size.x * 15 / 16;
-			blockY = block.GetComponent<SpriteRenderer> ().bounds.size.y * 15 / 16;
-		}
 
 		List<PosInfo> round = GetRoundPos (block.transform.position);
 		addAblePos (round);
@@ -693,13 +718,13 @@ public class SceneGen: MonoBehaviour
 				
 				if(Mathf.Abs(nextEntry.y-player.position.y)>entryRadius){
 					if(nextEntry.y>player.position.y){
-						y = "上";
+						y = StringCollection.UP;
 					}else{
-						y = "下";
+						y = StringCollection.DOWN;
 					}
 				}
 				
-				Debug.Log("入口位置大约位于"+x+y+"方");
+				Debug.Log(StringCollection.POSHINT+x+y);
 				
 			}else{
 				//这个级别提示具体距离
@@ -708,9 +733,9 @@ public class SceneGen: MonoBehaviour
 				
 				if(Mathf.Abs(nextEntry.x-player.position.x)>entryRadius){
 					if(nextEntry.x>player.position.x){
-						x = "往右";
+						x = StringCollection.RIGHT;
 					}else{
-						x = "往左";
+						x = StringCollection.LEFT;
 					}
 
 					Debug.Log((Mathf.Abs(nextEntry.x-player.position.x)/playerSide));
@@ -720,20 +745,35 @@ public class SceneGen: MonoBehaviour
 				
 				if(Mathf.Abs(nextEntry.y-player.position.y)>entryRadius){
 					if(nextEntry.y>player.position.y){
-						y = "上";
+						y = StringCollection.UP;
 					}else{
-						y = "下";
+						y = StringCollection.DOWN;
 					}
 
 					Debug.Log((Mathf.Abs(nextEntry.y-player.position.y)/playerSide));
 
-					y = y + (int)(Mathf.Abs(nextEntry.y-player.position.y)/playerSide)+"步";
+					y = y + (int)(Mathf.Abs(nextEntry.y-player.position.y)/playerSide)+StringCollection.STEP;
 				}
-				Debug.Log("入口位置大约位于"+x+y+"方的地方");
+				Debug.Log(StringCollection.POSHINT+x+y);
 			}
 		}
 	}
 
+	public void ToPreFloor(){
+		RecScene();
+		gData.currentFloor--;
+		Vector3 preFloorNextEntryPos = gData.scenes[gData.currentFloor-1].digToNextPos;
+		gData.playerPos = preFloorNextEntryPos;
+		Application.LoadLevel ("main");
+	}
+
+	public void ToNextFloor(Vector3 pos){
+		gData.scenes[gData.currentFloor-1].digToNextPos = pos;
+		RecScene();
+		gData.currentFloor++;
+		Application.LoadLevel ("main");
+	}
+	
 	public enum Direction
 	{  
 		Left,  

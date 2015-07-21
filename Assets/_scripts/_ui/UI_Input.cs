@@ -25,6 +25,8 @@ public class UI_Input : MonoBehaviour
 	private GameObject proname;
 	private GameObject health;
 	private GameObject stamina;
+	private GameObject strength;
+	private GameObject archeology;
 	private List<GameObject> assList;
 	private GlobalData gData;
 	private List<GameObject> focusList;
@@ -42,6 +44,9 @@ public class UI_Input : MonoBehaviour
 		proname = charInfo.transform.FindChild ("Proname").gameObject;
 		health = charInfo.transform.FindChild ("Health").gameObject;
 		stamina = charInfo.transform.FindChild ("Stamina").gameObject;
+		strength = charInfo.transform.FindChild ("Strength").gameObject;
+		archeology = charInfo.transform.FindChild ("Archeology").gameObject;
+
 		assList = new List<GameObject> ();
 		assList.Add (ass_1);
 		assList.Add (ass_2);
@@ -71,31 +76,34 @@ public class UI_Input : MonoBehaviour
 	}
 
 	void Update(){
-		UpdateUIInfo();
 		for (int i=0; i<focusList.Count; i++) {
 			GameUtil.Focus(focusList [i]);
 		}
 	}
 
 	public void UpdateUIInfo(){
-		List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
-		
-		if (charInfo.activeInHierarchy) {
-			//玩家角色信息
-			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
-			health.GetComponent<Text>().text = cList[0].Health.ToString();
-			//助手角色信息
-			for(int i=1;i<cList.Count;i++){
+		List<Character> cList = gData.characterList;
+
+		//玩家角色信息
+		stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
+		health.GetComponent<Text>().text = cList[0].Health.ToString();
+		strength.GetComponent<Text>().text = cList[0].strength.ToString();
+		archeology.GetComponent<Text>().text = cList[0].archeology.ToString();
+		//助手角色信息
+		for(int i=1;i<cList.Count;i++){
 				GameObject ass = assList[i-1];
 				GameObject info = ass.transform.FindChild("Info").gameObject;
 				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
 				info.transform.FindChild("H").GetComponent<Text>().text = cList[i].Health.ToString();
-			}
+				info.transform.FindChild("Str").GetComponent<Text>().text = cList[i].strength.ToString();
+				info.transform.FindChild("Arc").GetComponent<Text>().text = cList[i].archeology.ToString();
 		}
+
 	}
 
 	void InitCharInfo(){
-		List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
+		List<Character> cList = gData.characterList;
+
 		if(name.GetComponent<Text>().text.Equals("")){
 			//玩家角色信息
 			name.GetComponent<Text>().text = cList[0].ObjName;
@@ -108,8 +116,10 @@ public class UI_Input : MonoBehaviour
 			uiCharAvatar.GetComponent<UI_Player>().c = cList[0];
 			uiCharAvatar.transform.SetParent(avatar.transform);
 
-			health.GetComponent<Text>().text = cList[0].Health.ToString();
-			stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
+			charInfo.transform.FindChild ("StaminaLable").GetComponent<Text>().text = StringCollection.STAMINA;
+			charInfo.transform.FindChild ("StrengthLable").GetComponent<Text>().text = StringCollection.STRENGTH;
+			charInfo.transform.FindChild ("ArcheologyLable").GetComponent<Text>().text = StringCollection.ARCHEOLOGY;
+			charInfo.transform.FindChild ("HealthLable").GetComponent<Text>().text = StringCollection.HEALTH;
 
 			//加载装备
 
@@ -123,12 +133,16 @@ public class UI_Input : MonoBehaviour
 				uiCharAss.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_game/"+cList[i].PrefabName);
 				uiCharAss.transform.SetParent(ass.transform);
 				uiCharAss.GetComponent<UI_Player>().c = cList[i];
-
-				info.transform.FindChild("H").GetComponent<Text>().text = cList[i].Health.ToString();
-				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
 				info.transform.FindChild("Name").GetComponent<Text>().text = cList[i].ObjName;
 				info.transform.FindChild("Pro").GetComponent<Text>().text = cList[i].Pro.proname;
+
+				info.transform.FindChild ("SL").GetComponent<Text>().text = StringCollection.STAMINA;
+				info.transform.FindChild ("StrL").GetComponent<Text>().text = StringCollection.STRENGTH;
+				info.transform.FindChild ("ArcL").GetComponent<Text>().text = StringCollection.ARCHEOLOGY;
+				info.transform.FindChild ("HL").GetComponent<Text>().text = StringCollection.HEALTH;
 			}
+
+			UpdateUIInfo();
 		}
 	}
 
@@ -202,7 +216,7 @@ public class UI_Input : MonoBehaviour
 		if(item.ct == global::Item.CommonType.CONSUME){
 			//人物格闪动
 			focusList.Add(avatar);
-			List<Character> cList = player.GetComponent<PlayerAction> ().characterList;
+			List<Character> cList = gData.characterList;
 			for(int i=1;i<cList.Count;i++){
 				GameObject ass = assList[i-1];
 				focusList.Add(ass);
@@ -224,5 +238,7 @@ public class UI_Input : MonoBehaviour
 
 	public void ItemUseComplete(){
 		focusList.Clear();
+		//通知UI更新
+		UpdateUIInfo();
 	}
 }

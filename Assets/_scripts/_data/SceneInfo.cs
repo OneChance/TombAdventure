@@ -9,6 +9,8 @@ public class SceneInfo
 	private List<ElementData> enemyData;
 	private List<ElementData> digData;
 	public ElementData nextEntry;
+	public ElementData preEntry;
+	public Vector3 digToNextPos;//挖掘的通往下一层的坑位置
 
 	public List<ElementData> EnemyData {
 		get {
