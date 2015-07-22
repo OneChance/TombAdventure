@@ -99,7 +99,7 @@ public class SceneGen: MonoBehaviour
 			//如果是加载的场景，不用考虑是否是墓穴的问题
 			GenerateSceneFromSceneInfo (gData.scenes [currentFloor-1]);
 		} else {
-			//生成场景，判定是否是墓穴
+			//生成场景
 			GenerateSceneRandom ();
 		}
 
@@ -109,6 +109,9 @@ public class SceneGen: MonoBehaviour
 		sceneInfoUI.FindChild("TombName").GetComponent<Text>().text = gData.tombName;
 		sceneInfoUI.FindChild("FloorLable").GetComponent<Text>().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild("Floor").GetComponent<Text>().text = gData.currentFloor.ToString();
+
+		//从服务器加载物品掉落列表
+
 	}
 
 	public GameObject getDig(Vector3 playerPos){
@@ -314,7 +317,7 @@ public class SceneGen: MonoBehaviour
 	{
 		//根据层数，随机判定当前层是否是墓穴
 		if(Random.Range(1,101)<Mathf.Min(9,gData.currentFloor)*10){
-			gData.scenes[gData.currentFloor-1].isTomb = true;
+			currentSceneInfo.isTomb = true;
 		}
 
 		//生成地砖
@@ -323,7 +326,7 @@ public class SceneGen: MonoBehaviour
 		ReplaceTex ();
 		//如果当前层不是墓穴，生成通往下一层的入口，否则生成棺材位置
 		GenerateNextEntryOrTomb();
-		if(gData.scenes[gData.currentFloor-1].isTomb){
+		if(currentSceneInfo.isTomb){
 			GeneraterTomb ();
 		}
 		//创建地图元素，场景，敌人
@@ -335,7 +338,9 @@ public class SceneGen: MonoBehaviour
 	void GeneraterTomb(){
 		//根据墓穴等级，层数，决定棺材贴图名称
 		string texName = "coffin_"+gData.tombLevel+"_"+((int)((gData.currentFloor + 1)/2));
-
+		GameObject coffinO = Instantiate (coffinPrefab, currentSceneInfo.nextEntry.pos, Quaternion.identity) as GameObject;
+		Debug.Log(texName);
+		coffinO.GetComponent<SpriteRenderer>().sprite = Resources.Load <Sprite>("_images/_game/"+texName);
 	}
 
 	void GenerateNextEntryOrTomb(){
@@ -349,9 +354,9 @@ public class SceneGen: MonoBehaviour
 		ElementData nextEntry = new ElementData(new Vector3(pX,pY,0), "NextEntry",new Vector3(0,0,0),0);
 		currentSceneInfo.nextEntry = nextEntry;
 		//测试
-		if(gData.currentFloor==1){
-			player.position = nextEntry.pos;
-		}
+//		if(gData.currentFloor==1){
+//			player.position = nextEntry.pos+new Vector3(2,0,0);
+//		}
 	}
 
 	private void GenerateElements ()
@@ -703,9 +708,7 @@ public class SceneGen: MonoBehaviour
 
 	//根据探测等级返回提示消息
 	public void getDetectorResult(int detectLevel){
-		
-		Debug.Log(gData.scenes[gData.currentFloor-1].nextEntry);
-		
+
 		Vector3 nextEntry = gData.scenes[gData.currentFloor-1].nextEntry.pos;
 		
 		float distance = Vector3.Distance(player.position,nextEntry);
@@ -750,29 +753,33 @@ public class SceneGen: MonoBehaviour
 				string x = "";
 				string y = "";
 				
-				if(Mathf.Abs(nextEntry.x-player.position.x)>entryRadius){
+				if(distance>entryRadius){
 					if(nextEntry.x>player.position.x){
 						x = StringCollection.RIGHT;
 					}else{
 						x = StringCollection.LEFT;
 					}
 
-					Debug.Log((Mathf.Abs(nextEntry.x-player.position.x)/playerSide));
+					int xStep = (int)(Mathf.Abs(nextEntry.x-player.position.x)/playerSide);
 
-					x = x + (int)(Mathf.Abs(nextEntry.x-player.position.x)/playerSide)+"步";
-				}
-				
-				if(Mathf.Abs(nextEntry.y-player.position.y)>entryRadius){
+					if(xStep>0){
+						x = x + xStep + StringCollection.STEP;
+					}
+
+
 					if(nextEntry.y>player.position.y){
 						y = StringCollection.UP;
 					}else{
 						y = StringCollection.DOWN;
 					}
 
-					Debug.Log((Mathf.Abs(nextEntry.y-player.position.y)/playerSide));
+					int yStep = (int)(Mathf.Abs(nextEntry.y-player.position.y)/playerSide);
 
-					y = y + (int)(Mathf.Abs(nextEntry.y-player.position.y)/playerSide)+StringCollection.STEP;
+					if(yStep>0){
+						y = y + yStep + StringCollection.STEP;
+					}
 				}
+
 				Debug.Log(StringCollection.POSHINT+x+y);
 			}
 		}

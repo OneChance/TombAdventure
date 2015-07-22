@@ -41,7 +41,7 @@ public class Character:BattleObj
 		if(equipList!=null){
 			for(int i=0;i<equipList.Count;i++){
 				this.strength+=equipList[i].strength;
-				this.archeology+=equipList[i].intelligence;
+				this.archeology+=equipList[i].archeology;
 			}
 		}
 	}
