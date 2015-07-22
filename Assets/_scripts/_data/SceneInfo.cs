@@ -8,9 +8,10 @@ public class SceneInfo
 	private List<ElementData> itemData;
 	private List<ElementData> enemyData;
 	private List<ElementData> digData;
-	public ElementData nextEntry;
+	public ElementData nextEntry;//如果当前层时墓穴，此变量指定棺材位置，否则指定下层入口位置
 	public ElementData preEntry;
 	public Vector3 digToNextPos;//挖掘的通往下一层的坑位置
+	public bool isTomb = false;
 
 	public List<ElementData> EnemyData {
 		get {

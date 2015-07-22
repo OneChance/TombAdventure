@@ -50,6 +50,7 @@ public class SceneGen: MonoBehaviour
 	private SceneInfo currentSceneInfo;
 	private GameObject digPrefab;
 	private GameObject preEntryPrefab;
+	private GameObject coffinPrefab;
 	private float digSide;
 	private float playerSide;
 	private List<Character> cList;
@@ -76,6 +77,7 @@ public class SceneGen: MonoBehaviour
 		digData = new List<ElementData> ();
 		genPos = new Vector3 (0, 0, 0);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.scenes.Count;
 
@@ -85,6 +87,7 @@ public class SceneGen: MonoBehaviour
 		uiInput  = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input>();
 
 		preEntryPrefab = Resources.Load ("PreEntry", typeof(GameObject)) as GameObject;
+		coffinPrefab  = Resources.Load ("Coffin", typeof(GameObject)) as GameObject;
 
 		//不论是新的场景或是原来保存的场景，通往上一层的入口的位置总是在玩家(0,0,0)的位置，所以这个数据不用保存到全局数据的场景数据里
 		if(gData.currentFloor>1){
@@ -93,8 +96,10 @@ public class SceneGen: MonoBehaviour
 		}
 
 		if (scenesNum >= currentFloor) {
+			//如果是加载的场景，不用考虑是否是墓穴的问题
 			GenerateSceneFromSceneInfo (gData.scenes [currentFloor-1]);
 		} else {
+			//生成场景，判定是否是墓穴
 			GenerateSceneRandom ();
 		}
 
@@ -307,19 +312,33 @@ public class SceneGen: MonoBehaviour
 	//随机生成场景
 	public void GenerateSceneRandom ()
 	{
+		//根据层数，随机判定当前层是否是墓穴
+		if(Random.Range(1,101)<Mathf.Min(9,gData.currentFloor)*10){
+			gData.scenes[gData.currentFloor-1].isTomb = true;
+		}
+
 		//生成地砖
 		GenerateGround ();
 		//替换，旋转材质
 		ReplaceTex ();
+		//如果当前层不是墓穴，生成通往下一层的入口，否则生成棺材位置
+		GenerateNextEntryOrTomb();
+		if(gData.scenes[gData.currentFloor-1].isTomb){
+			GeneraterTomb ();
+		}
 		//创建地图元素，场景，敌人
 		GenerateElements ();
-		//生成通往下一层的入口
-		GenerateNextEntry();
 		//添加场景信息到全局数据对象
 		gData.scenes.Add (currentSceneInfo);
 	}
 
-	void GenerateNextEntry(){
+	void GeneraterTomb(){
+		//根据墓穴等级，层数，决定棺材贴图名称
+		string texName = "coffin_"+gData.tombLevel+"_"+((int)((gData.currentFloor + 1)/2));
+
+	}
+
+	void GenerateNextEntryOrTomb(){
 		//随机获取一个砖块
 		GameObject block = blockList[Random.Range(0,blockList.Count)];
 		float blockPosX = block.transform.position.x;

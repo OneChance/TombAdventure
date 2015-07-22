@@ -14,6 +14,7 @@ public class GlobalData : MonoBehaviour
 	public Baggrid currentItem;
 	public string tombName = StringCollection.KINGOFLU;
 	public Vector3 preDigPos;
+	public int tombLevel =1;
 
 	void Awake ()
 	{
