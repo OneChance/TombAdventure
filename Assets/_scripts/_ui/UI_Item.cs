@@ -24,5 +24,13 @@ public class UI_Item : MonoBehaviour {
 		itemInfo.transform.FindChild("Pic").GetComponent<Image>().sprite = Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
 		itemInfo.transform.FindChild ("ItemName").GetComponent<Text> ().text = bg.Item.name;
 		itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = bg.Item.note;
+
+		Text buttonText = itemInfo.transform.FindChild("UseButton").FindChild("Text").GetComponent<Text>();
+
+		if(bg.Item.ct==Item.CommonType.CONSUME){
+			buttonText.text = StringCollection.ITEMUSE;
+		}else if(bg.Item.ct==Item.CommonType.EQUIPMENT){
+			buttonText.text = StringCollection.ITEMEQUIP;
+		}
 	}
 }

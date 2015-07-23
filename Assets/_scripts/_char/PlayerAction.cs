@@ -33,7 +33,7 @@ public class PlayerAction : MonoBehaviour
 
 		if (gData.characterList == null || gData.characterList.Count == 0) {
 
-			Equipment e = new Equipment(1,2,Equipment.EquipPos.HAND,"2","学者的思考",1);
+			Equipment e = new Equipment(1,2,Equipment.EquipPos.BODY,"2","学者的思考",1);
 			List<Equipment> eList = new List<Equipment>();
 			eList.Add(e);
 			
@@ -43,6 +43,11 @@ public class PlayerAction : MonoBehaviour
 			List<Baggrid> bgList = new List<Baggrid> ();
 			Baggrid bg = new Baggrid (item, 2);
 			bgList.Add (bg);
+
+			Equipment e2 = new Equipment(1,2,Equipment.EquipPos.BODY,"3","学者的幻想",1);
+			Baggrid bg2 = new Baggrid (e2, 0);
+			bgList.Add (bg2);
+
 			c.BgList = bgList;
 
 			characterList.Add (c);

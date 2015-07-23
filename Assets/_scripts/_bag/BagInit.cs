@@ -13,6 +13,7 @@ public class BagInit : MonoBehaviour {
 	private float firstY;
 	public GameObject grid;
 	public List<GameObject> grids;
+	private GameObject itemPrefab;
 
 	public bool init;
 
@@ -20,6 +21,7 @@ public class BagInit : MonoBehaviour {
 		firstX = transform.position.x - border * 0.5f - gridSize- border - gridSize * 0.5f;
 		firstY = transform.position.y + border * 0.5f + gridSize + border + gridSize * 0.5f;
 		init = false;
+		itemPrefab = Resources.Load ("item", typeof(GameObject)) as GameObject;
 	}
 
 	void InitBag(Character c){
@@ -45,13 +47,19 @@ public class BagInit : MonoBehaviour {
 		List<Baggrid> bgList = c.BgList;
 		for (int i=0; i<bgList.Count; i++) {
 			Baggrid bg = bgList[i];
-			if(bg.Num>0){
 
-				GameObject itemPrefab = Resources.Load ("item", typeof(GameObject)) as GameObject;
+			if(bg.Num>0 || bg.Item.ct==Item.CommonType.EQUIPMENT){
 				GameObject itemO = Instantiate (itemPrefab, new Vector3(grids[i].transform.position.x,grids[i].transform.position.y,0), Quaternion.identity) as GameObject;
 				itemO.GetComponent<Image>().sprite =  Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
 				itemO.GetComponent<UI_Item>().bg = bg;
-				itemO.transform.FindChild("Num").GetComponent<Text>().text = bg.Num.ToString();
+
+				string num  = bg.Num.ToString();
+
+				if(num.Equals("0")){
+					num = "";
+				}
+
+				itemO.transform.FindChild("Num").GetComponent<Text>().text = num;
 				itemO.transform.SetParent(grids[i].transform);
 
 			}else{

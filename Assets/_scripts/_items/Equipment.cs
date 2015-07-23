@@ -15,6 +15,7 @@ public class Equipment : Item
 		this.archeology = archeology;
 		this.ep = ep;
 		this.eLevel = eLevel;
+		this.name = name;
 		if(strength>0){
 			this.note = this.note +  StringCollection.STRENGTH + "+"+strength;
 		}

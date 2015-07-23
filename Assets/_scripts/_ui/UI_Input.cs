@@ -30,6 +30,8 @@ public class UI_Input : MonoBehaviour
 	private List<GameObject> assList;
 	private GlobalData gData;
 	private List<GameObject> focusList;
+	private GameObject uiCharP;
+	private GameObject uiEquip;
 	
 	void Start(){
 		avatar = charInfo.transform.FindChild ("Avatar").gameObject;
@@ -53,6 +55,9 @@ public class UI_Input : MonoBehaviour
 		assList.Add (ass_3);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		focusList = new List<GameObject>();
+
+		uiCharP = Resources.Load ("UIChar", typeof(GameObject)) as GameObject;
+		uiEquip = Resources.Load ("UIEquip", typeof(GameObject)) as GameObject;
 	}
 
 	public void left ()
@@ -98,7 +103,23 @@ public class UI_Input : MonoBehaviour
 				info.transform.FindChild("Str").GetComponent<Text>().text = cList[i].strength.ToString();
 				info.transform.FindChild("Arc").GetComponent<Text>().text = cList[i].archeology.ToString();
 		}
+	}
 
+	public void UpdateUIEquip(){
+		List<Character> cList = gData.characterList;
+		List<Equipment> eList = cList[0].equipList;
+		for(int i=0;i<eList.Count;i++){			
+			GameObject eP = null;		
+			switch(eList[i].ep){
+			case Equipment.EquipPos.BODY:eP=clothes;break;
+			case Equipment.EquipPos.HAND:eP=hand;break;
+			case Equipment.EquipPos.HEAD:eP=head;break;
+			case Equipment.EquipPos.FOOT:eP=foot;break;
+			}	
+			GameObject uiEquipO = Instantiate (uiEquip, new Vector3(eP.transform.position.x,eP.transform.position.y,0), Quaternion.identity) as GameObject;
+			uiEquipO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_ui/"+eList[i].prefabName);
+			uiEquipO.transform.SetParent(eP.transform);
+		}
 	}
 
 	void InitCharInfo(){
@@ -110,7 +131,6 @@ public class UI_Input : MonoBehaviour
 			proname.GetComponent<Text>().text = cList[0].Pro.proname;
 
 			//生成玩家
-			GameObject uiCharP = Resources.Load ("UIChar", typeof(GameObject)) as GameObject;
 			GameObject uiCharAvatar = Instantiate (uiCharP, new Vector3(avatar.transform.position.x,avatar.transform.position.y,0), Quaternion.identity) as GameObject;
 			uiCharAvatar.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_game/"+cList[0].PrefabName);
 			uiCharAvatar.GetComponent<UI_Player>().c = cList[0];
@@ -122,6 +142,7 @@ public class UI_Input : MonoBehaviour
 			charInfo.transform.FindChild ("HealthLable").GetComponent<Text>().text = StringCollection.HEALTH;
 
 			//加载装备
+			UpdateUIEquip();
 
 			//助手角色信息
 			for(int i=1;i<cList.Count;i++){
@@ -240,7 +261,13 @@ public class UI_Input : MonoBehaviour
 			}
 
 		}else if(item.ct == global::Item.CommonType.EQUIPMENT){
-			//装备格闪动
+//			GameObject eP = null;		
+//			switch(eList[i].ep){
+//			case Equipment.EquipPos.BODY:eP=clothes;break;
+//			case Equipment.EquipPos.HAND:eP=hand;break;
+//			case Equipment.EquipPos.HEAD:eP=head;break;
+//			case Equipment.EquipPos.FOOT:eP=foot;break;
+//			}	
 		}
 	}
 

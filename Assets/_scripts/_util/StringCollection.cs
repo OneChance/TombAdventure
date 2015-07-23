@@ -30,6 +30,8 @@ public class StringCollection  {
 	public static string STAMINA =  "耐力";
 	public static string GEOMANCER = "风水师";
 	public static string FLOOR = "层";
+	public static string ITEMUSE = "使用";
+	public static string ITEMEQUIP = "装备";
 
 	//TombName
 	public static string KINGOFLU = "明鲁王墓";
