@@ -6,7 +6,7 @@ public class Character:BattleObj
 {
 
 	private List<Baggrid> bgList;
-	private List<Equipment> equipList;
+	public  List<Equipment> equipList;
 	private bool isOnLinePlayer;
 	private int stamina;
 	private int maxStamina;
@@ -17,7 +17,7 @@ public class Character:BattleObj
 	public int strength;
 	public int archeology;
 
-	public Character (int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp)
+	public Character (int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp,List<Equipment> eList)
 	{
 		this.Health = health;
 		this.MaxHealth = maxHealth;
@@ -37,6 +37,9 @@ public class Character:BattleObj
 		//玩家的属性->基本属性
 		this.strength = this.level * this.Pro.strengthFactor;
 		this.archeology = this.level * this.Pro.archeologyFactor;
+
+		this.equipList = eList;
+
 		//+装备属性
 		if(equipList!=null){
 			for(int i=0;i<equipList.Count;i++){

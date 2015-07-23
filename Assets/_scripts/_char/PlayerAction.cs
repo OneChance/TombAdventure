@@ -11,6 +11,7 @@ public class PlayerAction : MonoBehaviour
 	private int stepCounter;
 	public float moveDistance = 0.5f;
 	private UI_Input uiInput;
+	public bool isPlayer; //ture为玩家联机模式，false为单机佣兵模式
 
 	public enum MOVEDIRECTION{
 		LEFT,
@@ -27,20 +28,26 @@ public class PlayerAction : MonoBehaviour
 		uiInput = GameObject.FindGameObjectWithTag("GameController").GetComponent<UI_Input>();
 
 		//从服务器端获取玩家数据初始化
+		isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式
 		characterList = new List<Character> ();
 
 		if (gData.characterList == null || gData.characterList.Count == 0) {
 
-			Character c = new Character (30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0);
+			Equipment e = new Equipment(1,2,Equipment.EquipPos.HAND,"2","学者的思考",1);
+			List<Equipment> eList = new List<Equipment>();
+			eList.Add(e);
+			
+			Character c = new Character (30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0,eList);
 			
 			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂");
 			List<Baggrid> bgList = new List<Baggrid> ();
 			Baggrid bg = new Baggrid (item, 2);
 			bgList.Add (bg);
 			c.BgList = bgList;
+
 			characterList.Add (c);
 
-			Character c2 = new Character (40, 100,50, 0, 0, "unity", false,100,100,ProFactory.getPro("Settler","1"),1,0);
+			Character c2 = new Character (40, 100,50, 0, 0, "unity", false,100,100,ProFactory.getPro("Settler","1"),1,0,null);
 			characterList.Add (c2);
 			gData.characterList = characterList;
 		} else {

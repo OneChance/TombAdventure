@@ -58,6 +58,7 @@ public class SceneGen: MonoBehaviour
 	private bool digging;
 	private float digTimer;
 	private UI_Input uiInput;
+	private Dictionary<string,List<FallItem>> fallList;
 
 	void Start ()
 	{
@@ -96,7 +97,6 @@ public class SceneGen: MonoBehaviour
 		}
 
 		if (scenesNum >= currentFloor) {
-			//如果是加载的场景，不用考虑是否是墓穴的问题
 			GenerateSceneFromSceneInfo (gData.scenes [currentFloor-1]);
 		} else {
 			//生成场景
@@ -110,8 +110,22 @@ public class SceneGen: MonoBehaviour
 		sceneInfoUI.FindChild("FloorLable").GetComponent<Text>().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild("Floor").GetComponent<Text>().text = gData.currentFloor.ToString();
 
-		//从服务器加载物品掉落列表
+		//根据KEY从服务器加载物品掉落列表
+		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
+		fallList = getFallList(gData.tombLevel+"_"+gData.currentFloor);
+	}
 
+	Dictionary<string,List<FallItem>> getFallList(string key){
+		Dictionary<string,List<FallItem>> fallList = new Dictionary<string,List<FallItem>>();
+		List<FallItem> itemList = new List<FallItem>();
+		FallItem fi = new FallItem();
+		fi.item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂");
+		fi.minNum = 1;
+		fi.maxNum = 3;
+		fi.probability = 90;
+		itemList.Add(fi);
+		fallList.Add("dig",itemList);
+		return fallList;
 	}
 
 	public GameObject getDig(Vector3 playerPos){
@@ -156,8 +170,7 @@ public class SceneGen: MonoBehaviour
 				Debug.Log(StringCollection.CANNOTDIG);
 				uiInput.SendMessage("DigStop");
 			}else{
-
-				//如果这个坑已经挖到底
+				//如果这个坑已经挖完
 				DigInfo di = dig.GetComponent<DigInfo>();
 				if(di.currentDeep>=di.deep){
 					Debug.Log(StringCollection.DIGOVER);
@@ -216,7 +229,51 @@ public class SceneGen: MonoBehaviour
 					gData.currentFloor++;
 					Application.LoadLevel ("main");
 				}else{
-					Debug.Log(StringCollection.DIGNOTHING);
+					//掉落******************************************************************************************
+					int fall = Random.Range(1,101);
+					List<FallItem> itemList = fallList["dig"];		
+					string itemGet = "";				
+					for(int i=0;i<itemList.Count;i++){
+						if(fall<itemList[i].probability){					
+							int num = Random.Range(itemList[i].minNum,itemList[i].maxNum+1);						
+							itemGet = itemGet + " " + itemList[i].item.name + "x" + num;
+
+							Baggrid baggrid = new Baggrid(itemList[i].item,num);
+
+
+							//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)
+							bool get = false;
+							if(player.GetComponent<PlayerAction>().isPlayer){
+								//弹出面板，roll
+								//服务器返回队内其他玩家的roll值，判定
+								//如果roll 到 get设置为true
+							}else{
+								get = true;
+							}
+
+							if(get){
+								List<Baggrid> bgList = player.GetComponent<PlayerAction>().characterList[0].BgList;
+								
+								bool haveTheSame = false;
+								for(int j=0;j<bgList.Count;j++){
+									if(bgList[j].Item.name.Equals(baggrid.Item.name)){
+										haveTheSame = true;
+										bgList[i].Num+=baggrid.Num;
+										break;
+									}
+								}
+								if(!haveTheSame){
+									bgList.Add(baggrid);
+								}
+							}
+						}
+					}				
+					if(itemGet.Equals("")){
+						Debug.Log(StringCollection.DIGNOTHING);
+					}else{
+						Debug.Log(StringCollection.ITEMGET + ":" + itemGet);
+					}
+					//***********************************************************************************************
 				}
 				uiInput.SendMessage("DigStop");
 			}

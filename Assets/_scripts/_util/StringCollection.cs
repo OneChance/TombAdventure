@@ -21,6 +21,7 @@ public class StringCollection  {
 	public static string CANNOTDIG = "此处貌似有坚硬的石块，换个地方试试吧";
 	public static string DIGOVER = "这里已经挖过了,换一处好了";
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
+	public static string ITEMGET = "获得";
 
 	//LableText
 	public static string HEALTH =  "生命";
