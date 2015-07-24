@@ -80,7 +80,7 @@ public class SceneGen: MonoBehaviour
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 
 		int currentFloor = gData.currentFloor;
-		int scenesNum = gData.scenes.Count;
+		int scenesNum = gData.tombs[gData.tombLevel].Count;
 
 		//根据KEY从服务器加载物品掉落列表
 		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
@@ -101,7 +101,7 @@ public class SceneGen: MonoBehaviour
 		}
 
 		if (scenesNum >= currentFloor) {
-			GenerateSceneFromSceneInfo (gData.scenes [currentFloor-1]);
+			GenerateSceneFromSceneInfo (gData.tombs[gData.tombLevel] [currentFloor-1]);
 		} else {
 			//生成场景
 			GenerateSceneRandom ();
@@ -401,7 +401,7 @@ public class SceneGen: MonoBehaviour
 		//创建地图元素，场景，敌人
 		GenerateElements ();
 		//添加场景信息到全局数据对象
-		gData.scenes.Add (currentSceneInfo);
+		gData.tombs[gData.tombLevel].Add (currentSceneInfo);
 	}
 
 	void GeneraterTomb(){
@@ -505,7 +505,7 @@ public class SceneGen: MonoBehaviour
 
 		currentSceneInfo.DigData = digData;
 
-		gData.scenes[gData.currentFloor-1] = currentSceneInfo;
+		gData.tombs[gData.tombLevel][gData.currentFloor-1] = currentSceneInfo;
 	}
 
 	void AddNewDigData(GameObject digO){
@@ -778,7 +778,7 @@ public class SceneGen: MonoBehaviour
 	//根据探测等级返回提示消息
 	public void getDetectorResult(int detectLevel){
 
-		Vector3 nextEntry = gData.scenes[gData.currentFloor-1].nextEntry.pos;
+		Vector3 nextEntry = gData.tombs[gData.tombLevel][gData.currentFloor-1].nextEntry.pos;
 		
 		float distance = Vector3.Distance(player.position,nextEntry);
 
@@ -857,13 +857,13 @@ public class SceneGen: MonoBehaviour
 	public void ToPreFloor(){
 		RecScene();
 		gData.currentFloor--;
-		Vector3 preFloorNextEntryPos = gData.scenes[gData.currentFloor-1].digToNextPos;
+		Vector3 preFloorNextEntryPos = gData.tombs[gData.tombLevel][gData.currentFloor-1].digToNextPos;
 		gData.playerPos = preFloorNextEntryPos;
 		Application.LoadLevel ("main");
 	}
 
 	public void ToNextFloor(Vector3 pos){
-		gData.scenes[gData.currentFloor-1].digToNextPos = pos;
+		gData.tombs[gData.tombLevel][gData.currentFloor-1].digToNextPos = pos;
 		RecScene();
 		gData.currentFloor++;
 		Application.LoadLevel ("main");

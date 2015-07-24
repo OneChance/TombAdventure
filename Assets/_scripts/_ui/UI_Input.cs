@@ -219,7 +219,7 @@ public class UI_Input : MonoBehaviour
 
 	public void Detect ()
 	{
-		if (gData.scenes [gData.currentFloor - 1].isTomb) {
+		if (gData.tombs[gData.tombLevel] [gData.currentFloor - 1].isTomb) {
 			Debug.Log (StringCollection.ISTOMB);
 		} else {
 			player.SendMessage ("PlayerDetect");
@@ -234,7 +234,7 @@ public class UI_Input : MonoBehaviour
 
 	public void Dig ()
 	{
-		if (gData.scenes [gData.currentFloor - 1].isTomb) {
+		if (gData.tombs[gData.tombLevel] [gData.currentFloor - 1].isTomb) {
 			Debug.Log (StringCollection.ISTOMB);
 		} else {
 			charInfo.SetActive (false);
