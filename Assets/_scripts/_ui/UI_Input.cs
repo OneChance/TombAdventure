@@ -65,6 +65,14 @@ public class UI_Input : MonoBehaviour
 		cList = gData.characterList;
 		eList = cList [0].EquipList;
 		bgList = cList [0].BgList;
+
+		//加载按钮文本
+		Transform buttons = GameObject.FindGameObjectWithTag ("UI").transform.FindChild("Buttons");
+		buttons.FindChild("Bag").FindChild("Text").GetComponent<Text>().text = StringCollection.BAG;
+		buttons.FindChild("Equip").FindChild("Text").GetComponent<Text>().text = StringCollection.EQUIPMENT;
+		buttons.FindChild("DigStop").FindChild("Text").GetComponent<Text>().text = StringCollection.STOPDIG;
+		buttons.FindChild("Dig").FindChild("Text").GetComponent<Text>().text = StringCollection.DIG;
+		buttons.FindChild("Detect").FindChild("Text").GetComponent<Text>().text = StringCollection.DETECT;
 	}
 
 	public void left ()

@@ -34,13 +34,18 @@ public class StringCollection  {
 	public static string ITEMEQUIP = "装备";
 	public static string NOEQUIP = "卸下";
 
-	//战斗
+	//按钮
 	public static string ATTACK =  "攻击";
 	public static string ITEM =  "道具";
 	public static string WAIT =  "等待";
-
 	public static string CONFIRM =  "确认";
 	public static string CANCEL =  "撤销";
+
+	public static string DIG =  "挖掘";
+	public static string DETECT =  "探索";
+	public static string STOPDIG =  "停止";
+	public static string EQUIPMENT =  "装备";
+	public static string BAG =  "背包";
 
 	//TombName
 	public static string KINGOFLU = "明鲁王墓";
