@@ -44,7 +44,7 @@ public class PlayerAction : MonoBehaviour
 			Baggrid bg = new Baggrid (item, 2);
 			bgList.Add (bg);
 
-			Equipment e2 = new Equipment(1,2,Equipment.EquipPos.BODY,"3","学者的幻想",1);
+			Equipment e2 = new Equipment(2,3,Equipment.EquipPos.BODY,"3","学者的幻想",1);
 			Baggrid bg2 = new Baggrid (e2, 0);
 			bgList.Add (bg2);
 

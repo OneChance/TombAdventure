@@ -6,7 +6,7 @@ public class UI_Item : MonoBehaviour {
 	
 	private GameObject itemInfo;
 	private GlobalData gData;
-	public Baggrid bg;
+	private Baggrid bg;
 
 	void Awake ()
 	{
@@ -18,7 +18,7 @@ public class UI_Item : MonoBehaviour {
 	}
 		
 	public void OnClick(){
-		itemInfo = GameObject.FindGameObjectWithTag("BagContainer").transform.FindChild("ItemInfo").gameObject;
+		itemInfo = GameObject.FindGameObjectWithTag("UI").transform.FindChild("ItemInfo").gameObject;
 		itemInfo.SetActive (true);
 		gData.currentItem = bg;
 		itemInfo.transform.FindChild("Pic").GetComponent<Image>().sprite = Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
@@ -33,4 +33,14 @@ public class UI_Item : MonoBehaviour {
 			buttonText.text = StringCollection.ITEMEQUIP;
 		}
 	}
+
+	public Baggrid Bg {
+		get {
+			return this.bg;
+		}
+		set {
+			bg = value;
+		}
+	}
+
 }

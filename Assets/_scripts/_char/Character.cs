@@ -6,7 +6,7 @@ public class Character:BattleObj
 {
 
 	private List<Baggrid> bgList;
-	public  List<Equipment> equipList;
+	private List<Equipment> equipList;
 	private bool isOnLinePlayer;
 	private int stamina;
 	private int maxStamina;
@@ -16,6 +16,12 @@ public class Character:BattleObj
 	public int nextLevelExp;
 	public int strength;
 	public int archeology;
+
+	public int strengthBase;
+	public int archeologyBase;
+
+	private int strengthAdd;
+	private int archeologyAdd;
 
 	public Character (int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp,List<Equipment> eList)
 	{
@@ -35,18 +41,13 @@ public class Character:BattleObj
 		this.nextLevelExp = level * 50;
 
 		//玩家的属性->基本属性
-		this.strength = this.level * this.Pro.strengthFactor;
-		this.archeology = this.level * this.Pro.archeologyFactor;
+		this.strengthBase = this.level * this.Pro.strengthFactor;
+		this.archeologyBase = this.level * this.Pro.archeologyFactor;
 
-		this.equipList = eList;
+		this.strength = this.strengthBase  + this.strengthAdd;
+		this.archeology = this.archeologyBase +this.archeologyAdd;
 
-		//+装备属性
-		if(equipList!=null){
-			for(int i=0;i<equipList.Count;i++){
-				this.strength+=equipList[i].strength;
-				this.archeology+=equipList[i].archeology;
-			}
-		}
+		this.EquipList = eList;
 	}
 
 	public int Stamina {
@@ -76,5 +77,42 @@ public class Character:BattleObj
 		}
 	}
 
+	public List<Equipment> EquipList {
+		get {
+			return this.equipList;
+		}
+		set {
+			equipList = value;
+			this.StrengthAdd = 0;
+			this.ArcheologyAdd = 0;
+			//+装备属性
+			if(equipList!=null){
+				for(int i=0;i<equipList.Count;i++){
+					this.StrengthAdd+=equipList[i].strength;
+					this.ArcheologyAdd+=equipList[i].archeology;
+				}
+			}
+		}
+	}
+
+	public int StrengthAdd {
+		get {
+			return this.strengthAdd;
+		}
+		set {
+			strengthAdd = value;
+			strength = strengthBase +strengthAdd;
+		}
+	}
+
+	public int ArcheologyAdd {
+		get {
+			return this.archeologyAdd;
+		}
+		set {
+			archeologyAdd = value;
+			archeology = archeologyBase +archeologyAdd;
+		}
+	}
 
 }

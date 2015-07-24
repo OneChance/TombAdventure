@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class StringCollection  {
-	//Hint
+	//提示
 	public static string TRYTODIG = "就在这周围动手挖挖看吧";
 	public static string DISTANCEFAR =  "目前看来离下层入口还有很远的距离";
 	public static string DISTANCENEAR =  "下层入口应该就在这附近了";
@@ -23,7 +23,7 @@ public class StringCollection  {
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
 	public static string ITEMGET = "获得";
 
-	//LableText
+	//标签
 	public static string HEALTH =  "生命";
 	public static string STRENGTH =  "力量";
 	public static string ARCHEOLOGY =  "考古";
@@ -32,6 +32,15 @@ public class StringCollection  {
 	public static string FLOOR = "层";
 	public static string ITEMUSE = "使用";
 	public static string ITEMEQUIP = "装备";
+	public static string NOEQUIP = "卸下";
+
+	//战斗
+	public static string ATTACK =  "攻击";
+	public static string ITEM =  "道具";
+	public static string WAIT =  "等待";
+
+	public static string CONFIRM =  "确认";
+	public static string CANCEL =  "撤销";
 
 	//TombName
 	public static string KINGOFLU = "明鲁王墓";

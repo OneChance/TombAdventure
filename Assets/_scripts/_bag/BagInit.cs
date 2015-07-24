@@ -24,7 +24,7 @@ public class BagInit : MonoBehaviour {
 		itemPrefab = Resources.Load ("item", typeof(GameObject)) as GameObject;
 	}
 
-	void InitBag(Character c){
+	public void InitBag(Character c){
 
 		if (!init) {
 			//init all grid
@@ -45,25 +45,32 @@ public class BagInit : MonoBehaviour {
 		}
 
 		List<Baggrid> bgList = c.BgList;
+
 		for (int i=0; i<bgList.Count; i++) {
 			Baggrid bg = bgList[i];
+
+			//战斗场景不能使用装备
+			if(Application.loadedLevelName.Equals("battle") && bg.Item.ct==Item.CommonType.EQUIPMENT){
+				continue;
+			}
 
 			if(bg.Num>0 || bg.Item.ct==Item.CommonType.EQUIPMENT){
 				GameObject itemO = Instantiate (itemPrefab, new Vector3(grids[i].transform.position.x,grids[i].transform.position.y,0), Quaternion.identity) as GameObject;
 				itemO.GetComponent<Image>().sprite =  Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
-				itemO.GetComponent<UI_Item>().bg = bg;
+				itemO.GetComponent<UI_Item>().Bg = bg;
 
 				string num  = bg.Num.ToString();
 
 				if(num.Equals("0")){
 					num = "";
 				}
-
+			
 				itemO.transform.FindChild("Num").GetComponent<Text>().text = num;
 				itemO.transform.SetParent(grids[i].transform);
 
 			}else{
 				bgList.Remove(bg);
+				i--;
 			}
 		}
 	}	

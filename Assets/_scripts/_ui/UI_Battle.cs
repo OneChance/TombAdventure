@@ -7,7 +7,6 @@ public class UI_Battle : MonoBehaviour
 {
 
 	private Battle battle;
-	public GameObject bagContainer;
 	public GameObject bag;
 	public GameObject itemInfo;
 
@@ -25,14 +24,16 @@ public class UI_Battle : MonoBehaviour
 		PRO
 	}
 
-	public void closeBag(){
-		itemInfo.SetActive (true);
-		bagContainer.SetActive (false);
+	public void closeBag ()
+	{
+		itemInfo.SetActive (false);
+		bag.SetActive (false);
 	}
 
-	public void UseItem(){
+	public void UseItem ()
+	{
 		closeBag ();
-		Action act = new Action (Op.ITEM,battle.gData.currentItem);
+		Action act = new Action (Op.ITEM, battle.gData.currentItem);
 		battle.gData.currentItem = null;
 		battle.SendMessage ("Act", act);
 	}
@@ -40,33 +41,30 @@ public class UI_Battle : MonoBehaviour
 	public void ItemClick ()
 	{
 		itemInfo.SetActive (false);
-		bagContainer.SetActive (!bagContainer.activeInHierarchy);
+		bag.SetActive (!bag.activeInHierarchy);
 		//只获得第一个玩家的背包（不论是其他游戏玩家，还是NPC玩家，都没有背包）
-		Character currentC = (Character)battle.characterList[0];
-		if(bagContainer.activeInHierarchy)
-			bag.SendMessage ("InitBag",currentC);
+		Character currentC = (Character)battle.characterList [0];
+		if (bag.activeInHierarchy)
+			bag.SendMessage ("InitBag", currentC);
 	}
 
 	public void WaitClick ()
 	{
 		closeBag ();
+		Action act = new Action (Op.WAIT, new Baggrid (new WaitItem (), 1));
+		battle.SendMessage ("Act", act);
 	}
 
 	public void AttackClick ()
 	{
 		closeBag ();
-		Action act = new Action (Op.ATTACK,new Baggrid (new AttackItem (), 1));
+		Action act = new Action (Op.ATTACK, new Baggrid (new AttackItem (), 1));
 		battle.SendMessage ("Act", act);
 	}
 
 	public void OkClick ()
 	{
 		battle.SendMessage ("AddOp");
-	}
-
-	public void ProClick ()
-	{
-		closeBag ();
 	}
 
 	public void PosClick (GameObject clickGo)

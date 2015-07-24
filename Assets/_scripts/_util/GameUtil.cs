@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class GameUtil{
 
@@ -16,5 +17,14 @@ public class GameUtil{
 		Color toC = new Color (c.r, c.g, c.b, 0.3f);
 		
 		go.GetComponent<Image> ().color = Color.Lerp (fromC, toC, lerp);
+	}
+
+	public static void UnFocus (List<GameObject> goList)
+	{
+		for(int i=0;i<goList.Count;i++){
+			Color c = goList[i].GetComponent<Image> ().color;
+			goList[i].GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 1f);
+		}
+		goList.Clear();
 	}
 }

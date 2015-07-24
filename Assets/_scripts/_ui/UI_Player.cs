@@ -27,7 +27,6 @@ public class UI_Player : MonoBehaviour {
 			gData.currentItem.Item.doSth(new BattleObj(),toList);
 			//用完减少数量并移除
 			gData.currentItem.Num--;
-			gData.currentItem = null;
 			uiInput.SendMessage("ItemUseComplete");
 		}
 	}

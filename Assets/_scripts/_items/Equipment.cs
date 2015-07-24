@@ -29,7 +29,8 @@ public class Equipment : Item
 		HEAD,
 		BODY,
 		FOOT,
-		HAND
+		HAND,
+		ALL
 	}
 
 	public  override void doSth <T>(T from, List<T> to){

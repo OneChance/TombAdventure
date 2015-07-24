@@ -12,7 +12,6 @@ public class UI_Input : MonoBehaviour
 	public GameObject itemInfo;
 	public GameObject charInfo;
 	public GameObject buttons;
-
 	private GameObject avatar;
 	private GameObject head;
 	private GameObject hand;
@@ -32,8 +31,12 @@ public class UI_Input : MonoBehaviour
 	private List<GameObject> focusList;
 	private GameObject uiCharP;
 	private GameObject uiEquip;
+	private List<Character> cList;
+	private List<Equipment> eList;
+	private List<Baggrid> bgList;
 	
-	void Start(){
+	void Start ()
+	{
 		avatar = charInfo.transform.FindChild ("Avatar").gameObject;
 		head = charInfo.transform.FindChild ("Head").gameObject;
 		hand = charInfo.transform.FindChild ("Hand").gameObject;
@@ -54,116 +57,155 @@ public class UI_Input : MonoBehaviour
 		assList.Add (ass_2);
 		assList.Add (ass_3);
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
-		focusList = new List<GameObject>();
+		focusList = new List<GameObject> ();
 
 		uiCharP = Resources.Load ("UIChar", typeof(GameObject)) as GameObject;
 		uiEquip = Resources.Load ("UIEquip", typeof(GameObject)) as GameObject;
+
+		cList = gData.characterList;
+		eList = cList [0].EquipList;
+		bgList = cList [0].BgList;
 	}
 
 	public void left ()
 	{
-		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.LEFT);
+		player.SendMessage ("PlayerMove", PlayerAction.MOVEDIRECTION.LEFT);
 	}
 
 	public void right ()
 	{
-		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.RIGHT);
+		player.SendMessage ("PlayerMove", PlayerAction.MOVEDIRECTION.RIGHT);
 	}
 
 	public void up ()
 	{
-		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.UP);
+		player.SendMessage ("PlayerMove", PlayerAction.MOVEDIRECTION.UP);
 	}
 
 	public void down ()
 	{
-		player.SendMessage ("PlayerMove",PlayerAction.MOVEDIRECTION.DOWN);
+		player.SendMessage ("PlayerMove", PlayerAction.MOVEDIRECTION.DOWN);
 	}
 
-	void Update(){
+	void Update ()
+	{
 		for (int i=0; i<focusList.Count; i++) {
-			GameUtil.Focus(focusList [i]);
+			GameUtil.Focus (focusList [i]);
 		}
 	}
 
-	public void UpdateUIInfo(){
-		List<Character> cList = gData.characterList;
-
+	public void UpdateUIInfo ()
+	{
 		//玩家角色信息
-		stamina.GetComponent<Text>().text = cList[0].Stamina.ToString();
-		health.GetComponent<Text>().text = cList[0].Health.ToString();
-		strength.GetComponent<Text>().text = cList[0].strength.ToString();
-		archeology.GetComponent<Text>().text = cList[0].archeology.ToString();
+		stamina.GetComponent<Text> ().text = cList [0].Stamina.ToString ();
+		health.GetComponent<Text> ().text = cList [0].Health.ToString ();
+		strength.GetComponent<Text> ().text = cList [0].strength.ToString ();
+		archeology.GetComponent<Text> ().text = cList [0].archeology.ToString ();
 		//助手角色信息
-		for(int i=1;i<cList.Count;i++){
-				GameObject ass = assList[i-1];
-				GameObject info = ass.transform.FindChild("Info").gameObject;
-				info.transform.FindChild("S").GetComponent<Text>().text = cList[i].Stamina.ToString();
-				info.transform.FindChild("H").GetComponent<Text>().text = cList[i].Health.ToString();
-				info.transform.FindChild("Str").GetComponent<Text>().text = cList[i].strength.ToString();
-				info.transform.FindChild("Arc").GetComponent<Text>().text = cList[i].archeology.ToString();
+		for (int i=1; i<cList.Count; i++) {
+			GameObject ass = assList [i - 1];
+			GameObject info = ass.transform.FindChild ("Info").gameObject;
+			info.transform.FindChild ("S").GetComponent<Text> ().text = cList [i].Stamina.ToString ();
+			info.transform.FindChild ("H").GetComponent<Text> ().text = cList [i].Health.ToString ();
+			info.transform.FindChild ("Str").GetComponent<Text> ().text = cList [i].strength.ToString ();
+			info.transform.FindChild ("Arc").GetComponent<Text> ().text = cList [i].archeology.ToString ();
 		}
 	}
 
-	public void UpdateUIEquip(){
-		List<Character> cList = gData.characterList;
-		List<Equipment> eList = cList[0].equipList;
-		for(int i=0;i<eList.Count;i++){			
-			GameObject eP = null;		
-			switch(eList[i].ep){
-			case Equipment.EquipPos.BODY:eP=clothes;break;
-			case Equipment.EquipPos.HAND:eP=hand;break;
-			case Equipment.EquipPos.HEAD:eP=head;break;
-			case Equipment.EquipPos.FOOT:eP=foot;break;
-			}	
-			GameObject uiEquipO = Instantiate (uiEquip, new Vector3(eP.transform.position.x,eP.transform.position.y,0), Quaternion.identity) as GameObject;
-			uiEquipO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_ui/"+eList[i].prefabName);
-			uiEquipO.transform.SetParent(eP.transform);
+	public GameObject getEquipPosGo(Equipment.EquipPos pos){
+
+		GameObject eP = null;		
+
+		switch (pos) {
+		case Equipment.EquipPos.BODY:
+			eP = clothes;
+			break;
+		case Equipment.EquipPos.HAND:
+			eP = hand;
+			break;
+		case Equipment.EquipPos.HEAD:
+			eP = head;
+			break;
+		case Equipment.EquipPos.FOOT:
+			eP = foot;
+			break;
+		}	
+
+		return eP;
+	}
+
+	public void UpdateUIEquip (Equipment.EquipPos pos)
+	{
+
+		bool haveUpdate = false;
+
+		for (int i=0; i<eList.Count; i++) {
+
+			GameObject eP = getEquipPosGo (eList [i].ep) ;
+
+			if (pos == Equipment.EquipPos.ALL || pos == eList [i].ep) {
+
+				haveUpdate = true;
+
+				//检测该位置有没有装备,如果有先删除
+				if (eP.transform.FindChild ("UIEquip(Clone)") != null) {
+					Destroy (eP.transform.FindChild ("UIEquip(Clone)").gameObject);
+				}
+
+				GameObject uiEquipO = Instantiate (uiEquip, new Vector3 (eP.transform.position.x, eP.transform.position.y, 0), Quaternion.identity) as GameObject;
+				uiEquipO.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_ui/" + eList [i].prefabName);
+				uiEquipO.GetComponent<UI_Equip> ().e = eList [i];
+				uiEquipO.transform.SetParent (eP.transform);
+			}
+		}
+
+		//如果要更新的位置，已经没有装备，移除
+		if(!haveUpdate){
+			Destroy(getEquipPosGo (pos).transform.FindChild("UIEquip(Clone)").gameObject);
 		}
 	}
 
-	void InitCharInfo(){
-		List<Character> cList = gData.characterList;
-
-		if(name.GetComponent<Text>().text.Equals("")){
+	void InitCharInfo ()
+	{
+		if (name.GetComponent<Text> ().text.Equals ("")) {
 			//玩家角色信息
-			name.GetComponent<Text>().text = cList[0].ObjName;
-			proname.GetComponent<Text>().text = cList[0].Pro.proname;
+			name.GetComponent<Text> ().text = cList [0].ObjName;
+			proname.GetComponent<Text> ().text = cList [0].Pro.proname;
 
 			//生成玩家
-			GameObject uiCharAvatar = Instantiate (uiCharP, new Vector3(avatar.transform.position.x,avatar.transform.position.y,0), Quaternion.identity) as GameObject;
-			uiCharAvatar.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_game/"+cList[0].PrefabName);
-			uiCharAvatar.GetComponent<UI_Player>().c = cList[0];
-			uiCharAvatar.transform.SetParent(avatar.transform);
+			GameObject uiCharAvatar = Instantiate (uiCharP, new Vector3 (avatar.transform.position.x, avatar.transform.position.y, 0), Quaternion.identity) as GameObject;
+			uiCharAvatar.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/" + cList [0].PrefabName);
+			uiCharAvatar.GetComponent<UI_Player> ().c = cList [0];
+			uiCharAvatar.transform.SetParent (avatar.transform);
 
-			charInfo.transform.FindChild ("StaminaLable").GetComponent<Text>().text = StringCollection.STAMINA;
-			charInfo.transform.FindChild ("StrengthLable").GetComponent<Text>().text = StringCollection.STRENGTH;
-			charInfo.transform.FindChild ("ArcheologyLable").GetComponent<Text>().text = StringCollection.ARCHEOLOGY;
-			charInfo.transform.FindChild ("HealthLable").GetComponent<Text>().text = StringCollection.HEALTH;
+			charInfo.transform.FindChild ("StaminaLable").GetComponent<Text> ().text = StringCollection.STAMINA;
+			charInfo.transform.FindChild ("StrengthLable").GetComponent<Text> ().text = StringCollection.STRENGTH;
+			charInfo.transform.FindChild ("ArcheologyLable").GetComponent<Text> ().text = StringCollection.ARCHEOLOGY;
+			charInfo.transform.FindChild ("HealthLable").GetComponent<Text> ().text = StringCollection.HEALTH;
 
 			//加载装备
-			UpdateUIEquip();
+			UpdateUIEquip (Equipment.EquipPos.ALL);
 
 			//助手角色信息
-			for(int i=1;i<cList.Count;i++){
-				GameObject ass = assList[i-1];
-				GameObject info = ass.transform.FindChild("Info").gameObject;
-				info.SetActive(true);
+			for (int i=1; i<cList.Count; i++) {
+				GameObject ass = assList [i - 1];
+				GameObject info = ass.transform.FindChild ("Info").gameObject;
+				info.SetActive (true);
 
-				GameObject uiCharAss = Instantiate (uiCharP, new Vector3(ass.transform.position.x,ass.transform.position.y,0), Quaternion.identity) as GameObject;
-				uiCharAss.GetComponent<Image>().sprite =  Resources.Load<Sprite>("_images/_game/"+cList[i].PrefabName);
-				uiCharAss.transform.SetParent(ass.transform);
-				uiCharAss.GetComponent<UI_Player>().c = cList[i];
-				info.transform.FindChild("Name").GetComponent<Text>().text = cList[i].ObjName;
-				info.transform.FindChild("Pro").GetComponent<Text>().text = cList[i].Pro.proname;
+				GameObject uiCharAss = Instantiate (uiCharP, new Vector3 (ass.transform.position.x, ass.transform.position.y, 0), Quaternion.identity) as GameObject;
+				uiCharAss.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/" + cList [i].PrefabName);
+				uiCharAss.transform.SetParent (ass.transform);
+				uiCharAss.GetComponent<UI_Player> ().c = cList [i];
+				info.transform.FindChild ("Name").GetComponent<Text> ().text = cList [i].ObjName;
+				info.transform.FindChild ("Pro").GetComponent<Text> ().text = cList [i].Pro.proname;
 
-				info.transform.FindChild ("SL").GetComponent<Text>().text = StringCollection.STAMINA;
-				info.transform.FindChild ("StrL").GetComponent<Text>().text = StringCollection.STRENGTH;
-				info.transform.FindChild ("ArcL").GetComponent<Text>().text = StringCollection.ARCHEOLOGY;
-				info.transform.FindChild ("HL").GetComponent<Text>().text = StringCollection.HEALTH;
+				info.transform.FindChild ("SL").GetComponent<Text> ().text = StringCollection.STAMINA;
+				info.transform.FindChild ("StrL").GetComponent<Text> ().text = StringCollection.STRENGTH;
+				info.transform.FindChild ("ArcL").GetComponent<Text> ().text = StringCollection.ARCHEOLOGY;
+				info.transform.FindChild ("HL").GetComponent<Text> ().text = StringCollection.HEALTH;
 			}
 
-			UpdateUIInfo();
+			UpdateUIInfo ();
 		}
 	}
 
@@ -171,39 +213,39 @@ public class UI_Input : MonoBehaviour
 	{
 		charInfo.SetActive (!charInfo.activeInHierarchy);
 		if (charInfo.activeInHierarchy) {
-			InitCharInfo();
+			InitCharInfo ();
 		}
 	}
 
 	public void Detect ()
 	{
-		if(gData.scenes[gData.currentFloor-1].isTomb){
-			Debug.Log(StringCollection.ISTOMB);
-		}else{
+		if (gData.scenes [gData.currentFloor - 1].isTomb) {
+			Debug.Log (StringCollection.ISTOMB);
+		} else {
 			player.SendMessage ("PlayerDetect");
 		}
 	}
 
-
-	void closeBag(){
+	void closeBag ()
+	{
 		itemInfo.SetActive (false);
 		bag.SetActive (false);	
 	}
 
 	public void Dig ()
 	{
-		if(gData.scenes[gData.currentFloor-1].isTomb){
-			Debug.Log(StringCollection.ISTOMB);
-		}else{
+		if (gData.scenes [gData.currentFloor - 1].isTomb) {
+			Debug.Log (StringCollection.ISTOMB);
+		} else {
 			charInfo.SetActive (false);
 			closeBag ();
 			
 			//隐藏UI上除了停止按钮意外的其他元素
-			for(int i=0;i<buttons.transform.childCount;i++){
-				if(buttons.transform.GetChild(i).name!="DigStop"){
-					buttons.transform.GetChild(i).gameObject.SetActive(false);
-				}else{
-					buttons.transform.GetChild(i).gameObject.SetActive(true);
+			for (int i=0; i<buttons.transform.childCount; i++) {
+				if (buttons.transform.GetChild (i).name != "DigStop") {
+					buttons.transform.GetChild (i).gameObject.SetActive (false);
+				} else {
+					buttons.transform.GetChild (i).gameObject.SetActive (true);
 				}
 			}
 			
@@ -211,13 +253,14 @@ public class UI_Input : MonoBehaviour
 		}
 	}
 
-	public void DigStop(){
+	public void DigStop ()
+	{
 		//隐藏停止,显示UI上除了停止按钮意外的其他元素
-		for(int i=0;i<buttons.transform.childCount;i++){
-			if(buttons.transform.GetChild(i).name!="DigStop"){
-				buttons.transform.GetChild(i).gameObject.SetActive(true);
-			}else{
-				buttons.transform.GetChild(i).gameObject.SetActive(false);
+		for (int i=0; i<buttons.transform.childCount; i++) {
+			if (buttons.transform.GetChild (i).name != "DigStop") {
+				buttons.transform.GetChild (i).gameObject.SetActive (true);
+			} else {
+				buttons.transform.GetChild (i).gameObject.SetActive (false);
 			}
 		}
 		player.SendMessage ("StopDig");
@@ -227,53 +270,93 @@ public class UI_Input : MonoBehaviour
 	{
 		itemInfo.SetActive (false);
 		bag.SetActive (!bag.activeInHierarchy);
-		Character currentC = player.GetComponent<PlayerAction>().characterList[0];
-		if(bag.activeInHierarchy)
-			bag.SendMessage ("InitBag",currentC);
+		Character currentC = player.GetComponent<PlayerAction> ().characterList [0];
+		if (bag.activeInHierarchy)
+			bag.SendMessage ("InitBag", currentC);
 	}
 
-	public void UseItem(){
+	public void UseItem (Button button)
+	{
 		//关闭背包窗口
-		closeBag();
+		//closeBag ();
 		//打开人物属性面板
-		charInfo.SetActive(true);
-		InitCharInfo();
+		charInfo.SetActive (true);
+		InitCharInfo ();
 		//获取道具信息
 		Baggrid bg = gData.currentItem;
 		Item item = bg.Item;
 
-		if(item.ct == global::Item.CommonType.CONSUME){
+		if (item.ct == global::Item.CommonType.CONSUME) {
 			//人物格闪动
-			focusList.Add(avatar);
-			List<Character> cList = gData.characterList;
-			for(int i=1;i<cList.Count;i++){
-				GameObject ass = assList[i-1];
-				focusList.Add(ass);
+			focusList.Add (avatar.transform.FindChild("UIChar(Clone)").gameObject);
+			for (int i=1; i<cList.Count; i++) {
+				GameObject ass = assList [i - 1];
+				focusList.Add (ass.transform.FindChild("UIChar(Clone)").gameObject);
 			}
 
 			//如果是群体道具，直接应用，否则等待点击玩家后使用
-			if(item.rt == global::Item.RangeType.MULTI){
-				bg.Item.doSth(cList[0],cList);
-				//用完减少数量并移除
+			if (item.rt == global::Item.RangeType.MULTI) {
+				bg.Item.doSth (cList [0], cList);
+				//用完减少数量
 				gData.currentItem.Num--;
-				gData.currentItem = null;
 				ItemUseComplete();
 			}
 
-		}else if(item.ct == global::Item.CommonType.EQUIPMENT){
-//			GameObject eP = null;		
-//			switch(eList[i].ep){
-//			case Equipment.EquipPos.BODY:eP=clothes;break;
-//			case Equipment.EquipPos.HAND:eP=hand;break;
-//			case Equipment.EquipPos.HEAD:eP=head;break;
-//			case Equipment.EquipPos.FOOT:eP=foot;break;
-//			}	
+		} else if (item.ct == global::Item.CommonType.EQUIPMENT) {
+			if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.NOEQUIP)) {//装备卸下
+				//从装备中移除
+				for (int i=0; i<eList.Count; i++) {
+					if (eList [i].ep == ((Equipment)item).ep) {
+						eList.Remove (eList [i]);
+						break;
+					}
+				}
+				//添加到背包
+				bgList.Add (bg);
+			} else { //装备穿戴
+				bool haveE = false;
+				Equipment oldE = null;
+				
+				for (int i=0; i<eList.Count; i++) {
+					if (eList [i].ep == ((Equipment)item).ep) {
+						oldE = eList [i];
+						eList [i] = (Equipment)item; //替换装备
+						haveE = true;
+						break;
+					}
+				}
+				
+				if (!haveE) {
+					eList.Add ((Equipment)item);
+					//从背包移除
+					for (int i=0; i<bgList.Count; i++) {
+						if (bgList [i].Item.name == item.name) {
+							bgList.Remove(bgList [i]);
+						}
+					}
+				} else {
+					//替换背包里的装备，找到同名装备替换，即使有多个，因为背包会自动排序，随便替换一个也没有问题
+					for (int i=0; i<bgList.Count; i++) {
+						if (bgList [i].Item.name == item.name) {
+							bgList [i].Item = oldE;
+						}
+					}
+				}
+			}
+
+			UpdateUIEquip (((Equipment)item).ep);
+			cList [0].EquipList = eList;
+			ItemUseComplete();
 		}
+		itemInfo.SetActive(false);
 	}
 
-	public void ItemUseComplete(){
-		focusList.Clear();
+	public void ItemUseComplete ()
+	{
+		GameUtil.UnFocus(focusList);
 		//通知UI更新
-		UpdateUIInfo();
+		UpdateUIInfo ();
+		gData.currentItem = null;
+		bag.SendMessage("InitBag",cList[0]);
 	}
 }

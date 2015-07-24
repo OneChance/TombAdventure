@@ -82,6 +82,10 @@ public class SceneGen: MonoBehaviour
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.scenes.Count;
 
+		//根据KEY从服务器加载物品掉落列表
+		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
+		fallList = getFallList(gData.tombLevel+"_"+gData.currentFloor);
+
 		digPrefab =  Resources.Load ("Dig", typeof(GameObject)) as GameObject;
 		digSide = digPrefab.GetComponent<SpriteRenderer>().bounds.size.x;
 		playerSide = player.GetComponent<SpriteRenderer>().bounds.size.x;
@@ -109,13 +113,12 @@ public class SceneGen: MonoBehaviour
 		sceneInfoUI.FindChild("TombName").GetComponent<Text>().text = gData.tombName;
 		sceneInfoUI.FindChild("FloorLable").GetComponent<Text>().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild("Floor").GetComponent<Text>().text = gData.currentFloor.ToString();
-
-		//根据KEY从服务器加载物品掉落列表
-		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
-		fallList = getFallList(gData.tombLevel+"_"+gData.currentFloor);
 	}
 
 	Dictionary<string,List<FallItem>> getFallList(string key){
+
+		//此处请求服务器
+
 		Dictionary<string,List<FallItem>> fallList = new Dictionary<string,List<FallItem>>();
 		List<FallItem> itemList = new List<FallItem>();
 		FallItem fi = new FallItem();
@@ -124,7 +127,9 @@ public class SceneGen: MonoBehaviour
 		fi.maxNum = 3;
 		fi.probability = 90;
 		itemList.Add(fi);
+
 		fallList.Add("dig",itemList);
+		fallList.Add("enemy_1",itemList);
 		return fallList;
 	}
 
@@ -229,51 +234,7 @@ public class SceneGen: MonoBehaviour
 					gData.currentFloor++;
 					Application.LoadLevel ("main");
 				}else{
-					//掉落******************************************************************************************
-					int fall = Random.Range(1,101);
-					List<FallItem> itemList = fallList["dig"];		
-					string itemGet = "";				
-					for(int i=0;i<itemList.Count;i++){
-						if(fall<itemList[i].probability){					
-							int num = Random.Range(itemList[i].minNum,itemList[i].maxNum+1);						
-							itemGet = itemGet + " " + itemList[i].item.name + "x" + num;
-
-							Baggrid baggrid = new Baggrid(itemList[i].item,num);
-
-
-							//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)
-							bool get = false;
-							if(player.GetComponent<PlayerAction>().isPlayer){
-								//弹出面板，roll
-								//服务器返回队内其他玩家的roll值，判定
-								//如果roll 到 get设置为true
-							}else{
-								get = true;
-							}
-
-							if(get){
-								List<Baggrid> bgList = player.GetComponent<PlayerAction>().characterList[0].BgList;
-								
-								bool haveTheSame = false;
-								for(int j=0;j<bgList.Count;j++){
-									if(bgList[j].Item.name.Equals(baggrid.Item.name)){
-										haveTheSame = true;
-										bgList[i].Num+=baggrid.Num;
-										break;
-									}
-								}
-								if(!haveTheSame){
-									bgList.Add(baggrid);
-								}
-							}
-						}
-					}				
-					if(itemGet.Equals("")){
-						Debug.Log(StringCollection.DIGNOTHING);
-					}else{
-						Debug.Log(StringCollection.ITEMGET + ":" + itemGet);
-					}
-					//***********************************************************************************************
+					ItemFall("dig");
 				}
 				uiInput.SendMessage("DigStop");
 			}
@@ -281,6 +242,55 @@ public class SceneGen: MonoBehaviour
 			//更新耐力变化
 			uiInput.SendMessage("UpdateUIInfo");
 		}
+	}
+
+	void ItemFall(string key){
+		//掉落******************************************************************************************
+		int fall = Random.Range(1,101);
+		List<FallItem> itemList = fallList[key];		
+		string itemGet = "";				
+		for(int i=0;i<itemList.Count;i++){
+			if(fall<itemList[i].probability){					
+				int num = Random.Range(itemList[i].minNum,itemList[i].maxNum+1);						
+				itemGet = itemGet + " " + itemList[i].item.name + "x" + num;
+				
+				Baggrid baggrid = new Baggrid(itemList[i].item,num);
+				
+				
+				//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)
+				bool get = false;
+				if(player.GetComponent<PlayerAction>().isPlayer){
+					//弹出面板，roll
+					//服务器返回队内其他玩家的roll值，判定
+					//如果roll 到 get设置为true
+				}else{
+					get = true;
+				}
+				
+				if(get){
+
+					List<Baggrid> bgList = gData.characterList[0].BgList;
+					
+					bool haveTheSame = false;
+					for(int j=0;j<bgList.Count;j++){
+						if(bgList[j].Item.name.Equals(baggrid.Item.name)){
+							haveTheSame = true;
+							bgList[i].Num+=baggrid.Num;
+							break;
+						}
+					}
+					if(!haveTheSame){
+						bgList.Add(baggrid);
+					}
+				}
+			}
+		}				
+		if(itemGet.Equals("")){
+			Debug.Log(StringCollection.DIGNOTHING);
+		}else{
+			Debug.Log(StringCollection.ITEMGET + ":" + itemGet);
+		}
+		//***********************************************************************************************
 	}
 
 	//UI点击停止挖掘，传递给这个函数
@@ -350,6 +360,8 @@ public class SceneGen: MonoBehaviour
 		}
 
 		if(enemyNeedToRemove!=null){
+			//敌人掉落
+			ItemFall(enemyNeedToRemove.objName.Replace("(Clone)","").Split(new char[]{'@'})[0]);
 			enemyData.Remove(enemyNeedToRemove);
 		}
 
@@ -401,8 +413,8 @@ public class SceneGen: MonoBehaviour
 	}
 
 	void GenerateNextEntryOrTomb(){
-		//随机获取一个砖块
-		GameObject block = blockList[Random.Range(0,blockList.Count)];
+		//随机获取一个砖块(除玩家所在砖块以外)
+		GameObject block = blockList[Random.Range(1,blockList.Count)];
 		float blockPosX = block.transform.position.x;
 		float blockPosY = block.transform.position.y;
 		//随机获取一个位置
