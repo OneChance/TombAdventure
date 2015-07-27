@@ -7,12 +7,12 @@ public class UI_Player : MonoBehaviour {
 
 	public Character c;
 	private GlobalData gData;
-	private UI_Input uiInput;
+	private UI_Bag uiBag;
 
 	void Awake ()
 	{
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
-		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();
+		uiBag = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
 		Button btn = gameObject.GetComponent<Button>();
 		btn.onClick.AddListener(delegate() {
 			this.OnClick(); 
@@ -27,7 +27,7 @@ public class UI_Player : MonoBehaviour {
 			gData.currentItem.Item.doSth(new BattleObj(),toList);
 			//用完减少数量并移除
 			gData.currentItem.Num--;
-			uiInput.SendMessage("ItemUseComplete");
+			uiBag.SendMessage("ItemUseComplete");
 		}
 	}
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Character:BattleObj
 {
-
+	public int money;
 	private List<Baggrid> bgList;
 	private List<Equipment> equipList;
 	private bool isOnLinePlayer;
@@ -23,8 +23,9 @@ public class Character:BattleObj
 	private int strengthAdd;
 	private int archeologyAdd;
 
-	public Character (int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp,List<Equipment> eList)
+	public Character (int money,int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp,List<Equipment> eList)
 	{
+		this.money = money;
 		this.Health = health;
 		this.MaxHealth = maxHealth;
 		this.Attack = attack;

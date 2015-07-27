@@ -37,6 +37,7 @@ public abstract class Item
 	public string note;
 	public string targetNote;
 	public UseType ut;
+	public int price;
 
 	public Item(string itemId){
 		this.prefabName = "item_"+itemId;

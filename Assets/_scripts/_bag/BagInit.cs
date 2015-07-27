@@ -45,6 +45,7 @@ public class BagInit : MonoBehaviour {
 		}
 
 		List<Baggrid> bgList = c.BgList;
+		transform.FindChild("Money").FindChild("Text").GetComponent<Text>().text = c.money.ToString();
 
 		for (int i=0; i<bgList.Count; i++) {
 			Baggrid bg = bgList[i];
@@ -54,20 +55,19 @@ public class BagInit : MonoBehaviour {
 				continue;
 			}
 
-			if(bg.Num>0 || bg.Item.ct==Item.CommonType.EQUIPMENT){
+			if(bg.Num>0){
 				GameObject itemO = Instantiate (itemPrefab, new Vector3(grids[i].transform.position.x,grids[i].transform.position.y,0), Quaternion.identity) as GameObject;
 				itemO.GetComponent<Image>().sprite =  Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
 				itemO.GetComponent<UI_Item>().Bg = bg;
 
 				string num  = bg.Num.ToString();
 
-				if(num.Equals("0")){
-					num = "";
-				}
-			
-				itemO.transform.FindChild("Num").GetComponent<Text>().text = num;
+				if(bg.Item.ct == Item.CommonType.EQUIPMENT){
+					itemO.transform.FindChild("Num").gameObject.SetActive(false);
+				}else{
+					itemO.transform.FindChild("Num").GetComponent<Text>().text = num;
+				}			
 				itemO.transform.SetParent(grids[i].transform);
-
 			}else{
 				bgList.Remove(bg);
 				i--;

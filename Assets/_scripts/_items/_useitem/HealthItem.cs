@@ -6,7 +6,7 @@ public class HealthItem : Item
 {
 	private int heal;
 
-	public HealthItem (RangeType range,int heal,string itemId,string name):base(itemId)
+	public HealthItem (RangeType range,int heal,string itemId,string name,int price):base(itemId)
 	{
 		this.name = name;
 		this.Rt = range;
@@ -14,6 +14,7 @@ public class HealthItem : Item
 		this.heal = heal;
 		this.ot = ObjType.Friend;
 		this.ut = UseType.BATTLE;
+		this.price = price;
 		this.note = "恢复"+this.targetNote+"友军"+this.heal+"点生命力";
 	}
 

@@ -22,6 +22,8 @@ public class StringCollection  {
 	public static string DIGOVER = "这里已经挖过了,换一处好了";
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
 	public static string ITEMGET = "获得";
+	public static string NOTRADENUM = "请输入交易数量";
+	public static string NOTENOUGHMONEY = "金额不足";
 
 	//标签
 	public static string HEALTH =  "生命";
@@ -40,12 +42,15 @@ public class StringCollection  {
 	public static string WAIT =  "等待";
 	public static string CONFIRM =  "确认";
 	public static string CANCEL =  "撤销";
+	public static string BUY =  "购买";
+	public static string SELL =  "出售";
 
 	public static string DIG =  "挖掘";
 	public static string DETECT =  "探索";
 	public static string STOPDIG =  "停止";
 	public static string EQUIPMENT =  "装备";
 	public static string BAG =  "背包";
+	public static string LEAVESHOP =  "离开商店";
 
 	//TombName
 	public static string KINGOFLU = "明鲁王墓";

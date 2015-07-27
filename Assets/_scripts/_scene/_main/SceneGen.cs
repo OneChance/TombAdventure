@@ -122,7 +122,7 @@ public class SceneGen: MonoBehaviour
 		Dictionary<string,List<FallItem>> fallList = new Dictionary<string,List<FallItem>>();
 		List<FallItem> itemList = new List<FallItem>();
 		FallItem fi = new FallItem();
-		fi.item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂");
+		fi.item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂",50);
 		fi.minNum = 1;
 		fi.maxNum = 3;
 		fi.probability = 90;
@@ -259,7 +259,7 @@ public class SceneGen: MonoBehaviour
 				
 				//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)
 				bool get = false;
-				if(player.GetComponent<PlayerAction>().isPlayer){
+				if(gData.isPlayer){
 					//弹出面板，roll
 					//服务器返回队内其他玩家的roll值，判定
 					//如果roll 到 get设置为true

@@ -6,12 +6,10 @@ public class PlayerAction : MonoBehaviour
 {
 
 	private GlobalData gData;
-	public List<Character> characterList;
 	private SceneGen sceneGen;
 	private int stepCounter;
 	public float moveDistance = 0.5f;
 	private UI_Input uiInput;
-	public bool isPlayer; //ture为玩家联机模式，false为单机佣兵模式
 
 	public enum MOVEDIRECTION{
 		LEFT,
@@ -26,38 +24,6 @@ public class PlayerAction : MonoBehaviour
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		sceneGen = GameObject.FindGameObjectWithTag ("GameController").GetComponent<SceneGen>();
 		uiInput = GameObject.FindGameObjectWithTag("GameController").GetComponent<UI_Input>();
-
-		//从服务器端获取玩家数据初始化
-		isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式
-		characterList = new List<Character> ();
-
-		if (gData.characterList == null || gData.characterList.Count == 0) {
-
-			Equipment e = new Equipment(1,2,Equipment.EquipPos.BODY,"2","学者的思考",1);
-			List<Equipment> eList = new List<Equipment>();
-			eList.Add(e);
-			
-			Character c = new Character (30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0,eList);
-			
-			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂");
-			List<Baggrid> bgList = new List<Baggrid> ();
-			Baggrid bg = new Baggrid (item, 2);
-			bgList.Add (bg);
-
-			Equipment e2 = new Equipment(2,3,Equipment.EquipPos.BODY,"3","学者的幻想",1);
-			Baggrid bg2 = new Baggrid (e2, 0);
-			bgList.Add (bg2);
-
-			c.BgList = bgList;
-
-			characterList.Add (c);
-
-			Character c2 = new Character (40, 100,50, 0, 0, "unity", false,100,100,ProFactory.getPro("Settler","1"),1,0,null);
-			characterList.Add (c2);
-			gData.characterList = characterList;
-		} else {
-			characterList = gData.characterList;
-		}
 	}
 
 	void OnCollisionEnter2D (Collision2D coll)
@@ -90,11 +56,11 @@ public class PlayerAction : MonoBehaviour
 			uiInput.SendMessage("UpdateUIInfo");
 
 			//队长移动一次，减少一个体能；成员移动三次，减少一个体能
-			characterList[0].Stamina = Mathf.Max(0,characterList[0].Stamina-1);
+			gData.characterList[0].Stamina = Mathf.Max(0,gData.characterList[0].Stamina-1);
 			
 			if(stepCounter==3){
-				for (int i=1; i<characterList.Count; i++) {
-					characterList[i].Stamina = Mathf.Max(0,characterList[i].Stamina-1);
+				for (int i=1; i<gData.characterList.Count; i++) {
+					gData.characterList[i].Stamina = Mathf.Max(0,gData.characterList[i].Stamina-1);
 				}
 				stepCounter = 0;
 			}
@@ -104,12 +70,12 @@ public class PlayerAction : MonoBehaviour
 	}
 
 	public bool MoveStaminaCheck(){
-		return characterList[0].Stamina > 0 ;
+		return gData.characterList[0].Stamina > 0 ;
 	}
 
 	//挖掘动作
 	public void PlayerDig(){
-		sceneGen.SendMessage("DigInMap",characterList);
+		sceneGen.SendMessage("DigInMap",gData.characterList);
 	}
 	public void StopDig(){
 		sceneGen.SendMessage("StopDigInMap");
@@ -121,10 +87,10 @@ public class PlayerAction : MonoBehaviour
 
 		int sumArcheology = 0;
 
-		for(int i=0;i<characterList.Count;i++){
-			if(characterList[i].Pro.proname.Equals(StringCollection.GEOMANCER)){
+		for(int i=0;i<gData.characterList.Count;i++){
+			if(gData.characterList[i].Pro.proname.Equals(StringCollection.GEOMANCER)){
 				haveGeomancer = true;
-				sumArcheology+=characterList[i].archeology;
+				sumArcheology+=gData.characterList[i].archeology;
 			}
 		}
 
