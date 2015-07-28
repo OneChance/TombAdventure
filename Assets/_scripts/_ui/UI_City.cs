@@ -11,10 +11,12 @@ public class UI_City : MonoBehaviour
 	public GameObject charInfo;
 	private GlobalData gData;
 	private Transform buttons;
+	private GameObject exitButton;
 
 	void Start ()
 	{
 		//初始化文本
+		exitButton = GameObject.FindGameObjectWithTag("UI").transform.FindChild("Exit").gameObject;
 		buttons = GameObject.FindGameObjectWithTag("UI").transform.FindChild("Buttons");
 		buttons.FindChild("Bag_B").FindChild("Text").GetComponent<Text>().text = StringCollection.BAG;
 		buttons.FindChild("Equip_B").FindChild("Text").GetComponent<Text>().text = StringCollection.EQUIPMENT;
@@ -31,6 +33,7 @@ public class UI_City : MonoBehaviour
 
 		//进入商店模式,隐藏其他按钮
 		buttons.gameObject.SetActive(false);
+		exitButton.SetActive(false);
 		gData.isShop = true;
 	}
 
@@ -58,6 +61,7 @@ public class UI_City : MonoBehaviour
 		itemInfo.SetActive(false);
 		//离开商店模式,显示其他按钮
 		buttons.gameObject.SetActive(true);
+		exitButton.SetActive(true);
 		gData.isShop = false;
 	}
 

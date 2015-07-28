@@ -133,7 +133,7 @@ public class UI_Bag : MonoBehaviour
 				}
 				
 				GameObject uiEquipO = Instantiate (uiEquip, new Vector3 (eP.transform.position.x, eP.transform.position.y, 0), Quaternion.identity) as GameObject;
-				uiEquipO.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_ui/" + eList [i].prefabName);
+				uiEquipO.GetComponent<Image> ().sprite = Resources.Load<Sprite> (eList [i].prefabName);
 				uiEquipO.GetComponent<UI_Equip> ().e = eList [i];
 				uiEquipO.transform.SetParent (eP.transform);
 			}
@@ -154,7 +154,7 @@ public class UI_Bag : MonoBehaviour
 			
 			//生成玩家
 			GameObject uiCharAvatar = Instantiate (uiCharP, new Vector3 (avatar.transform.position.x, avatar.transform.position.y, 0), Quaternion.identity) as GameObject;
-			uiCharAvatar.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/" + cList [0].PrefabName);
+			uiCharAvatar.GetComponent<Image> ().sprite = Resources.Load<Sprite> (cList [0].PrefabName);
 			uiCharAvatar.GetComponent<UI_Player> ().c = cList [0];
 			uiCharAvatar.transform.SetParent (avatar.transform);
 			
@@ -173,7 +173,7 @@ public class UI_Bag : MonoBehaviour
 				info.SetActive (true);
 				
 				GameObject uiCharAss = Instantiate (uiCharP, new Vector3 (ass.transform.position.x, ass.transform.position.y, 0), Quaternion.identity) as GameObject;
-				uiCharAss.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/" + cList [i].PrefabName);
+				uiCharAss.GetComponent<Image> ().sprite = Resources.Load<Sprite> (cList [i].PrefabName);
 				uiCharAss.transform.SetParent (ass.transform);
 				uiCharAss.GetComponent<UI_Player> ().c = cList [i];
 				info.transform.FindChild ("Name").GetComponent<Text> ().text = cList [i].ObjName;
@@ -238,10 +238,9 @@ public class UI_Bag : MonoBehaviour
 				}
 
 				gData.characterList [0].money -= tradeMoney;
-
 				BagUtil.AddItem (bgList, new Baggrid (item, int.Parse (tradeNum.text)));
 			} else {
-				gData.characterList [0].money += tradeMoney;
+				gData.characterList [0].money += (int)(tradeMoney * 0.5); //卖出只有买入价格的二分之一
 				bg.Num -= int.Parse (tradeNum.text);
 			}
 

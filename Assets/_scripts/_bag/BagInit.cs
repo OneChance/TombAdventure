@@ -3,7 +3,8 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class BagInit : MonoBehaviour {
+public class BagInit : MonoBehaviour
+{
 
 	public int border = 9;
 	public int gridRow = 4;
@@ -14,17 +15,18 @@ public class BagInit : MonoBehaviour {
 	public GameObject grid;
 	public List<GameObject> grids;
 	private GameObject itemPrefab;
-
 	public bool init;
 
-	void Awake(){
-		firstX = transform.position.x - border * 0.5f - gridSize- border - gridSize * 0.5f;
+	void Awake ()
+	{
+		firstX = transform.position.x - border * 0.5f - gridSize - border - gridSize * 0.5f;
 		firstY = transform.position.y + border * 0.5f + gridSize + border + gridSize * 0.5f;
 		init = false;
 		itemPrefab = Resources.Load ("item", typeof(GameObject)) as GameObject;
 	}
 
-	public void InitBag(Character c){
+	public void InitBag (Character c)
+	{
 
 		if (!init) {
 			//init all grid
@@ -39,37 +41,41 @@ public class BagInit : MonoBehaviour {
 			init = true;
 		}
 
-		for(int i=0;i<grids.Count;i++){
-			if(grids[i].transform.childCount>0)
-				Destroy(grids[i].transform.GetChild(0).gameObject);
+		for (int i=0; i<grids.Count; i++) {
+			if (grids [i].transform.childCount > 0)
+				Destroy (grids [i].transform.GetChild (0).gameObject);
 		}
 
 		List<Baggrid> bgList = c.BgList;
-		transform.FindChild("Money").FindChild("Text").GetComponent<Text>().text = c.money.ToString();
+
+		if (Application.loadedLevelName.Equals ("city")) {
+			transform.FindChild ("Money").FindChild ("Text").GetComponent<Text> ().text = c.money.ToString ();
+		}
 
 		for (int i=0; i<bgList.Count; i++) {
-			Baggrid bg = bgList[i];
+			Baggrid bg = bgList [i];
 
 			//战斗场景不能使用装备
-			if(Application.loadedLevelName.Equals("battle") && bg.Item.ct==Item.CommonType.EQUIPMENT){
+			if (Application.loadedLevelName.Equals ("battle") && bg.Item.ct == Item.CommonType.EQUIPMENT) {
 				continue;
 			}
 
-			if(bg.Num>0){
-				GameObject itemO = Instantiate (itemPrefab, new Vector3(grids[i].transform.position.x,grids[i].transform.position.y,0), Quaternion.identity) as GameObject;
-				itemO.GetComponent<Image>().sprite =  Resources.Load <Sprite>("_images/_ui/"+bg.Item.prefabName);
-				itemO.GetComponent<UI_Item>().Bg = bg;
+			if (bg.Num > 0) {
+				GameObject itemO = Instantiate (itemPrefab, new Vector3 (grids [i].transform.position.x, grids [i].transform.position.y, 0), Quaternion.identity) as GameObject;
+				itemO.GetComponent<Image> ().sprite = Resources.Load <Sprite> (bg.Item.prefabName);
+				itemO.GetComponent<UI_Item> ().Bg = bg;
 
-				string num  = bg.Num.ToString();
+				string num = bg.Num.ToString ();
 
-				if(bg.Item.ct == Item.CommonType.EQUIPMENT){
-					itemO.transform.FindChild("Num").gameObject.SetActive(false);
-				}else{
-					itemO.transform.FindChild("Num").GetComponent<Text>().text = num;
+				if (bg.Item.ct == Item.CommonType.EQUIPMENT) {
+					itemO.transform.FindChild ("Num").gameObject.SetActive (false);
+				} else {
+					itemO.transform.FindChild ("Num").GetComponent<Text> ().text = num;
 				}			
-				itemO.transform.SetParent(grids[i].transform);
-			}else{
-				bgList.Remove(bg);
+
+				itemO.transform.SetParent (grids [i].transform);
+			} else {
+				bgList.Remove (bg);
 				i--;
 			}
 		}

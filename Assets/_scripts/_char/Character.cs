@@ -7,6 +7,7 @@ public class Character:BattleObj
 	public int money;
 	private List<Baggrid> bgList;
 	private List<Equipment> equipList;
+	public int logId;
 	private bool isOnLinePlayer;
 	private int stamina;
 	private int maxStamina;
@@ -23,7 +24,7 @@ public class Character:BattleObj
 	private int strengthAdd;
 	private int archeologyAdd;
 
-	public Character (int money,int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp,List<Equipment> eList)
+	public Character (int money,int health,int maxHealth,int attack, int def, int dodge, string objName,bool isOnLinePlayer,int stamina,int  maxStamina,Pro pro,int level,int exp,List<Equipment> eList,int logId)
 	{
 		this.money = money;
 		this.Health = health;
@@ -32,7 +33,7 @@ public class Character:BattleObj
 		this.Def = def;
 		this.Dodge = dodge;
 		this.ObjName = objName;
-		this.PrefabName = pro.prefabname;
+		this.PrefabName =  "_images/_game/"+pro.prefabname;
 		this.isOnLinePlayer = isOnLinePlayer;
 		this.stamina = stamina;
 		this.maxStamina = maxStamina;
@@ -40,6 +41,7 @@ public class Character:BattleObj
 		this.level = level;
 		this.exp = exp;
 		this.nextLevelExp = level * 50;
+		this.logId = logId;
 
 		//玩家的属性->基本属性
 		this.strengthBase = this.level * this.Pro.strengthFactor;

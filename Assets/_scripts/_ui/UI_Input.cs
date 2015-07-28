@@ -6,7 +6,8 @@ using System.Collections.Generic;
 public class UI_Input : MonoBehaviour
 {
 	public Transform player;
-	public GameObject buttons;
+	public GameObject dirButtons;
+	public GameObject actButtons;
 	private GlobalData gData;
 	
 	void Start ()
@@ -15,12 +16,12 @@ public class UI_Input : MonoBehaviour
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 
 		//加载按钮文本
-		Transform actbutton = GameObject.FindGameObjectWithTag ("UI").transform.FindChild("ActButton");
-		actbutton.FindChild("Bag").FindChild("Text").GetComponent<Text>().text = StringCollection.BAG;
-		actbutton.FindChild("Equip").FindChild("Text").GetComponent<Text>().text = StringCollection.EQUIPMENT;
-		actbutton.FindChild("DigStop").FindChild("Text").GetComponent<Text>().text = StringCollection.STOPDIG;
-		actbutton.FindChild("Dig").FindChild("Text").GetComponent<Text>().text = StringCollection.DIG;
-		actbutton.FindChild("Detect").FindChild("Text").GetComponent<Text>().text = StringCollection.DETECT;
+		Transform actbutton = actButtons.transform;
+		actbutton.FindChild ("Bag").FindChild ("Text").GetComponent<Text> ().text = StringCollection.BAG;
+		actbutton.FindChild ("Equip").FindChild ("Text").GetComponent<Text> ().text = StringCollection.EQUIPMENT;
+		actbutton.FindChild ("DigStop").FindChild ("Text").GetComponent<Text> ().text = StringCollection.STOPDIG;
+		actbutton.FindChild ("Dig").FindChild ("Text").GetComponent<Text> ().text = StringCollection.DIG;
+		actbutton.FindChild ("Detect").FindChild ("Text").GetComponent<Text> ().text = StringCollection.DETECT;
 	}
 
 	public void left ()
@@ -45,7 +46,7 @@ public class UI_Input : MonoBehaviour
 
 	public void Detect ()
 	{
-		if (gData.tombs[gData.tombLevel] [gData.currentFloor - 1].isTomb) {
+		if (gData.currentTomb.sceneList [gData.currentFloor - 1].isTomb) {
 			Debug.Log (StringCollection.ISTOMB);
 		} else {
 			player.SendMessage ("PlayerDetect");
@@ -54,18 +55,19 @@ public class UI_Input : MonoBehaviour
 
 	public void Dig ()
 	{
-		if (gData.tombs[gData.tombLevel] [gData.currentFloor - 1].isTomb) {
+		if (gData.currentTomb.sceneList [gData.currentFloor - 1].isTomb) {
 			Debug.Log (StringCollection.ISTOMB);
 		} else {
 
-			gameObject.SendMessage("closeAllBag");
+			gameObject.SendMessage ("closeAllBag");
 			
 			//隐藏UI上除了停止按钮意外的其他元素
-			for (int i=0; i<buttons.transform.childCount; i++) {
-				if (buttons.transform.GetChild (i).name != "DigStop") {
-					buttons.transform.GetChild (i).gameObject.SetActive (false);
+			dirButtons.SetActive(false);
+			for (int i=0; i<actButtons.transform.childCount; i++) {
+				if (actButtons.transform.GetChild (i).name != "DigStop") {
+					actButtons.transform.GetChild (i).gameObject.SetActive (false);
 				} else {
-					buttons.transform.GetChild (i).gameObject.SetActive (true);
+					actButtons.transform.GetChild (i).gameObject.SetActive (true);
 				}
 			}
 			
@@ -76,11 +78,12 @@ public class UI_Input : MonoBehaviour
 	public void DigStop ()
 	{
 		//隐藏停止,显示UI上除了停止按钮意外的其他元素
-		for (int i=0; i<buttons.transform.childCount; i++) {
-			if (buttons.transform.GetChild (i).name != "DigStop") {
-				buttons.transform.GetChild (i).gameObject.SetActive (true);
+		dirButtons.SetActive(true);
+		for (int i=0; i<actButtons.transform.childCount; i++) {
+			if (actButtons.transform.GetChild (i).name != "DigStop") {
+				actButtons.transform.GetChild (i).gameObject.SetActive (true);
 			} else {
-				buttons.transform.GetChild (i).gameObject.SetActive (false);
+				actButtons.transform.GetChild (i).gameObject.SetActive (false);
 			}
 		}
 		player.SendMessage ("StopDig");

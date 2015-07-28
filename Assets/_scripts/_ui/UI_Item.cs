@@ -8,7 +8,6 @@ public class UI_Item : MonoBehaviour {
 	private GlobalData gData;
 	private Baggrid bg;
 	public bool fromShop = false;
-	private InputField tradeNum;
 
 	void Awake ()
 	{
@@ -29,13 +28,14 @@ public class UI_Item : MonoBehaviour {
 
 		Text buttonText = itemInfo.transform.FindChild("UseButton").FindChild("Text").GetComponent<Text>();
 
-		tradeNum = itemInfo.transform.FindChild("TradeNum").GetComponent<InputField>();
-
-		if(tradeNum){
-			tradeNum.text = "";
-		}
-
 		if(gData.isShop){
+
+			InputField tradeNum = itemInfo.transform.FindChild("TradeNum").GetComponent<InputField>();
+			
+			if(tradeNum){
+				tradeNum.text = "";
+			}
+
 			itemInfo.transform.FindChild("TradeNum").gameObject.SetActive(true);
 			if(fromShop){
 				buttonText.text = StringCollection.BUY;
@@ -44,7 +44,13 @@ public class UI_Item : MonoBehaviour {
 				tradeNum.text = bg.Num.ToString(); //默认最大数量
 			}
 		}else{
-			itemInfo.transform.FindChild("TradeNum").gameObject.SetActive(false);
+
+			//只有城市场景的商店模式需要这个对象
+			if(itemInfo.transform.FindChild("TradeNum")!=null){
+				itemInfo.transform.FindChild("TradeNum").gameObject.SetActive(false);
+			}
+
+
 			if(bg.Item.ct==Item.CommonType.CONSUME){
 				buttonText.text = StringCollection.ITEMUSE;
 			}else if(bg.Item.ct==Item.CommonType.EQUIPMENT){

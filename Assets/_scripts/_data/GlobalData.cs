@@ -5,27 +5,16 @@ using System.Collections.Generic;
 public class GlobalData : MonoBehaviour
 {
 	public int currentFloor = 1;
-	public Dictionary<int,List<SceneInfo>> tombs;
 	public Enemy currentEnemy;
 	public List<Character> characterList;
 	public bool victory = true;
 	public string currentEnemyName;
 	public Vector3 playerPos; //record the pos of player when battle start
 	public Baggrid currentItem;
-	public string tombName = StringCollection.KINGOFLU; //应该在地图场景根据选择完成此设置
 	public Vector3 preDigPos;
-	public int tombLevel =1; //应该在地图场景根据选择完成此设置
 	public bool isPlayer; //ture为玩家联机模式，false为单机佣兵模式
 	public bool isShop = false;
-
-	void Awake ()
-	{
-		//如果在地图场景选择从记录继续，那加载，否则新生成  (应该在地图场景根据选择完成此设置)
-		tombs = new Dictionary<int,List<SceneInfo>>();
-		//从服务器中加载已记录的地图信息	
-		//服务器没有记录
-		tombs.Add(tombLevel,new List<SceneInfo>());
-	}
+	public Tomb currentTomb;
 
 	public void InitPlayerInfo(){
 		//从服务器端获取玩家数据初始化
@@ -36,7 +25,7 @@ public class GlobalData : MonoBehaviour
 		List<Equipment> eList = new List<Equipment>();
 		eList.Add(e);
 		
-		Character c = new Character (2000,30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0,eList);
+		Character c = new Character (2000,30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0,eList,-1);
 		
 		HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂",50);
 		List<Baggrid> bgList = new List<Baggrid> ();
@@ -51,7 +40,7 @@ public class GlobalData : MonoBehaviour
 		
 		characterList.Add (c);
 		
-		Character c2 = new Character (0,40, 100,50, 0, 0, "unity", false,100,100,ProFactory.getPro("Settler","1"),1,0,null);
+		Character c2 = new Character (0,40, 100,50, 0, 0, "unity", false,100,100,ProFactory.getPro("Settler","1"),1,0,null,-1);
 		characterList.Add (c2);
 	}
 }

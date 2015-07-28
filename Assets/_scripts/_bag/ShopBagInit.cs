@@ -60,13 +60,22 @@ public class ShopBagInit : MonoBehaviour
 			bgList.Add (bg2);
 
 			break;
+		case "mercenary":
+
+			Character c = new Character (0,500,500, 50, 0, 0, "潘子", false,500,500,ProFactory.getPro("Settler","100"),1,0,null,-1);
+			Mercenary  m = new Mercenary(c);
+
+			Baggrid bg3 = new Baggrid (m, 0);
+			bgList.Add (bg3);
+
+			break;
 		}
 			
 		for (int i=0; i<bgList.Count; i++) {
 			Baggrid bg = bgList [i];
 
 			GameObject itemO = Instantiate (itemPrefab, new Vector3 (grids [i].transform.position.x, grids [i].transform.position.y, 0), Quaternion.identity) as GameObject;
-			itemO.GetComponent<Image> ().sprite = Resources.Load <Sprite> ("_images/_ui/" + bg.Item.prefabName);
+			itemO.GetComponent<Image> ().sprite = Resources.Load <Sprite> (bg.Item.prefabName);
 			itemO.GetComponent<UI_Item> ().Bg = bg;
 			itemO.GetComponent<UI_Item> ().fromShop = true;
 			

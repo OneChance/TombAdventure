@@ -25,6 +25,6 @@ public class UI_Equip : MonoBehaviour {
 		itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = e.note;
 		Text buttonText = itemInfo.transform.FindChild("UseButton").FindChild("Text").GetComponent<Text>();
 		buttonText.text = StringCollection.NOEQUIP;
-		gData.currentItem = new Baggrid(e,0);
+		gData.currentItem = new Baggrid(e,1);
 	}
 }

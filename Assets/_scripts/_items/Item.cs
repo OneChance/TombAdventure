@@ -20,7 +20,8 @@ public abstract class Item
 	public enum CommonType
 	{
 		EQUIPMENT,
-		CONSUME
+		CONSUME,
+		MERCENARY
 	}
 
 	public enum ObjType
@@ -39,8 +40,12 @@ public abstract class Item
 	public UseType ut;
 	public int price;
 
+	public Item(){
+
+	}
+
 	public Item(string itemId){
-		this.prefabName = "item_"+itemId;
+		this.prefabName = "_images/_ui/item_"+itemId;
 	}
 	 
 	public RangeType Rt {
