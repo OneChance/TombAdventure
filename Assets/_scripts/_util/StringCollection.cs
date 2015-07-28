@@ -24,8 +24,7 @@ public class StringCollection  {
 	public static string ITEMGET = "获得";
 	public static string NOTRADENUM = "请输入交易数量";
 	public static string NOTENOUGHMONEY = "金额不足";
-
-	//标签
+	
 	public static string HEALTH =  "生命";
 	public static string STRENGTH =  "力量";
 	public static string ARCHEOLOGY =  "考古";
@@ -35,6 +34,8 @@ public class StringCollection  {
 	public static string ITEMUSE = "使用";
 	public static string ITEMEQUIP = "装备";
 	public static string NOEQUIP = "卸下";
+	public static string ADDTOTEAM = "参战";
+	public static string LEAVETEAM = "休息";
 
 	//按钮
 	public static string ATTACK =  "攻击";

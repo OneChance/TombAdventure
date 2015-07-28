@@ -167,22 +167,37 @@ public class UI_Bag : MonoBehaviour
 			UpdateUIEquip (Equipment.EquipPos.ALL);
 			
 			//助手角色信息
+			for(int i=1;i<=assList.Count;i++){
+
+				GameObject ass = assList [i-1];
+
+				if(i<cList.Count){
+
+					GameObject info = ass.transform.FindChild ("Info").gameObject;
+					info.SetActive (true);
+					
+					GameObject uiCharAss = Instantiate (uiCharP, new Vector3 (ass.transform.position.x, ass.transform.position.y, 0), Quaternion.identity) as GameObject;
+					uiCharAss.GetComponent<Image> ().sprite = Resources.Load<Sprite> (cList [i].PrefabName);
+					uiCharAss.transform.SetParent (ass.transform);
+					uiCharAss.GetComponent<UI_Player> ().c = cList [i];
+					info.transform.FindChild ("Name").GetComponent<Text> ().text = cList [i].ObjName;
+					info.transform.FindChild ("Pro").GetComponent<Text> ().text = cList [i].Pro.proname;
+					
+					info.transform.FindChild ("SL").GetComponent<Text> ().text = StringCollection.STAMINA;
+					info.transform.FindChild ("StrL").GetComponent<Text> ().text = StringCollection.STRENGTH;
+					info.transform.FindChild ("ArcL").GetComponent<Text> ().text = StringCollection.ARCHEOLOGY;
+					info.transform.FindChild ("HL").GetComponent<Text> ().text = StringCollection.HEALTH;
+				}else{
+					GameObject uiCharAss = Instantiate (uiCharP, new Vector3 (ass.transform.position.x, ass.transform.position.y, 0), Quaternion.identity) as GameObject;
+					uiCharAss.GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/no_ass");
+					uiCharAss.transform.SetParent (ass.transform);
+				}
+			}
+
+
+
 			for (int i=1; i<cList.Count; i++) {
-				GameObject ass = assList [i - 1];
-				GameObject info = ass.transform.FindChild ("Info").gameObject;
-				info.SetActive (true);
-				
-				GameObject uiCharAss = Instantiate (uiCharP, new Vector3 (ass.transform.position.x, ass.transform.position.y, 0), Quaternion.identity) as GameObject;
-				uiCharAss.GetComponent<Image> ().sprite = Resources.Load<Sprite> (cList [i].PrefabName);
-				uiCharAss.transform.SetParent (ass.transform);
-				uiCharAss.GetComponent<UI_Player> ().c = cList [i];
-				info.transform.FindChild ("Name").GetComponent<Text> ().text = cList [i].ObjName;
-				info.transform.FindChild ("Pro").GetComponent<Text> ().text = cList [i].Pro.proname;
-				
-				info.transform.FindChild ("SL").GetComponent<Text> ().text = StringCollection.STAMINA;
-				info.transform.FindChild ("StrL").GetComponent<Text> ().text = StringCollection.STRENGTH;
-				info.transform.FindChild ("ArcL").GetComponent<Text> ().text = StringCollection.ARCHEOLOGY;
-				info.transform.FindChild ("HL").GetComponent<Text> ().text = StringCollection.HEALTH;
+
 			}
 			
 			UpdateUIInfo ();
@@ -253,6 +268,7 @@ public class UI_Bag : MonoBehaviour
 
 			if (item.ct == global::Item.CommonType.CONSUME) {
 				//人物格闪动
+				GameUtil.UnFocus(focusList);
 				focusList.Add (avatar.transform.FindChild ("UIChar(Clone)").gameObject);
 				for (int i=1; i<cList.Count; i++) {
 					GameObject ass = assList [i - 1];
@@ -312,6 +328,12 @@ public class UI_Bag : MonoBehaviour
 				UpdateUIEquip (((Equipment)item).ep);
 				cList [0].EquipList = eList;
 				ItemUseComplete ();
+			}else if (item.ct == global::Item.CommonType.MERCENARY) {
+				//助手格闪动
+				GameUtil.UnFocus(focusList);
+				for (int i=0; i<assList.Count; i++) {
+					focusList.Add (assList [i]);
+				}
 			}
 			itemInfo.SetActive (false);
 		}

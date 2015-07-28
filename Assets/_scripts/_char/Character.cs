@@ -11,6 +11,7 @@ public class Character:BattleObj
 	private bool isOnLinePlayer;
 	private int stamina;
 	private int maxStamina;
+
 	public Pro Pro;
 	public int level;
 	public int exp;
