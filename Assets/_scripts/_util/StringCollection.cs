@@ -61,6 +61,11 @@ public class StringCollection  {
 	public static string BAG =  "背包";
 	public static string LEAVESHOP =  "离开商店";
 
+	public static string USERNAME = "用户名";
+	public static string PASSWORD = "密码";
+	public static string LOGIN = "登录";
+	public static string REG = "注册";
+
 	public static string NEWAD = "新的旅程";
 	public static string LOGAD = "从探险日志继续";
 	public static string BACKTOMAP = "回地图";
