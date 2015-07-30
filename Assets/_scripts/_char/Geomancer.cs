@@ -6,7 +6,9 @@ public class Geomancer : Pro {
 	public Geomancer(string image_name){
 		this.proname = StringCollection.GEOMANCER;
 		this.prefabname = "Geomancer_"+image_name;
-		this.strengthFactor = 1;
-		this.archeologyFactor = 5;
+		this.strengthFactor = 2;
+		this.archeologyFactor = 6;
+		this.defFactor = 2;
+		this.dodgeFactor = 1;
 	}
 }

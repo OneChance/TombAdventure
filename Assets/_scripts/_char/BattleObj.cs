@@ -10,7 +10,7 @@ public class BattleObj
 	private int maxHealth = 100;
 	private int def = 0;
 	private int attack = 5;
-	private float dodge = 0.0f;
+	public int dodge = 0;
 
 	public int MaxHealth {
 		get {
@@ -45,15 +45,6 @@ public class BattleObj
 		}
 		set {
 			attack = value;
-		}
-	}
-
-	public float Dodge {
-		get {
-			return this.dodge;
-		}
-		set {
-			dodge = value;
 		}
 	}
 

@@ -18,10 +18,14 @@ public class UI_Equip : MonoBehaviour {
 	}	
 
 	public void OnClick(){
+
+		if (gData.currentItem != null && gData.currentItem.Item.useable) {
+			return;
+		}
+
 		itemInfo = GameObject.FindGameObjectWithTag("UI").transform.FindChild("ItemInfo").gameObject;
 		itemInfo.SetActive (true);
-		itemInfo.transform.FindChild("Pic").GetComponent<Image>().sprite = Resources.Load <Sprite>("_images/_ui/"+e.prefabName);
-		itemInfo.transform.FindChild ("ItemName").GetComponent<Text> ().text = e.name;
+		itemInfo.transform.FindChild("Pic").GetComponent<Image>().sprite = Resources.Load <Sprite>(e.prefabName);
 		itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = e.note;
 		Text buttonText = itemInfo.transform.FindChild("UseButton").FindChild("Text").GetComponent<Text>();
 		buttonText.text = StringCollection.NOEQUIP;

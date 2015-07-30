@@ -67,7 +67,7 @@ public class BagInit : MonoBehaviour
 
 				string num = bg.Num.ToString ();
 
-				if (bg.Item.ct == Item.CommonType.EQUIPMENT) {
+				if (bg.Item.ct == Item.CommonType.EQUIPMENT || bg.Item.ct == Item.CommonType.MERCENARY) {
 					itemO.transform.FindChild ("Num").gameObject.SetActive (false);
 				} else {
 					itemO.transform.FindChild ("Num").GetComponent<Text> ().text = num;

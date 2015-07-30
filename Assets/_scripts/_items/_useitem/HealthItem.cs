@@ -6,16 +6,15 @@ public class HealthItem : Item
 {
 	private int heal;
 
-	public HealthItem (RangeType range,int heal,string itemId,string name,int price):base(itemId)
+	public HealthItem (RangeType range,int heal,string itemId,string name,int price):base(itemId,name)
 	{
-		this.name = name;
 		this.Rt = range;
 		this.ct = CommonType.CONSUME;
 		this.heal = heal;
 		this.ot = ObjType.Friend;
 		this.ut = UseType.BATTLE;
 		this.price = price;
-		this.note = "恢复"+this.targetNote+"友军"+this.heal+"点生命力";
+		this.note = this.note + "恢复"+this.targetNote+"友军"+this.heal+"点生命力";
 	}
 
 	public  override void doSth <T>(T from, List<T> to)

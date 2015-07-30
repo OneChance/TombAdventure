@@ -6,22 +6,33 @@ public class Equipment : Item
 {
 	public int strength;
 	public int archeology;
+	public int def;
+	public int dodge;
 	public EquipPos ep;
 	public int eLevel;
 
-	public Equipment(int strength,int archeology,EquipPos ep,string itemId,string name,int eLevel,int price):base(itemId){
+	public Equipment (int strength, int archeology, int def, int dodge, EquipPos ep, string itemId, string name, int eLevel, int price):base(itemId,name)
+	{
 		this.ct = global::Item.CommonType.EQUIPMENT;
 		this.strength = strength;
 		this.archeology = archeology;
+		this.def = def;
+		this.dodge = dodge;
 		this.ep = ep;
 		this.eLevel = eLevel;
-		this.name = name;
 		this.price = price;
-		if(strength>0){
-			this.note = this.note +  StringCollection.STRENGTH + "+"+strength;
+
+		if (strength > 0) {
+			this.note = this.note + StringCollection.STRENGTH + "+" + strength + "\n";
 		}
-		if(archeology>0){
-			this.note = this.note + StringCollection.ARCHEOLOGY +"+"+archeology;
+		if (archeology > 0) {
+			this.note = this.note + StringCollection.ARCHEOLOGY + "+" + archeology + "\n";
+		}
+		if (def > 0) {
+			this.note = this.note + StringCollection.DEF + "+" + def + "\n";
+		}
+		if (dodge > 0) {
+			this.note = this.note + StringCollection.DODGE + "+" + dodge + "\n";
 		}
 	}
 
@@ -34,7 +45,8 @@ public class Equipment : Item
 		ALL
 	}
 
-	public  override void doSth <T>(T from, List<T> to){
+	public  override void doSth <T> (T from, List<T> to)
+	{
 		
 	}
 }

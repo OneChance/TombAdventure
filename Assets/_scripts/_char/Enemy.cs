@@ -3,14 +3,20 @@ using System.Collections;
 
 public class Enemy : BattleObj
 {
-	public Enemy (int health, int attack, int def, int dodge, string objName, string prefabName)
+
+	public int exp;
+	public int moneyRangeMin;
+	public int moneyRangeMax;
+
+	public Enemy (int health, int attack, int def, int dodge, string objName, string prefabName, int exp)
 	{
 		this.Health = health;
 		this.Attack = attack;
 		this.Def = def;
-		this.Dodge = dodge;
+		this.dodge = dodge;
 		this.ObjName = objName;
 		this.PrefabName = prefabName;
+		this.exp = exp;
 	}
 
 	public Enemy (Enemy e)
@@ -18,7 +24,7 @@ public class Enemy : BattleObj
 		this.Health = e.Health;
 		this.Attack = e.Attack;
 		this.Def = e.Def;
-		this.Dodge = e.Dodge;
+		this.dodge = e.dodge;
 		this.ObjName = e.ObjName;
 		this.PrefabName = e.PrefabName;
 	}

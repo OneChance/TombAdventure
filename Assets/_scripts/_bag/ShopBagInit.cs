@@ -55,15 +55,15 @@ public class ShopBagInit : MonoBehaviour
 			Baggrid bg = new Baggrid (item, 0);
 			bgList.Add (bg);
 
-			Equipment e2 = new Equipment (2, 3, Equipment.EquipPos.BODY, "3", "学者的幻想", 1, 500);
+			Equipment e2 = new Equipment (2, 3, 0, 0, Equipment.EquipPos.BODY, "3", "学者的幻想", 1, 500);
 			Baggrid bg2 = new Baggrid (e2, 0);
 			bgList.Add (bg2);
 
 			break;
 		case "mercenary":
 
-			Character c = new Character (0,500,500, 50, 0, 0, "潘子", false,500,500,ProFactory.getPro("Settler","100"),1,0,null,-1);
-			Mercenary  m = new Mercenary(c);
+			Character c = new Character (0, 500, 500, 50, 0, 0, "潘子", false, 500, 500, ProFactory.getPro ("Settler", "100"), 1, 0, null, -1);
+			Mercenary m = new Mercenary (c);
 
 			Baggrid bg3 = new Baggrid (m, 0);
 			bgList.Add (bg3);

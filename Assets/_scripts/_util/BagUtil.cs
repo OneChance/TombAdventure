@@ -11,7 +11,7 @@ public class BagUtil
 
 		bool have = false;
 
-		if (bg.Item.ct == Item.CommonType.EQUIPMENT) {
+		if (bg.Item.ct == Item.CommonType.EQUIPMENT || bg.Item.ct == Item.CommonType.MERCENARY) {
 			for (int i=0; i<bg.Num; i++) {
 				bgList.Add (new Baggrid (bg.Item, 1));
 			}

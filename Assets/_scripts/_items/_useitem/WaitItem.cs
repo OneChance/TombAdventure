@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class WaitItem : Item
 {
 
-	public WaitItem ():base("noprefab")
+	public WaitItem ():base("noprefab","noname")
 	{
 		this.name = "WaitItem";
 	}

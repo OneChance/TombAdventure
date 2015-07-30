@@ -16,7 +16,8 @@ public class SceneGen: MonoBehaviour
 	public int minEnemyNum = 2;
 	public GameObject[] groundPrefabs;
 	public GameObject[] itemPrefabs;
-	public GameObject[] enemyPrefabs;
+	public GameObject enemyPrefab;
+	private List<Enemy> enemyTypes;
 	public Transform ground;
 	public Transform groundItem;
 	public Transform player;
@@ -61,6 +62,7 @@ public class SceneGen: MonoBehaviour
 		blockX = groundPrefabs [0].GetComponent<SpriteRenderer> ().bounds.size.x * 15 / 16;
 		blockY = groundPrefabs [0].GetComponent<SpriteRenderer> ().bounds.size.y * 15 / 16;
 
+		enemyTypes = new List<Enemy> ();
 		currentSceneInfo = new SceneInfo ();
 		ablePos = new List<Vector3> ();
 		addedPos = new List<Vector3> ();
@@ -81,6 +83,7 @@ public class SceneGen: MonoBehaviour
 		//根据KEY从服务器加载物品掉落列表
 		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
 		fallList = getFallList (gData.currentTomb.tombLevel + "_" + gData.currentFloor);
+		getEnemyTypes (gData.currentTomb.tombLevel + "_" + gData.currentFloor);
 
 		digPrefab = Resources.Load ("Dig", typeof(GameObject)) as GameObject;
 		digSide = digPrefab.GetComponent<SpriteRenderer> ().bounds.size.x;
@@ -107,6 +110,18 @@ public class SceneGen: MonoBehaviour
 		sceneInfoUI.FindChild ("TombName").GetComponent<Text> ().text = gData.currentTomb.tombName;
 		sceneInfoUI.FindChild ("FloorLable").GetComponent<Text> ().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild ("Floor").GetComponent<Text> ().text = gData.currentFloor.ToString ();
+
+		//自动上传当前记录
+	}
+
+	//根据场景key去服务获取当前场景敌人类别
+	void getEnemyTypes (string key)
+	{
+		Enemy e1 = new Enemy (100, 20, 0, 0, StringCollection.E_1, "enemy_1", 300);
+		Enemy e2 = new Enemy (30, 5, 0, 0, StringCollection.E_2, "enemy_2", 300);
+
+		enemyTypes.Add (e1);
+		enemyTypes.Add (e2);
 	}
 
 	Dictionary<string,List<FallItem>> getFallList (string key)
@@ -125,6 +140,8 @@ public class SceneGen: MonoBehaviour
 
 		fallList.Add ("dig", itemList);
 		fallList.Add ("enemy_1", itemList);
+		fallList.Add ("enemy_2", itemList);
+
 		return fallList;
 	}
 
@@ -245,11 +262,10 @@ public class SceneGen: MonoBehaviour
 	void ItemFall (string key)
 	{
 		//掉落******************************************************************************************
-		int fall = Random.Range (1, 101);
 		List<FallItem> itemList = fallList [key];		
 		string itemGet = "";				
 		for (int i=0; i<itemList.Count; i++) {
-			if (fall < itemList [i].probability) {					
+			if (GameUtil.RandomHappen (itemList [i].probability, 101)) {					
 				int num = Random.Range (itemList [i].minNum, itemList [i].maxNum + 1);						
 				itemGet = itemGet + " " + itemList [i].item.name + "x" + num;
 				
@@ -335,12 +351,10 @@ public class SceneGen: MonoBehaviour
 
 		for (int i=0; i<enemyData.Count; i++) {
 			if (!gData.victory || !gData.currentEnemyName.Equals (enemyData [i].objName)) {
-				string prefabName = enemyData [i].objName.Replace ("(Clone)", "").Split (new char[]{'@'}) [0];
-				object obj = Resources.Load (prefabName, typeof(GameObject));
-				GameObject enemyObj = obj as GameObject;
-				GameObject enemy = Instantiate (enemyObj, enemyData [i].pos, Quaternion.identity) as GameObject;
+				GameObject enemy = Instantiate (enemyPrefab, enemyData [i].pos, Quaternion.identity) as GameObject;
 				enemy.name = enemyData [i].objName;
-				enemy.GetComponent<SpriteRenderer> ().sortingOrder = itemData [i].order;
+				enemy.GetComponent<SpriteRenderer> ().sortingOrder = enemyData [i].order;
+				enemy.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + enemyData [i].objName.Split (new char[]{'@'}) [0]);
 				enemy.transform.parent = enemys;
 			} else if (gData.victory && gData.currentEnemyName.Equals (enemyData [i].objName)) {
 				enemyNeedToRemove = enemyData [i];
@@ -438,19 +452,17 @@ public class SceneGen: MonoBehaviour
 				itemList.Add (itemO);
 			}
 
-			//生成敌人
-			int start = level * typesOfEnemyInOneGroup;
-			int end = start + typesOfEnemyInOneGroup;
-
 			int enemyNum = Random.Range (minEnemyNum, maxEnemyNum);
 
 			for (int j=0; j<enemyNum; j++) {
-				GameObject enemy = enemyPrefabs [Random.Range (start, end)];
-				Vector3 enemyPos = getRandomPos (blockPos, enemy);
-				GameObject enemyO = Instantiate (enemy, enemyPos, Quaternion.identity) as GameObject;
-				enemyO.name = enemyO.name + "@" + num;
+				Vector3 enemyPos = getRandomPos (blockPos, enemyPrefab);
+				GameObject enemyO = Instantiate (enemyPrefab, enemyPos, Quaternion.identity) as GameObject;
 				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				enemyO.transform.parent = enemys;
+				Enemy e = enemyTypes [Random.Range (0, enemyTypes.Count)];
+				enemyO.name = e.PrefabName + "@" + num;
+				enemyO.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + e.PrefabName);
+				enemyO.GetComponent<EnemyAI> ().enemy = e;
 				enemyList.Add (enemyO);
 				num++;
 			}
@@ -852,10 +864,10 @@ public class SceneGen: MonoBehaviour
 	public void ToPreFloor ()
 	{
 		RecScene ();
-		if(gData.currentFloor == 1){
+		if (gData.currentFloor == 1) {
 			//如果是第一层,回到城市
 			Application.LoadLevel ("city");
-		}else{
+		} else {
 			gData.currentFloor--;
 			Vector3 preFloorNextEntryPos = gData.currentTomb.sceneList [gData.currentFloor - 1].digToNextPos;
 			gData.playerPos = preFloorNextEntryPos;

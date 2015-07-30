@@ -21,11 +21,11 @@ public class GlobalData : MonoBehaviour
 		isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式
 		characterList = new List<Character> ();
 
-		Equipment e = new Equipment(1,2,Equipment.EquipPos.BODY,"2","学者的思考",1,200);
+		Equipment e = new Equipment(1,2,0,0,Equipment.EquipPos.BODY,"2","学者的思考",1,200);
 		List<Equipment> eList = new List<Equipment>();
 		eList.Add(e);
 		
-		Character c = new Character (2000,30,100, 50, 0, 0, "zhouhui", false,200,200,ProFactory.getPro("Geomancer","1"),1,0,eList,-1);
+		Character c = new Character (2000,30,100, 50, 0, 0, "zhouhui", true,200,200,ProFactory.getPro("Geomancer","1"),1,0,eList,-1);
 		
 		HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂",50);
 		List<Baggrid> bgList = new List<Baggrid> ();

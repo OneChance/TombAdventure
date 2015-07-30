@@ -10,16 +10,7 @@ public class EnemyAI : MonoBehaviour
 	private float moveTimer;
 	private StatusType currentStatus;
 	private GameObject target;
-	private Enemy enemy;
-
-	public Enemy Enemy {
-		get {
-			return this.enemy;
-		}
-		set {
-			enemy = value;
-		}
-	}
+	public Enemy enemy;
 
 	private enum StatusType
 	{  
@@ -32,9 +23,6 @@ public class EnemyAI : MonoBehaviour
 	{
 		moveTimer = 0;
 		currentStatus = StatusType.Patrol;
-
-		//init enmey
-		enemy = new Enemy (100, 5, 0, 0, "enemy_1", "enemy_1");
 	}
 	
 	// Update is called once per frame
@@ -118,7 +106,8 @@ public class EnemyAI : MonoBehaviour
 		}
 	}
 
-	void OnTriggerExit2D(Collider2D other) {
+	void OnTriggerExit2D (Collider2D other)
+	{
 		if (other.gameObject.tag == "Player") {
 			Patrol ();
 			currentStatus = StatusType.Patrol;

@@ -39,13 +39,18 @@ public abstract class Item
 	public string targetNote;
 	public UseType ut;
 	public int price;
+	public bool useable = false;
 
-	public Item(){
+	public Item ()
+	{
 
 	}
 
-	public Item(string itemId){
-		this.prefabName = "_images/_ui/item_"+itemId;
+	public Item (string itemId,string itemname)
+	{
+		this.name = itemname;
+		this.note = this.name + "\n\n";
+		this.prefabName = "_images/_ui/item_" + itemId;
 	}
 	 
 	public RangeType Rt {
@@ -54,13 +59,13 @@ public abstract class Item
 		}
 		set {
 			rt = value;
-			if(value==RangeType.SINGLE){
+			if (value == RangeType.SINGLE) {
 				this.targetNote = "单个";
-			}else{
+			} else {
 				this.targetNote = "全部";
 			}
 		}
-	} 
+	}
 	
-	public abstract void doSth <T>(T from, List<T> to) where T:BattleObj; 
+	public abstract void doSth <T> (T from, List<T> to) where T:BattleObj; 
 }

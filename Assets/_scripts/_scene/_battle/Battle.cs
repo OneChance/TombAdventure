@@ -25,17 +25,14 @@ public class Battle : MonoBehaviour
 	private bool dead;
 	private bool victory;
 	private GameObject canvas;
+	private int battleExp = 0;
 
 	void Awake ()
 	{
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		canvas = GameObject.FindGameObjectWithTag ("UI");
-
 		currentEnemy = gData.currentEnemy;
-
-		object obj = Resources.Load (currentEnemy.PrefabName, typeof(GameObject));
-		GameObject enmey = obj as GameObject;
-		enemySprite = enmey.GetComponent<SpriteRenderer> ().sprite;
+		enemySprite = Resources.Load <Sprite> ("_images/_game/" + currentEnemy.PrefabName);
 
 		characterList = gData.characterList;
 
@@ -59,6 +56,9 @@ public class Battle : MonoBehaviour
 	void Start ()
 	{
 		int enemyNum = Random.Range (minEnemyNum, maxEnemyNum + 1);
+
+		battleExp = enemyNum * currentEnemy.exp;
+
 		//初始化敌人和玩家
 		for (int i=0; i<enemyNum; i++) {
 			enemyPos [i].SetActive (true);
@@ -71,7 +71,7 @@ public class Battle : MonoBehaviour
 		for (int i=0; i<characterList.Count; i++) {
 			characterPos [i].SetActive (true);
 			Character character = characterList [i];
-			characterPos [i].GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/" + character.PrefabName);
+			characterPos [i].GetComponent<Image> ().sprite = Resources.Load<Sprite> (character.PrefabName);
 			characterPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = character.Health.ToString ();
 			characterPos [i].transform.FindChild ("Name").GetComponent<Text> ().text = character.ObjName;
 			characterPos [i].GetComponent<PosChar> ().battleObj = character;
@@ -80,7 +80,6 @@ public class Battle : MonoBehaviour
 
 	void Update ()
 	{
-
 		//如果战斗未开始且战斗指令数量已经等于玩家数量了，即战斗开始
 		if (opList.Count == characterList.Count && !battleStart) {
 			battleStart = true;
@@ -112,7 +111,7 @@ public class Battle : MonoBehaviour
 	IEnumerator BattleProcess ()
 	{
 
-		//when the battle start,hide the action button
+		//战斗开始时,隐藏按钮
 		actionButton.SetActive (false);			
 
 		battleIng = true;
@@ -130,10 +129,16 @@ public class Battle : MonoBehaviour
 
 				//获取位置上挂载的battleObj
 				for (int j=0; j<opList[i].To.Count; j++) {
-					toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
+					//如果选择的目标已经给上一个玩家打死,不添加
+					if(opList [i].To [j].GetComponent<PosChar> ().battleObj.Health>0){
+						toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
+					}
 				}
 
-				bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
+				if(toList.Count>0){
+					bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
+				}
+			
 
 				bg.Num = bg.Num - 1;
 				
@@ -156,6 +161,8 @@ public class Battle : MonoBehaviour
 
 		battleIng = false; // this turn is over
 		newTurnInit = false;//tell to init a new turn
+				
+		//联机模式下,如果玩家死了,就不再显示按钮了(如果战斗过程中被人复活,则再显示)
 		actionButton.SetActive (true);	
 	}
 
@@ -163,7 +170,9 @@ public class Battle : MonoBehaviour
 	{
 		for (int i=0; i<characterList.Count; i++) {
 			Character character = characterList [i];
-			if (character.Health > 0 && !character.IsOnLinePlayer) {
+
+			//如果是联机模式,攻击列表中只有玩家自己
+			if (character.Health > 0 && (i==0 || !character.IsOnLinePlayer)) {
 				waitForAttack.Add (characterPos [i]);
 			}
 		}
@@ -287,6 +296,7 @@ public class Battle : MonoBehaviour
 		}
 
 		GameObject from = waitForAttack [0];
+
 		List<GameObject> to = new List<GameObject> (); 
 		
 		for (int i=0; i<focusList.Count; i++) {
@@ -361,6 +371,14 @@ public class Battle : MonoBehaviour
 					victory = false;
 					break;
 				}
+			}
+		}
+
+
+		if (victory) {
+			//获得经验
+			for (int i=0; i<characterList.Count; i++) {
+				characterList[i].AddExp(battleExp);
 			}
 		}
 		return victory;

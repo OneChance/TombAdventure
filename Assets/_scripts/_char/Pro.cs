@@ -9,4 +9,6 @@ public class Pro  {
 
 	public int strengthFactor;
 	public int archeologyFactor;
+	public int defFactor;
+	public int dodgeFactor;
 }

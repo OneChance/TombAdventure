@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class GameUtil{
+public class GameUtil
+{
 
 	/*
 	 * 目标闪动，选中效果
@@ -21,10 +22,22 @@ public class GameUtil{
 
 	public static void UnFocus (List<GameObject> goList)
 	{
-		for(int i=0;i<goList.Count;i++){
-			Color c = goList[i].GetComponent<Image> ().color;
-			goList[i].GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 1f);
+		for (int i=0; i<goList.Count; i++) {
+			Color c = goList [i].GetComponent<Image> ().color;
+			goList [i].GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 1f);
 		}
-		goList.Clear();
+		goList.Clear ();
+	}
+
+
+	public static bool RandomHappen (int happen, int range)
+	{
+		int samples = Random.Range (1, range);
+
+		if (samples < happen) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

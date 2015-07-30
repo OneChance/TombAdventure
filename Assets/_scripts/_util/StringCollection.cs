@@ -24,6 +24,7 @@ public class StringCollection  {
 	public static string ITEMGET = "获得";
 	public static string NOTRADENUM = "请输入交易数量";
 	public static string NOTENOUGHMONEY = "金额不足";
+	public static string DODGED = "躲开了";
 	
 	public static string HEALTH =  "生命";
 	public static string STRENGTH =  "力量";
@@ -36,6 +37,13 @@ public class StringCollection  {
 	public static string NOEQUIP = "卸下";
 	public static string ADDTOTEAM = "参战";
 	public static string LEAVETEAM = "休息";
+
+	public static string PRO = "职业";
+	public static string LEVEL = "等级";
+	public static string EXP = "经验";
+	public static string DEF = "防御";
+	public static string DODGE = "闪避";
+	public static string NAME = "名字";
 
 	//按钮
 	public static string ATTACK =  "攻击";
@@ -60,4 +68,8 @@ public class StringCollection  {
 	//TombName
 	public static string KINGOFLU = "明鲁王墓";
 		
+	//敌人
+	public static string E_1 = "血人";
+	public static string E_2 = "尸蟞";
+
 }
