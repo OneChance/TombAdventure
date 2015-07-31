@@ -44,7 +44,6 @@ public class UI_Item : MonoBehaviour
 				tradeNum.text = "";
 			}
 
-			itemInfo.transform.FindChild ("TradeNum").gameObject.SetActive (true);
 			if (fromShop) {
 				buttonText.text = StringCollection.BUY;
 			} else {

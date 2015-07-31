@@ -37,6 +37,7 @@ public class UI_City : MonoBehaviour
 		exitButton.SetActive (false);
 		charInfo.SetActive (false);
 		gData.isShop = true;
+		itemInfo.transform.FindChild ("TradeNum").gameObject.SetActive (true);
 	}
 
 	public void PlayerBag ()
@@ -67,12 +68,12 @@ public class UI_City : MonoBehaviour
 		//离开商店模式,显示其他按钮
 		buttons.gameObject.SetActive (true);
 		exitButton.SetActive (true);
+		itemInfo.transform.FindChild ("TradeNum").gameObject.SetActive (false);
 		gData.isShop = false;
 	}
 
 	public void WorldMap ()
 	{
-		DontDestroyOnLoad (gData);
 		Application.LoadLevel ("map");
 	}
 }

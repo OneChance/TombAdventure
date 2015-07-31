@@ -24,7 +24,6 @@ public class UI_Player : MonoBehaviour
 	public void OnClick ()
 	{
 		if (gData.currentItem != null && gData.currentItem.Item.useable) {
-
 			if (gData.currentItem.Item.ct == Item.CommonType.CONSUME) {
 				//对当前角色使用道具,此处From参数没有意义
 				List<BattleObj> toList = new List<BattleObj> ();
@@ -59,7 +58,7 @@ public class UI_Player : MonoBehaviour
 				}
 			}
 		} else {
-			if (gameObject.transform.parent.name.Contains ("Ass") && GetComponent<UI_Player>().c !=null) {
+			if (gameObject.transform.parent.name.Contains ("Ass") && GetComponent<UI_Player> ().c != null) {
 				Character c = GetComponent<UI_Player> ().c;
 				Mercenary m = new Mercenary (c);
 				m.assPos = int.Parse (transform.parent.name.Split (new char[]{'_'}) [1]);

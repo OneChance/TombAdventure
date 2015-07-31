@@ -12,7 +12,6 @@ public class GlobalDataManager : MonoBehaviour {
 	void Start () {	
 		if (!have) {		
 			gData = Instantiate (gDataPrefab, new Vector3 (0, 0, 0),Quaternion.identity) as GameObject;
-			gData.SendMessage("InitPlayerInfo");
 			have = true;			
 		}	
 		DontDestroyOnLoad (gData);

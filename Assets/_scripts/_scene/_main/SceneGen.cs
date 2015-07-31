@@ -211,7 +211,7 @@ public class SceneGen: MonoBehaviour
 		int sumStrength = 0;
 		for (int i=0; i<cList.Count; i++) {
 			if (cList [i].Stamina > 0) {
-				sumStrength += cList [i].strength;
+				sumStrength += cList [i].digPower;
 			}
 		}
 
