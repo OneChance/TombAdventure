@@ -130,12 +130,12 @@ public class Battle : MonoBehaviour
 				//获取位置上挂载的battleObj
 				for (int j=0; j<opList[i].To.Count; j++) {
 					//如果选择的目标已经给上一个玩家打死,不添加
-					if(opList [i].To [j].GetComponent<PosChar> ().battleObj.Health>0){
+					if (opList [i].To [j].GetComponent<PosChar> ().battleObj.Health > 0) {
 						toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
 					}
 				}
 
-				if(toList.Count>0){
+				if (toList.Count > 0) {
 					bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
 				}
 			
@@ -152,10 +152,11 @@ public class Battle : MonoBehaviour
 		dead = Dead ();
 		victory = Victory ();
 
-		if (dead || victory) {
-			//back to main scene
-			gData.victory = !Dead ();
-			DontDestroyOnLoad (gData);
+		if (victory) {
+			gData.victory = true;
+			Application.LoadLevel ("main");
+		} else if (dead) {
+			gData.victory = false;
 			Application.LoadLevel ("main");
 		}
 
@@ -172,7 +173,7 @@ public class Battle : MonoBehaviour
 			Character character = characterList [i];
 
 			//如果是联机模式,攻击列表中只有玩家自己
-			if (character.Health > 0 && (i==0 || !character.IsOnLinePlayer)) {
+			if (character.Health > 0 && (i == 0 || !character.IsOnLinePlayer)) {
 				waitForAttack.Add (characterPos [i]);
 			}
 		}
@@ -249,15 +250,15 @@ public class Battle : MonoBehaviour
 			//if choose the target can not be apply the item,return
 			if (target.name.Contains ("EPos")) {
 				if (item.ot == Item.ObjType.Friend) {
-					Debug.Log ("the item can only be use to friend");
+					ShowHint.Hint (StringCollection.ITEMTOFRIEND);
 					return;
 				} else if (target.GetComponent<PosChar> ().battleObj.Health <= 0) {
-					Debug.Log ("can not use to a dead enemy");
+					ShowHint.Hint (StringCollection.INVALIDTARGET);
 					return;
 				}
 			} else {
 				if (item.ot == Item.ObjType.Enemy) {
-					Debug.Log ("the item can only be use to enemy");
+					ShowHint.Hint (StringCollection.ITEMTOENEMY);
 					return;
 				}
 			}
@@ -378,7 +379,7 @@ public class Battle : MonoBehaviour
 		if (victory) {
 			//获得经验
 			for (int i=0; i<characterList.Count; i++) {
-				characterList[i].AddExp(battleExp);
+				characterList [i].AddExp (battleExp);
 			}
 		}
 		return victory;

@@ -29,7 +29,6 @@ public class GameUtil
 		goList.Clear ();
 	}
 
-
 	public static bool RandomHappen (int happen, int range)
 	{
 		int samples = Random.Range (1, range);

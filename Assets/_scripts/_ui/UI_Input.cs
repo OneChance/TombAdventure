@@ -47,7 +47,7 @@ public class UI_Input : MonoBehaviour
 	public void Detect ()
 	{
 		if (gData.currentTomb.sceneList [gData.currentFloor - 1].isTomb) {
-			Debug.Log (StringCollection.ISTOMB);
+			ShowHint.Hint (StringCollection.ISTOMB);
 		} else {
 			player.SendMessage ("PlayerDetect");
 		}
@@ -56,13 +56,13 @@ public class UI_Input : MonoBehaviour
 	public void Dig ()
 	{
 		if (gData.currentTomb.sceneList [gData.currentFloor - 1].isTomb) {
-			Debug.Log (StringCollection.ISTOMB);
+			ShowHint.Hint (StringCollection.ISTOMB);
 		} else {
 
 			gameObject.SendMessage ("closeAllBag");
 			
 			//隐藏UI上除了停止按钮意外的其他元素
-			dirButtons.SetActive(false);
+			dirButtons.SetActive (false);
 			for (int i=0; i<actButtons.transform.childCount; i++) {
 				if (actButtons.transform.GetChild (i).name != "DigStop") {
 					actButtons.transform.GetChild (i).gameObject.SetActive (false);
@@ -78,7 +78,7 @@ public class UI_Input : MonoBehaviour
 	public void DigStop ()
 	{
 		//隐藏停止,显示UI上除了停止按钮意外的其他元素
-		dirButtons.SetActive(true);
+		dirButtons.SetActive (true);
 		for (int i=0; i<actButtons.transform.childCount; i++) {
 			if (actButtons.transform.GetChild (i).name != "DigStop") {
 				actButtons.transform.GetChild (i).gameObject.SetActive (true);

@@ -12,5 +12,7 @@ public class Exorcist : Pro
 		this.archeologyFactor = 0;
 		this.defFactor = 2;
 		this.dodgeFactor = 2;
+		this.staminaAdd = 40;
+		this.healthAdd = 40;
 	}
 }

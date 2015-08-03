@@ -20,7 +20,6 @@ public class UI_Bag : MonoBehaviour
 	private GameObject uiEquip;
 	private List<Character> cList;
 	private List<Equipment> eList;
-	private List<Baggrid> bgList;
 	public GameObject bag;
 	public GameObject itemInfo;
 	public GameObject charInfo;
@@ -54,7 +53,6 @@ public class UI_Bag : MonoBehaviour
 		
 		cList = gData.characterList;
 		eList = cList [0].EquipList;
-		bgList = cList [0].BgList;
 	}
 
 	public void ClearFocus ()
@@ -141,7 +139,7 @@ public class UI_Bag : MonoBehaviour
 		}
 		
 		//如果要更新的位置，已经没有装备，移除
-		if (!haveUpdate) {
+		if (!haveUpdate && pos != Equipment.EquipPos.ALL) {
 			Destroy (getEquipPosGo (pos).transform.FindChild ("UIEquip(Clone)").gameObject);
 		}
 	}
@@ -213,7 +211,7 @@ public class UI_Bag : MonoBehaviour
 			InputField tradeNum = itemInfo.transform.FindChild ("TradeNum").GetComponent<InputField> ();
 		
 			if (tradeNum.text.Equals ("")) {
-				Debug.Log (StringCollection.NOTRADENUM);
+				ShowHint.Hint (StringCollection.NOTRADENUM);
 				return;
 			}
 
@@ -222,7 +220,7 @@ public class UI_Bag : MonoBehaviour
 			if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.BUY)) {
 
 				if (tradeMoney > gData.characterList [0].money) {
-					Debug.Log (StringCollection.NOTENOUGHMONEY);
+					ShowHint.Hint (StringCollection.NOTENOUGHMONEY);
 					return;
 				}
 

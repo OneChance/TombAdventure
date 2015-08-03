@@ -9,8 +9,8 @@ public class Character:BattleObj
 	private List<Equipment> equipList;
 	public int logId;
 	private bool isOnLinePlayer;
-	private int stamina;
-	private int maxStamina;
+	public int stamina;
+	public int maxStamina;
 	public Pro Pro;
 	public int level;
 	public int exp;
@@ -18,7 +18,6 @@ public class Character:BattleObj
 	public int strength;
 	public int archeology;
 	public int def;
-	public int dodge;
 	public int strengthBase;
 	public int archeologyBase;
 	public int defBase;
@@ -165,6 +164,9 @@ public class Character:BattleObj
 		this.exp = explevel [0];
 		this.level = explevel [1];
 
+		this.MaxHealth = this.level * this.Pro.healthAdd;
+		this.maxStamina = this.level * this.Pro.staminaAdd;
+
 		this.strengthBase = (int)(this.level * this.Pro.strengthFactor * (isOnLinePlayer ? 1 : 0.5f));
 		this.archeologyBase = (int)(this.level * this.Pro.archeologyFactor * (isOnLinePlayer ? 1 : 0.5f));
 		this.defBase = (int)(this.level * this.Pro.defFactor * (isOnLinePlayer ? 1 : 0.5f));
@@ -198,8 +200,8 @@ public class Character:BattleObj
 				StringCollection.NAME + ":" + this.ObjName + "\n" + 
 				StringCollection.PRO + ":" + this.Pro.proname + "[" + this.level + "]" + "\n" + 
 				StringCollection.EXP + ":" + this.exp + "/" + this.nextLevelExp + "\n" + 
-				StringCollection.HEALTH + ":" + this.Health + "\n" + 
-				StringCollection.STAMINA + ":" + this.stamina + "\n" + 
+				StringCollection.HEALTH + ":" + this.Health + "/" + this.MaxHealth + "\n" + 
+				StringCollection.STAMINA + ":" + this.stamina + "/" + this.maxStamina + "\n" + 
 				StringCollection.STRENGTH + ":" + this.strength + "\n" + 
 				StringCollection.ARCHEOLOGY + ":" + this.archeology + "\n" + 
 				StringCollection.ATTACK + ":" + this.Attack + "\n" + 

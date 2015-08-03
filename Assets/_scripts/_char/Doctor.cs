@@ -10,5 +10,7 @@ public class Doctor : Pro {
 		this.archeologyFactor = 0;
 		this.defFactor = 6;
 		this.dodgeFactor = 1;
+		this.staminaAdd = 20;
+		this.healthAdd = 60;
 	}
 }

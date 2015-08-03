@@ -19,8 +19,6 @@ public class UI_Login : MonoBehaviour
 		canvas.FindChild ("PasswordLable").GetComponent<Text> ().text = StringCollection.PASSWORD;
 		canvas.FindChild ("Login").FindChild ("Text").GetComponent<Text> ().text = StringCollection.LOGIN;
 		canvas.FindChild ("Reg").FindChild ("Text").GetComponent<Text> ().text = StringCollection.REG;
-
-
 		username = canvas.FindChild ("Username").GetComponent<InputField> ();
 		password = canvas.FindChild ("Password").GetComponent<InputField> ();
 	}
@@ -34,12 +32,12 @@ public class UI_Login : MonoBehaviour
 	public void Login ()
 	{
 		if (username.text.Trim ().Equals ("")) {
-			Debug.Log (StringCollection.NEEDUSERNAME);
+			ShowHint.Hint (StringCollection.NEEDUSERNAME);
 			return;
 		}
 
 		if (password.text.Trim ().Equals ("")) {
-			Debug.Log (StringCollection.NEEDPASSWORD);
+			ShowHint.Hint (StringCollection.NEEDPASSWORD);
 			return;
 		}
 
@@ -63,7 +61,7 @@ public class UI_Login : MonoBehaviour
 				List<Equipment> eList = new List<Equipment> ();
 				eList.Add (e);
 				
-				Character c = new Character (2000, 30, 100, 0, 0, "zhouhui", true, 200, 200, ProFactory.getPro ("Geomancer", "1"), 1, 0, eList, -1);
+				Character c = new Character (2000, 30, 100, 0, 0, "zhouhui", true, 50, 0, ProFactory.getPro ("Geomancer", "1"), 10, 0, eList, -1);
 				
 				HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂", 50);
 				List<Baggrid> bgList = new List<Baggrid> ();
@@ -87,7 +85,7 @@ public class UI_Login : MonoBehaviour
 			}
 
 		} else {
-			Debug.Log (StringCollection.INVALIDACCOUNT);
+			ShowHint.Hint (StringCollection.INVALIDACCOUNT);
 		}
 	}
 

@@ -111,13 +111,12 @@ public class PlayerAction : MonoBehaviour
 		}
 
 		if (!haveGeomancer) {
-			Debug.Log (StringCollection.NOGEO);
+			ShowHint.Hint (StringCollection.NOGEO);
 		} else {
 			//根据总智力属性,消耗一定的挖掘探测工具,给出信息（信息准确度由考古属性，当前挖掘层数决定）
 			//消耗探测工具的逻辑未实现(未实现道具 铁椎)
-			int detectLevel = sumArcheology - 3 * gData.currentFloor;
-			//测试 45级别的探索  非常高
-			sceneGen.SendMessage ("getDetectorResult", 45);
+			int detectLevel = sumArcheology - 10 * gData.currentFloor - 50 * gData.currentTomb.tombLevel;
+			sceneGen.SendMessage ("getDetectorResult", detectLevel);
 		}
 	}
 

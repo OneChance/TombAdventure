@@ -23,6 +23,8 @@ public class SceneGen: MonoBehaviour
 	public Transform player;
 	public Transform enemys;
 	public Transform digs;
+	public int digDeepMin;
+	public int digDeepMax;
 
 	//边界墙的厚度
 	public float wallSize = 1.5f;
@@ -40,7 +42,6 @@ public class SceneGen: MonoBehaviour
 	private List<ElementData> blockData;
 	private List<ElementData> enemyData;
 	private List<ElementData> digData;
-	private ElementData nextEntry;
 	private Vector3 genPos;
 	private float border = 2.5f;
 	private GlobalData gData;
@@ -59,6 +60,12 @@ public class SceneGen: MonoBehaviour
 
 	void Start ()
 	{
+		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+
+		if (!gData.victory) {
+
+		}
+
 		blockX = groundPrefabs [0].GetComponent<SpriteRenderer> ().bounds.size.x * 15 / 16;
 		blockY = groundPrefabs [0].GetComponent<SpriteRenderer> ().bounds.size.y * 15 / 16;
 
@@ -75,7 +82,6 @@ public class SceneGen: MonoBehaviour
 		enemyData = new List<ElementData> ();
 		digData = new List<ElementData> ();
 		genPos = new Vector3 (0, 0, 0);
-		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.currentTomb.sceneList.Count;
@@ -95,7 +101,7 @@ public class SceneGen: MonoBehaviour
 
 		//不论是新的场景或是原来保存的场景，通往上一层的入口的位置总是在玩家(0,0,0)的位置，所以这个数据不用保存到全局数据的场景数据里
 		//在玩家位置生成上一层入口,由于该位置处不应该有敌人或场景物品，所以放在其他元素之前生成
-		GameObject preEntry = Instantiate (preEntryPrefab, player.position, Quaternion.identity) as GameObject;
+		Instantiate (preEntryPrefab, player.position, Quaternion.identity);
 
 		if (scenesNum >= currentFloor) {
 			GenerateSceneFromSceneInfo (gData.currentTomb.sceneList [currentFloor - 1]);
@@ -170,7 +176,7 @@ public class SceneGen: MonoBehaviour
 		di.currentDeep = 0;
 		di.texType = 0;
 		//根据当前层数,随机生成深度
-		di.deep = Random.Range (gData.currentFloor * 10, gData.currentFloor * 20);
+		di.deep = Random.Range (gData.currentFloor * digDeepMin, gData.currentFloor * digDeepMax);
 		digList.Add (dig);
 		return dig;
 	}
@@ -186,13 +192,13 @@ public class SceneGen: MonoBehaviour
 			GameObject dig = getDig (player.transform.position);
 			
 			if (dig == null) {
-				Debug.Log (StringCollection.CANNOTDIG);
+				ShowHint.Hint (StringCollection.CANNOTDIG);
 				uiInput.SendMessage ("DigStop");
 			} else {
 				//如果这个坑已经挖完
 				DigInfo di = dig.GetComponent<DigInfo> ();
 				if (di.currentDeep >= di.deep) {
-					Debug.Log (StringCollection.DIGOVER);
+					ShowHint.Hint (StringCollection.DIGOVER);
 					uiInput.SendMessage ("DigStop");
 				} else {
 					//开始挖掘
@@ -201,26 +207,27 @@ public class SceneGen: MonoBehaviour
 				}
 			}
 		} else {
-			Debug.Log (StringCollection.ALONGWALL);
+			ShowHint.Hint (StringCollection.ALONGWALL);
 			uiInput.SendMessage ("DigStop");
 		}
 	}
 
 	public void Digging ()
 	{
-		int sumStrength = 0;
+		int sumDigPower = 0;
+
 		for (int i=0; i<cList.Count; i++) {
 			if (cList [i].Stamina > 0) {
-				sumStrength += cList [i].digPower;
+				sumDigPower += cList [i].digPower;
 			}
 		}
 
-		if (sumStrength == 0) {
-			Debug.Log (StringCollection.NOSTAMINA);
+		if (sumDigPower == 0) {
+			ShowHint.Hint (StringCollection.NOSTAMINA);
 			digging = false;
 		} else {
 			DigInfo di = currentDigging.GetComponent<DigInfo> ();
-			di.currentDeep += sumStrength;    //一点力量挖掘一个深度
+			di.currentDeep += sumDigPower;    //一点力量挖掘一个深度
 			if (di.currentDeep > (di.texType + 1) * (di.deep * 0.3333)) {
 				di.texType++;
 				currentDigging.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/dig_" + Mathf.Min (2, di.texType));
@@ -234,6 +241,7 @@ public class SceneGen: MonoBehaviour
 			}
 			
 			if (di.currentDeep >= di.deep) {
+
 				digging = false;
 				
 				float digPosX = currentDigging.transform.position.x;
@@ -288,9 +296,9 @@ public class SceneGen: MonoBehaviour
 			}
 		}				
 		if (itemGet.Equals ("")) {
-			Debug.Log (StringCollection.DIGNOTHING);
+			ShowHint.Hint (StringCollection.DIGNOTHING);
 		} else {
-			Debug.Log (StringCollection.ITEMGET + ":" + itemGet);
+			ShowHint.Hint (StringCollection.ITEMGET + ":" + itemGet);
 		}
 		//***********************************************************************************************
 	}
@@ -320,7 +328,6 @@ public class SceneGen: MonoBehaviour
 		itemData = currentSceneInfo.ItemData;
 		enemyData = currentSceneInfo.EnemyData;
 		digData = currentSceneInfo.DigData;
-		nextEntry = currentSceneInfo.nextEntry;
 
 		//修改玩家位置为保存的位置
 		player.position = gData.playerPos;
@@ -411,7 +418,6 @@ public class SceneGen: MonoBehaviour
 		//根据墓穴等级，层数，决定棺材贴图名称
 		string texName = "coffin_" + gData.currentTomb.tombLevel + "_" + ((int)((gData.currentFloor + 1) / 2));
 		GameObject coffinO = Instantiate (coffinPrefab, currentSceneInfo.nextEntry.pos, Quaternion.identity) as GameObject;
-		Debug.Log (texName);
 		coffinO.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + texName);
 	}
 
@@ -790,18 +796,18 @@ public class SceneGen: MonoBehaviour
 		float distance = Vector3.Distance (player.position, nextEntry);
 
 		if (distance < entryRadius) {
-			Debug.Log (StringCollection.TRYTODIG);
+			ShowHint.Hint (StringCollection.TRYTODIG);
 		} else {
-			if (detectLevel < 10) {
+			if (detectLevel < 100) {
 				//这个级别只提示模糊的信息
 				if (distance > entryRadius * 4) {
-					Debug.Log (StringCollection.DISTANCEFAR);
+					ShowHint.Hint (StringCollection.DISTANCEFAR);
 				} else if (distance > entryRadius * 2) {
-					Debug.Log (StringCollection.DISTANCENEAR);
+					ShowHint.Hint (StringCollection.DISTANCENEAR);
 				} else if (distance > entryRadius) {
-					Debug.Log (StringCollection.DISTANCECLOSE);
+					ShowHint.Hint (StringCollection.DISTANCECLOSE);
 				}
-			} else if (detectLevel < 20) {
+			} else if (detectLevel < 200) {
 				//这个级别提示方位
 				string x = "";
 				string y = "";
@@ -822,7 +828,7 @@ public class SceneGen: MonoBehaviour
 					}
 				}
 				
-				Debug.Log (StringCollection.POSHINT + x + y);
+				ShowHint.Hint (StringCollection.POSHINT + x + y);
 				
 			} else {
 				//这个级别提示具体距离
@@ -856,7 +862,7 @@ public class SceneGen: MonoBehaviour
 					}
 				}
 
-				Debug.Log (StringCollection.POSHINT + x + y);
+				ShowHint.Hint (StringCollection.POSHINT + x + y);
 			}
 		}
 	}

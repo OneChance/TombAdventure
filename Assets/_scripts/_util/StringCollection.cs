@@ -18,8 +18,8 @@ public class StringCollection
 	public static string DIGNOTHING = "挖到底了,什么也发现";
 	public static string NOSTAMINA = "没有体能挖掘了,大家需要休息一会";
 	public static string ALONGWALL = "靠着墙的位置不太好挖啊，换个地方试试吧";
-	public static string CANNOTDIG = "此处貌似有坚硬的石块，换个地方试试吧";
-	public static string DIGOVER = "这里已经挖过了,换一处好了";
+	public static string CANNOTDIG = "此地貌似有坚硬的石块，换个地方试试吧";
+	public static string DIGOVER = "这里已经挖过了,换一个地方吧";
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
 	public static string ITEMGET = "获得";
 	public static string NOTRADENUM = "请输入交易数量";
@@ -71,5 +71,10 @@ public class StringCollection
 	public static string SETTLER = "拓荒者";
 	public static string EXORCIST = "驱魔师";
 	public static string DOCTOR = "医师";
-
+	public static string CREATE = "创建";
+	public static string NEEDCHARNAME = "请问你叫什么名字？";
+	public static string NEEDPRO = "你想从事什么职业呢？";
+	public static string ITEMTOFRIEND = "该道具只能被用于队友";
+	public static string INVALIDTARGET = "无效的目标";
+	public static string ITEMTOENEMY = "该道具只能被用于敌人";
 }
