@@ -13,4 +13,5 @@ public class Pro
 	public int dodgeFactor;
 	public int healthAdd;
 	public int staminaAdd;
+    public int itemid;
 }

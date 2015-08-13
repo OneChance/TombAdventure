@@ -15,4 +15,5 @@ public class GlobalData : MonoBehaviour
 	public bool isPlayer; //ture为玩家联机模式，false为单机佣兵模式
 	public bool isShop = false;
 	public Tomb currentTomb;
+    public Dictionary<int, ServerItemData> siList;
 }

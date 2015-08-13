@@ -8,8 +8,17 @@ public class ProFactory  {
 			return new Geomancer (img_name);
 		} else if (proname.Equals ("Settler")) {
 			return new Settler (img_name);
-		} else {
-			return null;
-		}
+        }
+        else if (proname.Equals("Exorcist"))
+        {
+            return new Exorcist(img_name);
+        }
+        else if (proname.Equals("Doctor"))
+        {
+            return new Doctor(img_name);
+        }
+        else {
+            return null;
+        }
 	}
 }

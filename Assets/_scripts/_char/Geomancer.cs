@@ -14,5 +14,6 @@ public class Geomancer : Pro
 		this.dodgeFactor = 1;
 		this.staminaAdd = 20;
 		this.healthAdd = 50;
+        this.itemid = 1;
 	}
 }

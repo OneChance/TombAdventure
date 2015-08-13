@@ -14,5 +14,6 @@ public class Settler : Pro
 		this.dodgeFactor = 1;
 		this.staminaAdd = 50;
 		this.healthAdd = 70;
+        this.itemid = 2;
 	}
 }
