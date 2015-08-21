@@ -99,7 +99,7 @@ public class Kbe : MonoBehaviour {
         loginUI.roleList = roleList;
     }
 
-    public void onReqItemList(Dictionary<UInt64, Dictionary<string, object>> itemList) {
-        loginUI.ItemDown(itemList);
+	public void onReqItemList(Dictionary<UInt64, Dictionary<string, object>> itemList) {
+		loginUI.ItemDown(itemList);
     }
 }

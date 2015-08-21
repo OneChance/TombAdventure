@@ -47,9 +47,8 @@ public class UI_Login : MonoBehaviour
 
 	}
 
-    public void ItemDown(Dictionary<UInt64, Dictionary<string, object>> itemList){
+	public void ItemDown(Dictionary<UInt64, Dictionary<string, object>> itemList){
 
-  
         Dictionary<int, ServerItemData> siList = new Dictionary<int, ServerItemData>();
 
         if (itemList != null && itemList.Count > 0)
@@ -136,8 +135,6 @@ public class UI_Login : MonoBehaviour
             //Equipment e = new Equipment(1, 2, 0, 0, Equipment.EquipPos.BODY, "2", "学者的思考", 1, 200);
             List<Equipment> eList = new List<Equipment>();
             //eList.Add(e);
-
-            Debug.Log(level + " nnnnnnnnnnnnnnnn  "+ exp);
 
             Character c = new Character(2000, -1, -1, 0, 0, name, true, 50, 0, ProFactory.getPro(sid.pro, "1"), level, exp, eList, -1);
 

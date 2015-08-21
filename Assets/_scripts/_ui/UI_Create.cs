@@ -47,21 +47,23 @@ public class UI_Create : MonoBehaviour
 			return;
 		}
 
-        Pro pro = ProFactory.getPro (canvas.transform.FindChild ("Choose").GetComponent<Image> ().sprite.name.Split (new char[]{'_'}) [0], "1");
+		Pro pro = ProFactory.getPro (canvas.transform.FindChild ("Choose").GetComponent<Image> ().sprite.name.Split (new char[]{'_'}) [0], "1");
 
-        Account account = (Account)KBEngineApp.app.player();
+		Debug.Log(KBEngineApp.app.entities.Count);
 
-        account.reqCreateRole(name.text.Trim(), pro.itemid.ToString());
+		Account account = (Account)KBEngineApp.app.player();
 
-        //玩家创建的角色也可以看成是一个卡片道具，游戏加载的时候从服务器读取道具列表，此处创建时根据职业，判定道具ID即可
+		account.reqCreateRole (name.text.Trim (), pro.itemid.ToString ());
+
+		//下面的语句应该放在一个创建角色的服务器回调方法里
 
 		gData.isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式
 		gData.characterList = new List<Character> ();
 
 		List<Equipment> eList = new List<Equipment> ();
 
-        //这里的初始属性根据服务器加载的道具列表获得
-        Character c = new Character(5000, 0, 0, 0, 0, name.text.Trim(), true, 0, 0, pro, 1, 0, eList, -1);
+		//这里的初始属性根据服务器加载的道具列表获得
+		Character c = new Character (5000, 0, 0, 0, 0, name.text.Trim (), true, 0, 0, pro, 1, 0, eList, -1);
 		c.Health = c.MaxHealth;
 		c.Stamina = c.maxStamina;
 
