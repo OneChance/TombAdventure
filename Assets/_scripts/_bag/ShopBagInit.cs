@@ -51,18 +51,18 @@ public class ShopBagInit : MonoBehaviour
 		//获得商店物品列表
 		switch (shopType) {
 		case "item":
-			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂", 50);
+			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "801", "单体治疗药剂", 50);
 			Baggrid bg = new Baggrid (item, 0);
 			bgList.Add (bg);
 
-			Equipment e2 = new Equipment (2, 3, 0, 0, Equipment.EquipPos.BODY, "3", "学者的幻想", 1, 500);
+			Equipment e2 = new Equipment (2, 3, 0, 0, Equipment.EquipPos.BODY, "1201", "学者的幻想", 1, 500);
 			Baggrid bg2 = new Baggrid (e2, 0);
 			bgList.Add (bg2);
 
 			break;
 		case "mercenary":
 
-			Character c = new Character (0, 500, 500, 0, 0, "潘子", false, 500, 500, ProFactory.getPro ("Settler", "100"), 1, 0, null, -1);
+			Character c = new Character (0, 500, 500, 0, 0, "潘子", false, 500, 500, ProFactory.getPro ("Settler", "401"), 1, 0, null, -1);
 			Mercenary m = new Mercenary (c);
 
 			Baggrid bg3 = new Baggrid (m, 0);

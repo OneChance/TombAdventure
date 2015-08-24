@@ -45,6 +45,22 @@ public class Equipment : Item
 		ALL
 	}
 
+	public static EquipPos getPosByIndex (int pos)
+	{
+		switch (pos) {
+		case 1:
+			return EquipPos.HEAD;
+		case 2:
+			return EquipPos.BODY;
+		case 3:
+			return EquipPos.FOOT;
+		case 4:
+			return EquipPos.HAND;
+		default:
+			return EquipPos.ALL;
+		}
+	}
+
 	public  override void doSth <T> (T from, List<T> to)
 	{
 		

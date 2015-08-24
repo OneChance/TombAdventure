@@ -6,40 +6,43 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	
-	public class Gdata : KBEngine.GameObject 
+	public class Gdata : KBEngine.GameObject
 	{
 		
-		public Dictionary<UInt64, Dictionary<string, object>> items = new Dictionary<UInt64, Dictionary<string, object>>();
-		
-		public Gdata()
+		public Dictionary<UInt64, Dictionary<string, object>> items = new Dictionary<UInt64, Dictionary<string, object>> ();
+
+		public Gdata ()
 		{
 		}
 		
-		public override void __init__()
+		public override void __init__ ()
 		{
-			Debug.Log("gdata run ..............................................");
-			baseCall("reqItemList",0);     
+			baseCall ("reqItemList", 0);     
 		}
 		
-		public void onReqItemList(Dictionary<string, object> itemList)
+		public void onReqItemList (Dictionary<string, object> itemList, Dictionary<string, object> itemshop, Dictionary<string, object> assistshop, Dictionary<string, object> equipshop)
 		{
 			
-			items.Clear();
+			items.Clear ();
 			
-			List<object> listinfos = (List<object>)itemList["values"];
+			List<object> listinfos = (List<object>)itemList ["values"];
+			List<object> itemshopList = (List<object>)itemshop ["values"];
+			List<object> assshopList = (List<object>)assistshop ["values"];
+			List<object> equipshopList = (List<object>)equipshop ["values"];
 			
-			for (int i = 0; i < listinfos.Count; i++)
-			{
-				Dictionary<string, object> info = (Dictionary<string, object>)listinfos[i];
-				items.Add((UInt64)info["dbid"], info);
+			for (int i = 0; i < listinfos.Count; i++) {
+				Dictionary<string, object> info = (Dictionary<string, object>)listinfos [i];
+				items.Add ((UInt64)info ["dbid"], info);
 			}
 			
 			// ui event
-			Dictionary<UInt64, Dictionary<string, object>> iList = new Dictionary<ulong, Dictionary<string, object>>(items);
-			KBEngine.Event.fireOut("onReqItemList", new object[] { iList });
-			
-			if (listinfos.Count == 0)
-				return;
+			Dictionary<UInt64, Dictionary<string, object>> iList = new Dictionary<ulong, Dictionary<string, object>> (items);
+			KBEngine.Event.fireOut ("onReqItemList", new object[] {
+				iList,
+				itemshopList,
+				assshopList,
+				equipshopList
+			});
 		}
 	}
 } 

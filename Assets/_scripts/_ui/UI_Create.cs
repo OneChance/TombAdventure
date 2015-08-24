@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using KBEngine;
+using System;
 
 public class UI_Create : MonoBehaviour
 {
@@ -37,6 +38,7 @@ public class UI_Create : MonoBehaviour
 	public void Create ()
 	{
 		InputField name = canvas.FindChild ("Name").GetComponent<InputField> ();
+
 		if (name.text.Trim ().Equals ("")) {
 			ShowHint.Hint (StringCollection.NEEDCHARNAME);
 			return;
@@ -49,30 +51,19 @@ public class UI_Create : MonoBehaviour
 
 		Pro pro = ProFactory.getPro (canvas.transform.FindChild ("Choose").GetComponent<Image> ().sprite.name.Split (new char[]{'_'}) [0], "1");
 
-		Debug.Log(KBEngineApp.app.entities.Count);
-
 		Account account = (Account)KBEngineApp.app.player();
 
 		account.reqCreateRole (name.text.Trim (), pro.itemid.ToString ());
 
-		//下面的语句应该放在一个创建角色的服务器回调方法里
+	}
+
+	public void OnCreateRole(Dictionary<string, object> role){
 
 		gData.isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式
 		gData.characterList = new List<Character> ();
 
-		List<Equipment> eList = new List<Equipment> ();
+		gData.characterList = DataHelper.GetCharacterFromServer(role,gData.siList);
 
-		//这里的初始属性根据服务器加载的道具列表获得
-		Character c = new Character (5000, 0, 0, 0, 0, name.text.Trim (), true, 0, 0, pro, 1, 0, eList, -1);
-		c.Health = c.MaxHealth;
-		c.Stamina = c.maxStamina;
-
-		List<Baggrid> bgList = new List<Baggrid> ();
-		
-		c.BgList = bgList;				
-		gData.characterList.Add (c);				
-		
 		Application.LoadLevel ("city");
-
 	}
 }

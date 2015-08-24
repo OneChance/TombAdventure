@@ -16,4 +16,7 @@ public class GlobalData : MonoBehaviour
 	public bool isShop = false;
 	public Tomb currentTomb;
     public Dictionary<int, ServerItemData> siList;
+	public List<int> itemShopConten;
+	public List<int> assistShopContent;
+	public List<int> equipShopContent;
 }

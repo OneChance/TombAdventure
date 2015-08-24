@@ -167,15 +167,6 @@ public class Character:BattleObj
 		this.MaxHealth = this.level * this.Pro.healthAdd;
 		this.maxStamina = this.level * this.Pro.staminaAdd;
 
-        //创建角色的时候初始化当前属性
-        if (this.Health < 0) {
-            this.Health = this.MaxHealth;
-        }
-        if (this.stamina < 0)
-        {
-            this.stamina = this.maxStamina;
-        }
-
 		this.strengthBase = (int)(this.level * this.Pro.strengthFactor * (isOnLinePlayer ? 1 : 0.5f));
 		this.archeologyBase = (int)(this.level * this.Pro.archeologyFactor * (isOnLinePlayer ? 1 : 0.5f));
 		this.defBase = (int)(this.level * this.Pro.defFactor * (isOnLinePlayer ? 1 : 0.5f));
