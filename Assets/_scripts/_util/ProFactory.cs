@@ -19,23 +19,4 @@ public class ProFactory
 		}
 	}
 
-	public static Pro getProById (int itemid, string img_name)
-	{
-		switch (itemid) {
-		case 1:
-			return new Geomancer (img_name);
-			break;
-		case 2:
-			return new Settler (img_name);
-			break;
-		case 3:
-			return new Exorcist (img_name);
-			break;
-		case 4:
-			return new Doctor (img_name);
-			break;
-		default:
-			return null;
-		}
-	}
 }

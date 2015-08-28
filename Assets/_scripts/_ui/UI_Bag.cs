@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System;
 
 public class UI_Bag : MonoBehaviour
 {
@@ -197,6 +198,18 @@ public class UI_Bag : MonoBehaviour
 		if (bag.activeInHierarchy)
 			bag.SendMessage ("InitBag", currentC);
 	}
+
+	//交易 服务器callback
+	public void TradeOver (Dictionary<string, object> role, string msg)
+	{
+		if (!msg.Equals ("ok")) {
+			ShowHint.Hint(StringCollection.stringDict_CN[msg]);
+		}else{
+			//更新背包
+			DataHelper.BagDataBind(gData.characterList [0],role,gData.siList);
+			ItemUseComplete();
+		}
+	}
 	
 	public void UseItem (Button button)
 	{
@@ -217,28 +230,22 @@ public class UI_Bag : MonoBehaviour
 
 			int tradeMoney = int.Parse (tradeNum.text) * item.price;
 
+			//获得道具ID
+			string iid = item.prefabName.Split (new char[]{'/'}) [2].Split (new char[]{'_'}) [1];
+
 			if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.BUY)) {
-
-				if (tradeMoney > gData.characterList [0].money) {
-					ShowHint.Hint (StringCollection.NOTENOUGHMONEY);
-					return;
-				}
-
-				gData.characterList [0].money -= tradeMoney;
-				BagUtil.AddItem (bgList, new Baggrid (item, int.Parse (tradeNum.text)));
+				gData.account.TradeItem (int.Parse (iid), 0, int.Parse (tradeNum.text),0,bg.level);
 			} else {
-				gData.characterList [0].money += (int)(tradeMoney * 0.5); //卖出只有买入价格的二分之一
-				bg.Num -= int.Parse (tradeNum.text);
+				gData.account.TradeItem (int.Parse (iid), 1, int.Parse (tradeNum.text),bg.dbid,bg.level);
 			}
 
-			ItemUseComplete ();
 		} else {
 			//打开人物属性面板
 			charInfo.SetActive (true);
 			InitCharInfo ();
 			//获取道具信息
 
-			if (item.ct == global::Item.CommonType.CONSUME) {
+			if (item.ct == (int)global::Item.CommonType.CONSUME) {
 				//人物格闪动
 				GameUtil.UnFocus (focusList);
 				focusList.Add (avatar.transform.FindChild ("UIChar(Clone)").gameObject);
@@ -248,14 +255,14 @@ public class UI_Bag : MonoBehaviour
 				}
 				
 				//如果是群体道具，直接应用，否则等待点击玩家后使用
-				if (item.rt == global::Item.RangeType.MULTI) {
+				if (item.rt == (int)global::Item.RangeType.MULTI) {
 					bg.Item.doSth (cList [0], cList);
 					//用完减少数量
 					gData.currentItem.Num--;
 					ItemUseComplete ();
 				}
 				
-			} else if (item.ct == global::Item.CommonType.EQUIPMENT) {
+			} else if (item.ct == (int)global::Item.CommonType.EQUIPMENT) {
 				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.NOEQUIP)) {//装备卸下
 					//从装备中移除
 					for (int i=0; i<eList.Count; i++) {
@@ -302,7 +309,7 @@ public class UI_Bag : MonoBehaviour
 				UpdateUIEquip (((Equipment)item).ep);
 				cList [0].EquipList = eList;
 				ItemUseComplete ();
-			} else if (item.ct == global::Item.CommonType.MERCENARY) {
+			} else if (item.ct == (int)global::Item.CommonType.MERCENARY) {
 				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.LEAVETEAM)) {//离队
 
 					//从队中移除

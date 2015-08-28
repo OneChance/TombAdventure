@@ -14,6 +14,5 @@ public class Exorcist : Pro
 		this.dodgeFactor = 2;
 		this.staminaAdd = 40;
 		this.healthAdd = 40;
-        this.itemid = 3;
 	}
 }

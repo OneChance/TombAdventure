@@ -13,7 +13,7 @@ public class Equipment : Item
 
 	public Equipment (int strength, int archeology, int def, int dodge, EquipPos ep, string itemId, string name, int eLevel, int price):base(itemId,name)
 	{
-		this.ct = global::Item.CommonType.EQUIPMENT;
+		this.ct = (int)global::Item.CommonType.EQUIPMENT;
 		this.strength = strength;
 		this.archeology = archeology;
 		this.def = def;

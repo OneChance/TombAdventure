@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using KBEngine;
 
 public class GlobalData : MonoBehaviour
 {
@@ -19,4 +20,5 @@ public class GlobalData : MonoBehaviour
 	public List<int> itemShopConten;
 	public List<int> assistShopContent;
 	public List<int> equipShopContent;
+	public Account account;
 }

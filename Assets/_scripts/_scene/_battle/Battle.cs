@@ -42,7 +42,7 @@ public class Battle : MonoBehaviour
 		enemyAttackTypeList = new List<Baggrid> ();
 
 		//敌人攻击类型列表，此处只添加额普通单体攻击
-		enemyAttackTypeList.Add (new Baggrid (new AttackItem (), 1));
+		enemyAttackTypeList.Add (new Baggrid (new AttackItem (), 1,-1));
 
 		//初始化按钮文本
 		Transform buttons = canvas.transform.FindChild ("Button").transform;
@@ -207,8 +207,8 @@ public class Battle : MonoBehaviour
 		//等待道具无聚焦列表
 		if (act.Op != UI_Battle.Op.WAIT) {
 			//判断道具属性，使用于敌方还是友方，单体还是多体
-			if (act.Bg.Item.ot == Item.ObjType.Enemy) {
-				if (act.Bg.Item.rt == Item.RangeType.SINGLE) {
+			if (act.Bg.Item.ot == (int)Item.ObjType.Enemy) {
+				if (act.Bg.Item.rt == (int)Item.RangeType.SINGLE) {
 					
 					//如果是单体，选择第一个活着的敌人
 					for (int i=0; i<enemyPos.Length; i++) {
@@ -226,7 +226,7 @@ public class Battle : MonoBehaviour
 					}
 				}
 			} else {
-				if (act.Bg.Item.rt == Item.RangeType.SINGLE) {
+				if (act.Bg.Item.rt == (int)Item.RangeType.SINGLE) {
 					focusList.Add (characterPos [0]);
 				} else {
 					for (int i=0; i<characterPos.Length; i++) {
@@ -249,7 +249,7 @@ public class Battle : MonoBehaviour
 
 			//if choose the target can not be apply the item,return
 			if (target.name.Contains ("EPos")) {
-				if (item.ot == Item.ObjType.Friend) {
+				if (item.ot == (int)Item.ObjType.Friend) {
 					ShowHint.Hint (StringCollection.ITEMTOFRIEND);
 					return;
 				} else if (target.GetComponent<PosChar> ().battleObj.Health <= 0) {
@@ -257,13 +257,13 @@ public class Battle : MonoBehaviour
 					return;
 				}
 			} else {
-				if (item.ot == Item.ObjType.Enemy) {
+				if (item.ot == (int)Item.ObjType.Enemy) {
 					ShowHint.Hint (StringCollection.ITEMTOENEMY);
 					return;
 				}
 			}
 			//if use the item which can attack all of the object,do not change the focusList
-			if (item.rt == Item.RangeType.MULTI) {
+			if (item.rt == (int)Item.RangeType.MULTI) {
 				return;
 			} else {
 				RecoverFocusList ();
@@ -325,7 +325,7 @@ public class Battle : MonoBehaviour
 		Baggrid bg = enemyAttackTypeList [Random.Range (0, enemyAttackTypeList.Count)];
 		List<GameObject> attackList = new List<GameObject> ();
 
-		if (bg.Item.rt == Item.RangeType.SINGLE) {
+		if (bg.Item.rt == (int)Item.RangeType.SINGLE) {
 			//choose a player with the min health
 			GameObject minHealthChar = characterPos [0];
 

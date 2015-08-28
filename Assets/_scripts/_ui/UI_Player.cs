@@ -24,7 +24,7 @@ public class UI_Player : MonoBehaviour
 	public void OnClick ()
 	{
 		if (gData.currentItem != null && gData.currentItem.Item.useable) {
-			if (gData.currentItem.Item.ct == Item.CommonType.CONSUME) {
+			if (gData.currentItem.Item.ct == (int)Item.CommonType.CONSUME) {
 				//对当前角色使用道具,此处From参数没有意义
 				List<BattleObj> toList = new List<BattleObj> ();
 				toList.Add (c);
@@ -32,10 +32,11 @@ public class UI_Player : MonoBehaviour
 				//用完减少数量并移除
 				gData.currentItem.Num--;
 				uiBag.SendMessage ("ItemUseComplete");
-			} else if (gData.currentItem.Item.ct == Item.CommonType.MERCENARY) {
+			} else if (gData.currentItem.Item.ct == (int)Item.CommonType.MERCENARY) {
 				if (gameObject.transform.parent.name.Contains ("Ass")) {
 					//更换助手
 					Mercenary m = (Mercenary)(gData.currentItem.Item);
+
 					//如果点击的位置上有助手,替换,否则直接参战
 					if (GetComponent<Image> ().sprite.name.Equals ("no_ass")) {
 						gData.characterList.Add (m.c);	
@@ -68,7 +69,7 @@ public class UI_Player : MonoBehaviour
 				itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = m.note;
 				Text buttonText = itemInfo.transform.FindChild ("UseButton").FindChild ("Text").GetComponent<Text> ();
 				buttonText.text = StringCollection.LEAVETEAM;
-				gData.currentItem = new Baggrid (m, 1);
+				gData.currentItem = new Baggrid (m, 1,-1);
 			}
 		}
 	}

@@ -83,6 +83,7 @@ public class UI_Login : MonoBehaviour
 				string pro = (string)info ["pro"];
 				int levelexpadd = int.Parse (((UInt16)info ["levelexpadd"]).ToString ());
 				int attack = int.Parse (((UInt16)info ["attack"]).ToString ());
+				int health = int.Parse (((UInt16)info ["health"]).ToString ());
  
 				sid.name = name;
 				sid.usetype = usetype;
@@ -103,6 +104,7 @@ public class UI_Login : MonoBehaviour
 				sid.pro = pro;
 				sid.levelexpadd = levelexpadd;
 				sid.attack = attack;
+				sid.health = health;
 
 				siList.Add (dbid, sid);
 			}
@@ -120,7 +122,7 @@ public class UI_Login : MonoBehaviour
 			if (assistshop != null && assistshop.Count > 0) {
 				for (int i=0; i<assistshop.Count; i++) {
 					Dictionary<string, object> info = (Dictionary<string, object>)assistshop [i];
-					assistShopContent.Add (int.Parse (((UInt16)info ["iid"]).ToString ()));
+					assistShopContent.Add (int.Parse (info ["iid"].ToString ()));
 				}
 			}
 
@@ -142,27 +144,16 @@ public class UI_Login : MonoBehaviour
 		gData.itemShopConten = itemShopContent;
 		gData.assistShopContent = assistShopContent;
 		gData.equipShopContent = equipShopContent;
-
+		gData.account = (Account)KBEngineApp.app.player();
 
 		if (roleList != null && roleList.Count > 0) {
 			Dictionary<string, object> uinfo = roleList [0];
 
 			Dictionary<string, object> playerInfo = (Dictionary<string, object>)uinfo ["info"];
 
-			string name = (string)playerInfo ["name"];
-			int iid = int.Parse (((UInt16)(playerInfo ["iid"])).ToString ());
-			int level = int.Parse (((UInt16)(playerInfo ["level"])).ToString ());
-			int exp = int.Parse (((UInt16)(playerInfo ["exp"])).ToString ());
-
-			//根据iid去查询数据
-			ServerItemData sid = siList [iid];
-
-			//如果有玩家信息,加载并跳转城市场景
-
 			//从服务器端获取玩家数据初始化
 			gData.isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式
 			gData.characterList = DataHelper.GetCharacterFromServer (uinfo, gData.siList);
-
 
 			/*
             //Equipment e = new Equipment(1, 2, 0, 0, Equipment.EquipPos.BODY, "2", "学者的思考", 1, 200);
@@ -184,6 +175,9 @@ public class UI_Login : MonoBehaviour
             //Character c2 = new Character(0, 40, 100, 0, 0, "unity", false, 100, 100, ProFactory.getPro("Settler", "1"), 1, 0, null, -1);
             //gData.characterList.Add(c2);
             */
+
+			//加载背包
+			DataHelper.BagDataBind(gData.characterList[0],uinfo,gData.siList);
 
 			Application.LoadLevel ("city");
 		} else {

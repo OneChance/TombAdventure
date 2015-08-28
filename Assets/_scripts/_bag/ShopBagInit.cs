@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ShopBagInit : MonoBehaviour
 {
 
-	public int border = 9;
+	public int border = 12;
 	public int gridRow = 4;
 	public int gridCol = 4;
 	public int gridSize = 40;
@@ -46,29 +46,36 @@ public class ShopBagInit : MonoBehaviour
 				Destroy (grids [i].transform.GetChild (0).gameObject);
 		}
 
+
+		GlobalData gData = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+
 		List<Baggrid> bgList = new List<Baggrid> ();
 
+		Dictionary<int, ServerItemData> siList = gData.siList;
+
 		//获得商店物品列表
+		List<int> shopConten = new List<int>();
+
 		switch (shopType) {
 		case "item":
-			HealthItem item = new HealthItem (Item.RangeType.SINGLE, 10, "801", "单体治疗药剂", 50);
-			Baggrid bg = new Baggrid (item, 0);
-			bgList.Add (bg);
-
+			shopConten = gData.itemShopConten;
+			/*
 			Equipment e2 = new Equipment (2, 3, 0, 0, Equipment.EquipPos.BODY, "1201", "学者的幻想", 1, 500);
 			Baggrid bg2 = new Baggrid (e2, 0);
 			bgList.Add (bg2);
-
+			*/
 			break;
 		case "mercenary":
-
-			Character c = new Character (0, 500, 500, 0, 0, "潘子", false, 500, 500, ProFactory.getPro ("Settler", "401"), 1, 0, null, -1);
-			Mercenary m = new Mercenary (c);
-
-			Baggrid bg3 = new Baggrid (m, 0);
-			bgList.Add (bg3);
-
+			shopConten = gData.assistShopContent;
 			break;
+		}
+
+		if (shopConten != null && shopConten.Count > 0) {
+			for (int i=0; i<shopConten.Count; i++) {
+				ServerItemData sid = siList[shopConten[i]];
+				Baggrid bg = new Baggrid (ItemFactory.getItemFromSID(sid), 0,-1);
+				bgList.Add (bg);
+			}
 		}
 			
 		for (int i=0; i<bgList.Count; i++) {

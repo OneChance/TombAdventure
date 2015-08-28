@@ -35,6 +35,9 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("onReqRoleList", this, "onReqRoleList");
 		KBEngine.Event.registerOut ("onReqItemList", this, "onReqItemList");
 		KBEngine.Event.registerOut ("onCreateRoleResult", this, "onCreateRoleResult");
+
+		//trade
+		KBEngine.Event.registerOut ("onTradeOver", this, "onTradeOver");
 	}
 
 	void OnDestroy ()
@@ -63,6 +66,7 @@ public class Kbe : MonoBehaviour
 
 	public void onLoginFailed (UInt16 failedcode)
 	{
+		//"login is failed(登陆失败), err=" + 
 		if (failedcode == 20) {
 			//login is failed(登陆失败), err=" + KBEngineApp.app.serverErr (failedcode) + ", " + 
 			ShowHint.Hint (System.Text.Encoding.ASCII.GetString (KBEngineApp.app.serverdatas ()));
@@ -98,14 +102,23 @@ public class Kbe : MonoBehaviour
 		loginUI.roleList = roleList;
 	}
 
+	/*请求道具信息callback*/
 	public void onReqItemList (Dictionary<UInt64, Dictionary<string, object>> itemList, List<object> itemshop, List<object> assistshop, List<object> equipshop)
 	{
 		loginUI.ItemDown (itemList, itemshop, assistshop, equipshop);
 	}
 
+	/*创建角色callback*/
 	public void onCreateRoleResult (Dictionary<string, object> role)
 	{
 		UI_Create createUI = UnityEngine.GameObject.FindGameObjectWithTag ("UI").GetComponent<UI_Create> ();
 		createUI.OnCreateRole (role);
+	}
+
+	/*交易callback*/
+	public void onTradeOver (Dictionary<string, object> role,string msg)
+	{
+		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
+		bagUI.TradeOver (role,msg);
 	}
 }

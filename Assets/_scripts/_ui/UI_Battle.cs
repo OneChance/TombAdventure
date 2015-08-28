@@ -51,14 +51,14 @@ public class UI_Battle : MonoBehaviour
 	public void WaitClick ()
 	{
 		closeBag ();
-		Action act = new Action (Op.WAIT, new Baggrid (new WaitItem (), 1));
+		Action act = new Action (Op.WAIT, new Baggrid (new WaitItem (), 1,-1));
 		battle.SendMessage ("Act", act);
 	}
 
 	public void AttackClick ()
 	{
 		closeBag ();
-		Action act = new Action (Op.ATTACK, new Baggrid (new AttackItem (), 1));
+		Action act = new Action (Op.ATTACK, new Baggrid (new AttackItem (), 1,-1));
 		battle.SendMessage ("Act", act);
 	}
 

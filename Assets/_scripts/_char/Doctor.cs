@@ -12,6 +12,5 @@ public class Doctor : Pro {
 		this.dodgeFactor = 1;
 		this.staminaAdd = 20;
 		this.healthAdd = 60;
-        this.itemid = 4;
 	}
 }

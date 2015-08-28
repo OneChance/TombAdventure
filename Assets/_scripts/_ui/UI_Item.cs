@@ -57,11 +57,11 @@ public class UI_Item : MonoBehaviour
 				itemInfo.transform.FindChild ("TradeNum").gameObject.SetActive (false);
 			}
 
-			if (bg.Item.ct == Item.CommonType.CONSUME) {
+			if (bg.Item.ct == (int)Item.CommonType.CONSUME) {
 				buttonText.text = StringCollection.ITEMUSE;
-			} else if (bg.Item.ct == Item.CommonType.EQUIPMENT) {
+			} else if (bg.Item.ct == (int)Item.CommonType.EQUIPMENT) {
 				buttonText.text = StringCollection.ITEMEQUIP;
-			} else if (bg.Item.ct == Item.CommonType.MERCENARY) {
+			} else if (bg.Item.ct == (int)Item.CommonType.MERCENARY) {
 				buttonText.text = StringCollection.ADDTOTEAM;
 			}
 		}

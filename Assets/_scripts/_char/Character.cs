@@ -29,18 +29,21 @@ public class Character:BattleObj
 	private static int LEVELEXPADD = 50;
 	private string charInfo;
 	public int digPower;
+	public string mnote;
 
 	public Character ()
 	{
 
 	}
 	
-	public Character (int money, int health, int maxHealth, int def, int dodge, string objName, bool isOnLinePlayer, int stamina, int  maxStamina, Pro pro, int level, int exp, List<Equipment> eList, int logId)
+	public Character (int money, int health, int maxHealth, int strength,int archeology, int def, int dodge, string objName, bool isOnLinePlayer, int stamina, int  maxStamina, Pro pro, int level, int exp, List<Equipment> eList, int logId)
 	{
 		this.money = money;
 		this.Health = health;
 		this.MaxHealth = maxHealth;
-		this.Def = def;
+		this.strength = strength;
+		this.archeology = archeology;
+		this.def = def;
 		this.dodge = dodge;
 		this.ObjName = objName;
 		this.PrefabName = "_images/_game/" + pro.prefabname;
@@ -55,7 +58,7 @@ public class Character:BattleObj
 		this.EquipList = eList;
 
 		//玩家的属性->基本属性+装备属性
-		AddExp (0);
+		//AddExp (0);
 	}
 
 	public int Stamina {
@@ -91,6 +94,8 @@ public class Character:BattleObj
 		}
 		set {
 			equipList = value;
+
+			/*
 			this.StrengthAdd = 0;
 			this.ArcheologyAdd = 0;
 			//+装备属性
@@ -100,6 +105,7 @@ public class Character:BattleObj
 					this.ArcheologyAdd += equipList [i].archeology;
 				}
 			}
+			*/
 		}
 	}
 
@@ -157,6 +163,7 @@ public class Character:BattleObj
 
 	public void AddExp (int addExp)
 	{
+		/*
 		this.exp += addExp;
 
 		int[] explevel = LevelUp (this.exp, this.level);
@@ -167,10 +174,10 @@ public class Character:BattleObj
 		this.MaxHealth = this.level * this.Pro.healthAdd;
 		this.maxStamina = this.level * this.Pro.staminaAdd;
 
-		this.strengthBase = (int)(this.level * this.Pro.strengthFactor * (isOnLinePlayer ? 1 : 0.5f));
-		this.archeologyBase = (int)(this.level * this.Pro.archeologyFactor * (isOnLinePlayer ? 1 : 0.5f));
-		this.defBase = (int)(this.level * this.Pro.defFactor * (isOnLinePlayer ? 1 : 0.5f));
-		this.dodgeBase = (int)((this.level * 0.2) * this.Pro.dodgeFactor * (isOnLinePlayer ? 1 : 0.5f)); //每五级升级一次躲闪
+		this.strengthBase = (int)(this.level * this.Pro.strengthFactor * rank);
+		this.archeologyBase = (int)(this.level * this.Pro.archeologyFactor * rank);
+		this.defBase = (int)(this.level * this.Pro.defFactor * rank);
+		this.dodgeBase = (int)((this.level * 0.2) * this.Pro.dodgeFactor * rank); //每五级升级一次躲闪
 		
 		this.strength = this.strengthBase + this.strengthAdd;
 		this.archeology = this.archeologyBase + this.archeologyAdd;
@@ -191,6 +198,7 @@ public class Character:BattleObj
 			this.Attack = strength;
 			digPower = strength;
 		}
+		*/
 	}
 
 	public string CharInfo {
@@ -206,7 +214,8 @@ public class Character:BattleObj
 				StringCollection.ARCHEOLOGY + ":" + this.archeology + "\n" + 
 				StringCollection.ATTACK + ":" + this.Attack + "\n" + 
 				StringCollection.DEF + ":" + this.def + "\n" + 
-				StringCollection.DODGE + ":" + this.dodge + "\n";
+				StringCollection.DODGE + ":" + this.dodge + "\n\n" + mnote;
+
 
 			return this.charInfo;
 		}

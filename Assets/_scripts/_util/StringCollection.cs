@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class StringCollection
 {
@@ -77,4 +78,5 @@ public class StringCollection
 	public static string ITEMTOFRIEND = "该道具只能被用于队友";
 	public static string INVALIDTARGET = "无效的目标";
 	public static string ITEMTOENEMY = "该道具只能被用于敌人";
+	public static Dictionary<string, string> stringDict_CN = new Dictionary<string, string> (){{"NUMOVER","超出背包空间"},{"NOMATCHITEM","抱歉,没有这种商品!"}};
 }

@@ -56,7 +56,7 @@ public class BagInit : MonoBehaviour
 			Baggrid bg = bgList [i];
 
 			//战斗场景不能使用装备
-			if (Application.loadedLevelName.Equals ("battle") && bg.Item.ct == Item.CommonType.EQUIPMENT) {
+			if (Application.loadedLevelName.Equals ("battle") && bg.Item.ct == (int)Item.CommonType.EQUIPMENT) {
 				continue;
 			}
 
@@ -67,7 +67,7 @@ public class BagInit : MonoBehaviour
 
 				string num = bg.Num.ToString ();
 
-				if (bg.Item.ct == Item.CommonType.EQUIPMENT || bg.Item.ct == Item.CommonType.MERCENARY) {
+				if (bg.Item.ct == (int)Item.CommonType.EQUIPMENT || bg.Item.ct == (int)Item.CommonType.MERCENARY) {
 					itemO.transform.FindChild ("Num").gameObject.SetActive (false);
 				} else {
 					itemO.transform.FindChild ("Num").GetComponent<Text> ().text = num;

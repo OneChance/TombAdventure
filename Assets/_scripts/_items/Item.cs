@@ -7,37 +7,37 @@ public abstract class Item
 
 	public enum UseType
 	{
-		MAIN,
-		BATTLE
+		MAIN=1,
+		BATTLE=2
 	}
 
 	public enum RangeType
 	{
-		SINGLE,
-		MULTI
+		SINGLE=1,
+		MULTI=2
 	}
 
 	public enum CommonType
 	{
-		EQUIPMENT,
-		CONSUME,
-		MERCENARY
+		EQUIPMENT=1,
+		MERCENARY=2,
+		CONSUME=3
 	}
 
 	public enum ObjType
 	{
-		Friend,
-		Enemy
+		Friend=1,
+		Enemy=2
 	}
 
 	public string name;
-	public RangeType rt;
-	public CommonType ct;
+	public int rt;
+	public int ct;
 	public string prefabName; // relate with the item id of the server database
-	public ObjType ot;
+	public int ot;
 	public string note;
 	public string targetNote;
-	public UseType ut;
+	public int ut;
 	public int price;
 	public bool useable = false;
 
@@ -53,13 +53,13 @@ public abstract class Item
 		this.prefabName = "_images/_ui/item_" + itemId;
 	}
 	 
-	public RangeType Rt {
+	public int Rt {
 		get {
 			return this.rt;
 		}
 		set {
 			rt = value;
-			if (value == RangeType.SINGLE) {
+			if (value == (int)RangeType.SINGLE) {
 				this.targetNote = "单个";
 			} else {
 				this.targetNote = "全部";

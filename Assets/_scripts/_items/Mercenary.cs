@@ -9,11 +9,11 @@ public class Mercenary : Item
 
 	public Mercenary (Character  c)
 	{
-		this.ct = global::Item.CommonType.MERCENARY;
+		this.ct = (int)global::Item.CommonType.MERCENARY;
 		this.c = c;
 		this.prefabName = c.PrefabName;
 		this.note = c.CharInfo;
-		this.price = c.strength + c.archeology + (int)(c.Stamina * 0.5);
+		this.price = 0;
 	}
 
 	public  override void doSth <T> (T from, List<T> to)

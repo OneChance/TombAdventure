@@ -8,9 +8,9 @@ public class AttackItem : Item
 	public AttackItem ():base("noprefab","noname")
 	{
 		this.name = "AttackItem";
-		this.rt = RangeType.SINGLE;
-		this.ct = CommonType.CONSUME;
-		this.ot = ObjType.Enemy;
+		this.rt = (int)RangeType.SINGLE;
+		this.ct = (int)CommonType.CONSUME;
+		this.ot = (int)ObjType.Enemy;
 	}
 
 	public  override void doSth <T> (T from, List<T> to)

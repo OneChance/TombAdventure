@@ -138,7 +138,7 @@ public class SceneGen: MonoBehaviour
 		Dictionary<string,List<FallItem>> fallList = new Dictionary<string,List<FallItem>> ();
 		List<FallItem> itemList = new List<FallItem> ();
 		FallItem fi = new FallItem ();
-		fi.item = new HealthItem (Item.RangeType.SINGLE, 10, "1", "单体治疗药剂", 50);
+		fi.item = new HealthItem ((int)Item.RangeType.SINGLE, 10, "1", "单体治疗药剂", 50);
 		fi.minNum = 1;
 		fi.maxNum = 3;
 		fi.probability = 90;
@@ -277,7 +277,7 @@ public class SceneGen: MonoBehaviour
 				int num = Random.Range (itemList [i].minNum, itemList [i].maxNum + 1);						
 				itemGet = itemGet + " " + itemList [i].item.name + "x" + num;
 				
-				Baggrid baggrid = new Baggrid (itemList [i].item, num);
+				Baggrid baggrid = new Baggrid (itemList [i].item, num,-1);
 				
 				
 				//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)

@@ -11,9 +11,9 @@ public class BagUtil
 
 		bool have = false;
 
-		if (bg.Item.ct == Item.CommonType.EQUIPMENT || bg.Item.ct == Item.CommonType.MERCENARY) {
+		if (bg.Item.ct == (int)Item.CommonType.EQUIPMENT || bg.Item.ct == (int)Item.CommonType.MERCENARY) {
 			for (int i=0; i<bg.Num; i++) {
-				bgList.Add (new Baggrid (bg.Item, 1));
+				bgList.Add (new Baggrid (bg.Item, 1,-1));
 			}
 		} else {
 			for (int i=0; i<bgList.Count; i++) {
@@ -35,7 +35,7 @@ public class BagUtil
 			}
 			
 			if (!have) {
-				bgList.Add (new Baggrid (bg.Item, bg.Num));
+				bgList.Add (new Baggrid (bg.Item, bg.Num,-1));
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ServerItemData {    
+public class ServerItemData { 
     public int dbid;
 	public string name;
 	public int usetype;
@@ -18,6 +18,7 @@ public class ServerItemData {
 	public int dodge;
 	public int epos;
 	public int level;
+	public int health;
 	public int stamina;
 	public string pro;
 	public int levelexpadd;

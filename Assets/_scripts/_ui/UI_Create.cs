@@ -49,11 +49,11 @@ public class UI_Create : MonoBehaviour
 			return;
 		}
 
-		Pro pro = ProFactory.getPro (canvas.transform.FindChild ("Choose").GetComponent<Image> ().sprite.name.Split (new char[]{'_'}) [0], "1");
+		string proname = canvas.transform.FindChild ("Choose").GetComponent<Image> ().sprite.name.Split (new char[]{'_'}) [0];
 
 		Account account = (Account)KBEngineApp.app.player();
 
-		account.reqCreateRole (name.text.Trim (), pro.itemid.ToString ());
+		account.reqCreateRole (name.text.Trim (), proname);
 
 	}
 
