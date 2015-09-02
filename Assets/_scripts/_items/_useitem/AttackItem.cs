@@ -13,6 +13,8 @@ public class AttackItem : Item
 		this.ot = (int)ObjType.Enemy;
 	}
 
+
+	/*
 	public  override void doSth <T> (T from, List<T> to)
 	{
 		int attack = from.Attack;
@@ -29,5 +31,5 @@ public class AttackItem : Item
 				Debug.Log (StringCollection.DODGED);
 			}
 		}
-	}
+	}*/
 }

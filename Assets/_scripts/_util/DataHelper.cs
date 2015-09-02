@@ -30,29 +30,75 @@ public class DataHelper : MonoBehaviour
 		string proname = player ["pro"].ToString ();
 		int img = int.Parse (player ["img"].ToString ());
 
-		Pro pro = ProFactory.getPro(proname,img.ToString());
+		Pro pro = ProFactory.getPro (proname, img.ToString ());
 
+		List<Equipment> eList = getEquipsFromServer (role, siList);
+
+		List<Baggrid> bgList = new List<Baggrid> ();
+
+		Character c = new Character (money, health, maxhealth, strength, archeology, def, dodge, name, true, stamina, maxstamina, pro, level, exp, eList, -1);
+
+		c.BgList = bgList;
+		c.dbid = 1; //玩家是1,雇佣兵为2,3,4
+		
+		BagDataBind (c, role, siList);
+	
+		characterList.Add (c);
+
+		getAssistsFromServer (role, siList, characterList);
+
+		return characterList;
+	}
+
+	public static void getAssistsFromServer (Dictionary<string, object> role, Dictionary<int, ServerItemData> siList, List<Character> characterList)
+	{
+		List<object> assistL = (List<object>)role ["assists"];
+		for (int i = 0; i < assistL.Count; i++) {
+			Dictionary<string, object> assistInfo = (Dictionary<string, object>)assistL [i];
+			int iid = int.Parse (assistInfo ["iid"].ToString ());
+			int dbid = int.Parse (assistInfo ["dbid"].ToString ());
+			int level = int.Parse (assistInfo ["level"].ToString ());
+			int commontype = int.Parse (assistInfo ["commontype"].ToString ());
+			int stamina = int.Parse (assistInfo ["stamina"].ToString ());
+			int maxstamina = int.Parse (assistInfo ["maxstamina"].ToString ());
+			int health = int.Parse (assistInfo ["health"].ToString ());
+			int maxhealth = int.Parse (assistInfo ["maxhealth"].ToString ());
+			int strength = int.Parse (assistInfo ["strength"].ToString ());
+			int archeology = int.Parse (assistInfo ["archeology"].ToString ());
+			int def = int.Parse (assistInfo ["def"].ToString ());
+			int dodge = int.Parse (assistInfo ["dodge"].ToString ());
+			int exp = int.Parse (assistInfo ["exp"].ToString ());
+			int attack = int.Parse (assistInfo ["attack"].ToString ());
+
+			ServerItemData assistProInfo = siList [iid];
+
+			Pro pro = ProFactory.getPro (assistProInfo.pro, assistProInfo.prefabname);
+
+			if (assistProInfo != null) {
+				Character c = new Character (0, health, maxhealth, strength, archeology, def, dodge, assistProInfo.name, false, stamina, maxstamina, pro, level, exp, null, -1);
+				c.dbid = dbid;
+				c.iid = iid;
+				characterList.Add (c);
+			}
+		}
+	}
+
+	public static List<Equipment> getEquipsFromServer (Dictionary<string, object> role, Dictionary<int, ServerItemData> siList)
+	{
 		List<Equipment> eList = new List<Equipment> ();
 		List<object> equipL = (List<object>)role ["equips"];
 		for (int i = 0; i < equipL.Count; i++) {
 			Dictionary<string, object> info = (Dictionary<string, object>)equipL [i];
-			int eid = int.Parse (((UInt16)info ["eid"]).ToString ());
-			ServerItemData equipInfo = siList [eid];
+			int iid = int.Parse (((UInt16)info ["iid"]).ToString ());
+			int dbid = int.Parse (info ["dbid"].ToString ());
+			ServerItemData equipInfo = siList [iid];
 			if (equipInfo != null) {
-				Equipment e = new Equipment (equipInfo.strength, equipInfo.archeology, equipInfo.def, equipInfo.dodge, Equipment.getPosByIndex (equipInfo.epos), eid.ToString (), equipInfo.name, equipInfo.level, equipInfo.price);
+				Equipment e = new Equipment (equipInfo.strength, equipInfo.archeology, equipInfo.def, equipInfo.dodge, equipInfo.epos, iid.ToString (), equipInfo.name, equipInfo.level, equipInfo.price, equipInfo.health, equipInfo.stamina);
+				e.dbid = dbid;
 				eList.Add (e);
 			}
 		}
-
-		List<Baggrid> bgList = new List<Baggrid> ();
-
-		Character c = new Character (money, health, maxhealth, strength, archeology,def,dodge,name, true, stamina, maxstamina, pro, level, exp, eList, -1);
-		
-		c.BgList = bgList;	
-	
-		characterList.Add (c);
-
-		return characterList;
+		return eList;
 	}
 
 	public static void BagDataBind (Character c, Dictionary<string, object> role, Dictionary<int, ServerItemData> siList)
@@ -74,7 +120,7 @@ public class DataHelper : MonoBehaviour
 
 			int bgDBID = int.Parse (bg_server ["dbid"].ToString ());
 
-			Baggrid bg = new Baggrid (ItemFactory.getItemFromSID (sid), num,bgDBID);
+			Baggrid bg = new Baggrid (ItemFactory.getItemFromSID (sid, bg_server), num, bgDBID);
 			
 			c.BgList.Add (bg);
 		}

@@ -15,11 +15,4 @@ public class HealthItem : Item
 		this.ut = (int)UseType.BATTLE;
 		this.price = price;
 	}
-
-	public  override void doSth <T>(T from, List<T> to)
-	{
-		for (int i=0; i<to.Count; i++) {
-			to [i].Health = Mathf.Min(to [i].Health + heal,to[i].MaxHealth);
-		}
-	}
 }

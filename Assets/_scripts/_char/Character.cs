@@ -30,6 +30,8 @@ public class Character:BattleObj
 	private string charInfo;
 	public int digPower;
 	public string mnote;
+	public int dbid = 0;
+	public int iid = 0;
 
 	public Character ()
 	{
@@ -56,9 +58,6 @@ public class Character:BattleObj
 		this.nextLevelExp = level * LEVELEXPADD;
 		this.logId = logId;
 		this.EquipList = eList;
-
-		//玩家的属性->基本属性+装备属性
-		//AddExp (0);
 	}
 
 	public int Stamina {
@@ -94,18 +93,6 @@ public class Character:BattleObj
 		}
 		set {
 			equipList = value;
-
-			/*
-			this.StrengthAdd = 0;
-			this.ArcheologyAdd = 0;
-			//+装备属性
-			if (equipList != null) {
-				for (int i=0; i<equipList.Count; i++) {
-					this.StrengthAdd += equipList [i].strength;
-					this.ArcheologyAdd += equipList [i].archeology;
-				}
-			}
-			*/
 		}
 	}
 
@@ -147,58 +134,6 @@ public class Character:BattleObj
 			dodgeAdd = value;
 			dodge = dodgeBase + dodgeAdd;
 		}
-	}
-
-	public int[] LevelUp (int exp, int level)
-	{
-		int nextExp = level * LEVELEXPADD;
-
-		if (exp >= nextExp) {
-			level++;
-			return LevelUp (exp - nextExp, level);
-		} else {
-			return new int[2]{exp,level};
-		}
-	}
-
-	public void AddExp (int addExp)
-	{
-		/*
-		this.exp += addExp;
-
-		int[] explevel = LevelUp (this.exp, this.level);
-
-		this.exp = explevel [0];
-		this.level = explevel [1];
-
-		this.MaxHealth = this.level * this.Pro.healthAdd;
-		this.maxStamina = this.level * this.Pro.staminaAdd;
-
-		this.strengthBase = (int)(this.level * this.Pro.strengthFactor * rank);
-		this.archeologyBase = (int)(this.level * this.Pro.archeologyFactor * rank);
-		this.defBase = (int)(this.level * this.Pro.defFactor * rank);
-		this.dodgeBase = (int)((this.level * 0.2) * this.Pro.dodgeFactor * rank); //每五级升级一次躲闪
-		
-		this.strength = this.strengthBase + this.strengthAdd;
-		this.archeology = this.archeologyBase + this.archeologyAdd;
-		this.def = this.defBase + this.defAdd;
-		this.dodge = this.dodgeBase + this.dodgeAdd;
-
-	
-		if (StringCollection.GEOMANCER.Equals (Pro.proname)) {
-			this.Attack = strength;
-			digPower = strength;
-		} else if (StringCollection.SETTLER.Equals (Pro.proname)) {
-			this.Attack = strength * 2;
-			digPower = strength * 4;
-		} else if (StringCollection.EXORCIST.Equals (Pro.proname)) {
-			this.Attack = strength * 4;
-			digPower = strength;
-		} else if (StringCollection.DOCTOR.Equals (Pro.proname)) {
-			this.Attack = strength;
-			digPower = strength;
-		}
-		*/
 	}
 
 	public string CharInfo {

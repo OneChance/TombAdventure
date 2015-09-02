@@ -8,10 +8,12 @@ public class Equipment : Item
 	public int archeology;
 	public int def;
 	public int dodge;
-	public EquipPos ep;
+	public int ep;
 	public int eLevel;
+	public int health;
+	public int stamina;
 
-	public Equipment (int strength, int archeology, int def, int dodge, EquipPos ep, string itemId, string name, int eLevel, int price):base(itemId,name)
+	public Equipment (int strength, int archeology, int def, int dodge, int ep, string itemId, string name, int eLevel, int price,int health,int stamina):base(itemId,name)
 	{
 		this.ct = (int)global::Item.CommonType.EQUIPMENT;
 		this.strength = strength;
@@ -21,6 +23,8 @@ public class Equipment : Item
 		this.ep = ep;
 		this.eLevel = eLevel;
 		this.price = price;
+		this.health = health;
+		this.stamina = stamina;
 
 		if (strength > 0) {
 			this.note = this.note + StringCollection.STRENGTH + "+" + strength + "\n";
@@ -34,35 +38,20 @@ public class Equipment : Item
 		if (dodge > 0) {
 			this.note = this.note + StringCollection.DODGE + "+" + dodge + "\n";
 		}
+		if (health > 0) {
+			this.note = this.note + StringCollection.HEALTH + "+" + health + "\n";
+		}
+		if (stamina > 0) {
+			this.note = this.note + StringCollection.STAMINA + "+" + stamina + "\n";
+		}
 	}
 
 	public enum EquipPos
 	{
-		HEAD,
-		BODY,
-		FOOT,
-		HAND,
-		ALL
-	}
-
-	public static EquipPos getPosByIndex (int pos)
-	{
-		switch (pos) {
-		case 1:
-			return EquipPos.HEAD;
-		case 2:
-			return EquipPos.BODY;
-		case 3:
-			return EquipPos.FOOT;
-		case 4:
-			return EquipPos.HAND;
-		default:
-			return EquipPos.ALL;
-		}
-	}
-
-	public  override void doSth <T> (T from, List<T> to)
-	{
-		
+		HEAD=1,
+		BODY=2,
+		FOOT=3,
+		HAND=4,
+		ALL=5
 	}
 }

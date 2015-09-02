@@ -38,6 +38,12 @@ public class Kbe : MonoBehaviour
 
 		//trade
 		KBEngine.Event.registerOut ("onTradeOver", this, "onTradeOver");
+		//equip
+		KBEngine.Event.registerOut ("onEquipOperOver", this, "onEquipOperOver");
+		//item
+		KBEngine.Event.registerOut ("onUseItemOver", this, "onUseItemOver");
+		//assist
+		KBEngine.Event.registerOut ("onAssistOperOver", this, "onAssistOperOver");
 	}
 
 	void OnDestroy ()
@@ -120,5 +126,26 @@ public class Kbe : MonoBehaviour
 	{
 		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
 		bagUI.TradeOver (role,msg);
+	}
+
+	/*装备操作callback*/
+	public void onEquipOperOver (Dictionary<string, object> role,string msg)
+	{
+		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
+		bagUI.onEquipOperOver (role,msg);
+	}
+
+	/*使用道具callback*/
+	public void onUseItemOver (Dictionary<string, object> role,string msg)
+	{
+		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
+		bagUI.onUseItemOver (role,msg);
+	}
+
+	/*装备雇佣兵 callback*/
+	public void onAssistOperOver (Dictionary<string, object> role,string msg)
+	{
+		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
+		bagUI.onAssistOperOver (role,msg);
 	}
 }

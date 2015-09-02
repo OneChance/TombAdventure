@@ -9,9 +9,4 @@ public class WaitItem : Item
 	{
 		this.name = "WaitItem";
 	}
-
-	public  override void doSth <T>(T from, List<T> to)
-	{
-
-	}
 }

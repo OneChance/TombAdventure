@@ -24,7 +24,7 @@ public class StringCollection
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
 	public static string ITEMGET = "获得";
 	public static string NOTRADENUM = "请输入交易数量";
-	public static string NOTENOUGHMONEY = "金额不足";
+	public static string NOTENOUGHMONEY = "没钱了";
 	public static string DODGED = "躲开了";
 	public static string NEEDUSERNAME = "请填写用户名";
 	public static string NEEDPASSWORD = "请填写密码";
@@ -78,5 +78,5 @@ public class StringCollection
 	public static string ITEMTOFRIEND = "该道具只能被用于队友";
 	public static string INVALIDTARGET = "无效的目标";
 	public static string ITEMTOENEMY = "该道具只能被用于敌人";
-	public static Dictionary<string, string> stringDict_CN = new Dictionary<string, string> (){{"NUMOVER","超出背包空间"},{"NOMATCHITEM","抱歉,没有这种商品!"}};
+	public static Dictionary<string, string> stringDict_CN = new Dictionary<string, string> (){{"NUMOVER","超出背包空间"},{"NOMATCHITEM","抱歉,没有这种商品"},{"NOTENOUGHMONEY","没钱了"}};
 }

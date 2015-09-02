@@ -58,12 +58,15 @@ public class ShopBagInit : MonoBehaviour
 
 		switch (shopType) {
 		case "item":
-			shopConten = gData.itemShopConten;
-			/*
-			Equipment e2 = new Equipment (2, 3, 0, 0, Equipment.EquipPos.BODY, "1201", "学者的幻想", 1, 500);
-			Baggrid bg2 = new Baggrid (e2, 0);
-			bgList.Add (bg2);
-			*/
+
+			for(int i=0;i<gData.itemShopConten.Count;i++){
+				shopConten.Add(gData.itemShopConten[i]);
+			}
+
+			for(int i=0;i<gData.equipShopContent.Count;i++){
+				shopConten.Add(gData.equipShopContent[i]);
+			}
+
 			break;
 		case "mercenary":
 			shopConten = gData.assistShopContent;
@@ -73,7 +76,7 @@ public class ShopBagInit : MonoBehaviour
 		if (shopConten != null && shopConten.Count > 0) {
 			for (int i=0; i<shopConten.Count; i++) {
 				ServerItemData sid = siList[shopConten[i]];
-				Baggrid bg = new Baggrid (ItemFactory.getItemFromSID(sid), 0,-1);
+				Baggrid bg = new Baggrid (ItemFactory.getItemFromSID(sid,null), 0,-1);
 				bgList.Add (bg);
 			}
 		}

@@ -16,8 +16,4 @@ public class Mercenary : Item
 		this.price = 0;
 	}
 
-	public  override void doSth <T> (T from, List<T> to)
-	{
-		
-	}
 }

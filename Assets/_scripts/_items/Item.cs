@@ -40,6 +40,7 @@ public abstract class Item
 	public int ut;
 	public int price;
 	public bool useable = false;
+	public int dbid; //与服务器端同步的列表id
 
 	public Item ()
 	{
@@ -66,6 +67,4 @@ public abstract class Item
 			}
 		}
 	}
-	
-	public abstract void doSth <T> (T from, List<T> to) where T:BattleObj; 
 }

@@ -136,7 +136,7 @@ public class Battle : MonoBehaviour
 				}
 
 				if (toList.Count > 0) {
-					bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
+					//bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
 				}
 			
 
@@ -379,7 +379,7 @@ public class Battle : MonoBehaviour
 		if (victory) {
 			//获得经验
 			for (int i=0; i<characterList.Count; i++) {
-				characterList [i].AddExp (battleExp);
+				//characterList [i].AddExp (battleExp);
 			}
 		}
 		return victory;

@@ -72,6 +72,9 @@ public class UI_Bag : MonoBehaviour
 
 	public void UpdateUIInfo ()
 	{
+
+		cList = gData.characterList;
+
 		if (charInfo.activeInHierarchy) {
 
 			charNote.GetComponent<Text> ().text = cList [0].CharInfo;
@@ -91,58 +94,53 @@ public class UI_Bag : MonoBehaviour
 		}
 	}
 
-	public GameObject getEquipPosGo (Equipment.EquipPos pos)
+	public GameObject getEquipPosGo (int pos)
 	{
 		
 		GameObject eP = null;		
 		
 		switch (pos) {
-		case Equipment.EquipPos.BODY:
+		case (int)Equipment.EquipPos.BODY:
 			eP = clothes;
 			break;
-		case Equipment.EquipPos.HAND:
+		case  (int)Equipment.EquipPos.HAND:
 			eP = hand;
 			break;
-		case Equipment.EquipPos.HEAD:
+		case  (int)Equipment.EquipPos.HEAD:
 			eP = head;
 			break;
-		case Equipment.EquipPos.FOOT:
+		case  (int)Equipment.EquipPos.FOOT:
 			eP = foot;
 			break;
 		}	
 		
 		return eP;
 	}
+
 	
-	public void UpdateUIEquip (Equipment.EquipPos pos)
+	public void DestroyIfNotNull(Transform trans){
+		if(trans!=null){
+			Destroy(trans.gameObject);
+		}
+	}
+
+	public void UpdateUIEquip ()
 	{
-		
-		bool haveUpdate = false;
-		
-		for (int i=0; i<eList.Count; i++) {
-			
+		//先清除所有装备
+		DestroyIfNotNull(clothes.transform.FindChild("UIEquip(Clone)"));
+		DestroyIfNotNull(hand.transform.FindChild("UIEquip(Clone)"));
+		DestroyIfNotNull(head.transform.FindChild("UIEquip(Clone)"));
+		DestroyIfNotNull(foot.transform.FindChild("UIEquip(Clone)"));
+
+
+		for (int i=0; i<eList.Count; i++) {			
 			GameObject eP = getEquipPosGo (eList [i].ep);
-			
-			if (pos == Equipment.EquipPos.ALL || pos == eList [i].ep) {
-				
-				haveUpdate = true;
-				
-				//检测该位置有没有装备,如果有先删除
-				if (eP.transform.FindChild ("UIEquip(Clone)") != null) {
-					Destroy (eP.transform.FindChild ("UIEquip(Clone)").gameObject);
-				}
-				
-				GameObject uiEquipO = Instantiate (uiEquip, new Vector3 (eP.transform.position.x, eP.transform.position.y, 0), Quaternion.identity) as GameObject;
-				uiEquipO.GetComponent<Image> ().sprite = Resources.Load<Sprite> (eList [i].prefabName);
-				uiEquipO.GetComponent<UI_Equip> ().e = eList [i];
-				uiEquipO.transform.SetParent (eP.transform);
-			}
+			GameObject uiEquipO = Instantiate (uiEquip, new Vector3 (eP.transform.position.x, eP.transform.position.y, 0), Quaternion.identity) as GameObject;
+			uiEquipO.GetComponent<Image> ().sprite = Resources.Load<Sprite> (eList [i].prefabName);
+			uiEquipO.GetComponent<UI_Equip> ().e = eList [i];
+			uiEquipO.transform.SetParent (eP.transform);
 		}
-		
-		//如果要更新的位置，已经没有装备，移除
-		if (!haveUpdate && pos != Equipment.EquipPos.ALL) {
-			Destroy (getEquipPosGo (pos).transform.FindChild ("UIEquip(Clone)").gameObject);
-		}
+
 	}
 
 	public void InitCharInfo ()
@@ -158,7 +156,7 @@ public class UI_Bag : MonoBehaviour
 			uiCharAvatar.transform.SetParent (avatar.transform);
 			
 			//加载装备
-			UpdateUIEquip (Equipment.EquipPos.ALL);
+			UpdateUIEquip ();
 			
 			//助手角色信息
 			for (int i=1; i<=assList.Count; i++) {
@@ -199,18 +197,59 @@ public class UI_Bag : MonoBehaviour
 			bag.SendMessage ("InitBag", currentC);
 	}
 
+	//更新玩家数据
+	public void refreshCharacterData(Dictionary<string, object> role){
+		gData.characterList = DataHelper.GetCharacterFromServer (role, gData.siList);
+		cList = gData.characterList;
+		eList = cList [0].EquipList;
+	}
+
 	//交易 服务器callback
 	public void TradeOver (Dictionary<string, object> role, string msg)
 	{
 		if (!msg.Equals ("ok")) {
-			ShowHint.Hint(StringCollection.stringDict_CN[msg]);
-		}else{
+			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
+		} else {
 			//更新背包
-			DataHelper.BagDataBind(gData.characterList [0],role,gData.siList);
-			ItemUseComplete();
+			refreshCharacterData(role);
+			ItemUseComplete ();
 		}
 	}
-	
+
+	//装备操作 服务器callback
+	public void onEquipOperOver (Dictionary<string, object> role, string msg)
+	{
+		if (!msg.Equals ("ok")) {
+			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
+		} else {
+			refreshCharacterData(role);
+			UpdateUIEquip ();
+			ItemUseComplete ();
+		}
+	}
+
+	//道具使用 服务器callback
+	public void onUseItemOver (Dictionary<string, object> role, string msg)
+	{
+		if (!msg.Equals ("ok")) {
+			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
+		} else {
+			refreshCharacterData(role);
+			ItemUseComplete ();
+		}
+	}
+
+	//装备雇佣兵 服务器callback
+	public void onAssistOperOver (Dictionary<string, object> role, string msg)
+	{
+		if (!msg.Equals ("ok")) {
+			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
+		} else {
+			refreshCharacterData(role);
+			ItemUseComplete ();
+		}
+	}
+
 	public void UseItem (Button button)
 	{
 		Baggrid bg = gData.currentItem;
@@ -234,9 +273,9 @@ public class UI_Bag : MonoBehaviour
 			string iid = item.prefabName.Split (new char[]{'/'}) [2].Split (new char[]{'_'}) [1];
 
 			if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.BUY)) {
-				gData.account.TradeItem (int.Parse (iid), 0, int.Parse (tradeNum.text),0,bg.level);
+				gData.account.TradeItem (int.Parse (iid), 0, int.Parse (tradeNum.text), 0, bg.level);
 			} else {
-				gData.account.TradeItem (int.Parse (iid), 1, int.Parse (tradeNum.text),bg.dbid,bg.level);
+				gData.account.TradeItem (int.Parse (iid), 1, int.Parse (tradeNum.text), bg.dbid, bg.level);
 			}
 
 		} else {
@@ -246,81 +285,33 @@ public class UI_Bag : MonoBehaviour
 			//获取道具信息
 
 			if (item.ct == (int)global::Item.CommonType.CONSUME) {
-				//人物格闪动
-				GameUtil.UnFocus (focusList);
-				focusList.Add (avatar.transform.FindChild ("UIChar(Clone)").gameObject);
-				for (int i=1; i<cList.Count; i++) {
-					GameObject ass = assList [i - 1];
-					focusList.Add (ass.transform.FindChild ("UIChar(Clone)").gameObject);
-				}
-				
 				//如果是群体道具，直接应用，否则等待点击玩家后使用
+
+				Debug.Log("sdfasdfafasdf  "+item.rt);
+
 				if (item.rt == (int)global::Item.RangeType.MULTI) {
-					bg.Item.doSth (cList [0], cList);
-					//用完减少数量
-					gData.currentItem.Num--;
-					ItemUseComplete ();
+					gData.account.UseItem(cList [0].ObjName, "ALLTEAM",bg.dbid);
+				}else{
+					//人物格闪动
+					GameUtil.UnFocus (focusList);
+					focusList.Add (avatar.transform.FindChild ("UIChar(Clone)").gameObject);
+					for (int i=1; i<cList.Count; i++) {
+						GameObject ass = assList [i - 1];
+						focusList.Add (ass.transform.FindChild ("UIChar(Clone)").gameObject);
+					}
 				}
 				
 			} else if (item.ct == (int)global::Item.CommonType.EQUIPMENT) {
-				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.NOEQUIP)) {//装备卸下
-					//从装备中移除
-					for (int i=0; i<eList.Count; i++) {
-						if (eList [i].ep == ((Equipment)item).ep) {
-							eList.Remove (eList [i]);
-							break;
-						}
-					}
-					//添加到背包
-					BagUtil.AddItem (bgList, bg);
-
-				} else { //装备穿戴
-					bool haveE = false;
-					Equipment oldE = null;
-					
-					for (int i=0; i<eList.Count; i++) {
-						if (eList [i].ep == ((Equipment)item).ep) {
-							oldE = eList [i];
-							eList [i] = (Equipment)item; //替换装备
-							haveE = true;
-							break;
-						}
-					}
-					
-					if (!haveE) {
-						eList.Add ((Equipment)item);
-						//从背包移除
-						for (int i=0; i<bgList.Count; i++) {
-							if (bgList [i].Item.name.Equals (item.name)) {
-								bgList.Remove (bgList [i]);
-							}
-						}
-					} else {
-						//替换背包里的装备，找到同名装备替换，即使有多个，因为背包会自动排序，随便替换一个也没有问题
-						for (int i=0; i<bgList.Count; i++) {
-							if (bgList [i].Item.name.Equals (item.name)) {
-								bgList [i].Item = oldE;
-								break;
-							}
-						}
-					}
+				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.NOEQUIP)) {
+					//装备卸下
+					gData.account.EquipOper (bg.Item.dbid, 1);
+				} else { 
+					//装备穿戴
+					gData.account.EquipOper (bg.dbid, 0);
 				}
-				
-				UpdateUIEquip (((Equipment)item).ep);
-				cList [0].EquipList = eList;
-				ItemUseComplete ();
 			} else if (item.ct == (int)global::Item.CommonType.MERCENARY) {
 				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.LEAVETEAM)) {//离队
-
-					//从队中移除
-					Mercenary m = (Mercenary)item;
-					if (m.assPos > 0) {
-						cList.Remove (cList [m.assPos]);
-					}
-					
-					//添加到背包
-					BagUtil.AddItem (bgList, bg);
-					ItemUseComplete ();
+					gData.account.AssistOper(0,((Mercenary)item).c.dbid);
 				} else {
 					//助手格闪动
 					GameUtil.UnFocus (focusList);
@@ -341,7 +332,6 @@ public class UI_Bag : MonoBehaviour
 			UpdateUIInfo ();
 		}
 		itemInfo.SetActive (false);
-		gData.currentItem.Item.useable = false;
 		gData.currentItem = null;
 		if (bag.activeInHierarchy) {
 			bag.SendMessage ("InitBag", cList [0]);
