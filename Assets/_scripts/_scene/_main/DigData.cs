@@ -12,4 +12,12 @@ public class DigData : ElementData {
 		this.currentDeep = currentDeep;
 		this.texType = texType;
 	}
+
+	public DigData(ElementData element){
+		this.dbid = element.dbid;
+		this.pos = element.pos;
+		this.objName = element.objName;
+		this.eulerAngles = element.eulerAngles;
+		this.order = element.order;
+	}
 }

@@ -15,20 +15,14 @@ public class UI_Map : MonoBehaviour
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 
 		//从服务器加载tomb列表
-		tombs = new List<Tomb> ();
-		
-		Tomb tomb = new Tomb ();
-		tomb.tombName = StringCollection.KINGOFLU;
-		tomb.tombLevel = 1;
-		tomb.sceneList = new List<SceneInfo>();
-		
-		tombs.Add (tomb);
-		
+		tombs = gData.tombs;
+
+
 		//用列表初始化map
 		Transform tombsO = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("Tombs");
 		for (int i=0; i<tombsO.childCount; i++) {
 			tombsO.GetChild (i).GetComponent<Image> ().sprite = Resources.Load <Sprite> ("_images/_game/tomb_" + tombs [i].tombLevel);
-			tombsO.GetChild (i).FindChild ("Text").GetComponent<Text> ().text = tombs [i].tombName;
+			tombsO.GetChild (i).FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN[tombs [i].tombName];
 			tombsO.GetChild (i).GetComponent<TombInfo> ().tomb = tombs [i];
 		}
 
@@ -51,16 +45,18 @@ public class UI_Map : MonoBehaviour
 
 		tombIn.SetActive (true);
 
-		//(当玩家购买探险日志时，为日志生成唯一的id，此后的探险记录，都与这个id绑定，获取记录也是根据这个id去获取)
-		int logId = gData.characterList [0].logId;
-		
 		bool haveLog = false;
-		
-		if (logId == -1) {
-			
-		} else {
-			
+
+		Dictionary<int,TombLog> tombLogs = gData.characterList[0].tombLogs;
+
+		List<SceneInfo> sceneList = new List<SceneInfo>();
+
+		if(tombLogs.ContainsKey(currentTomb.dbid)){
+			haveLog = true;
+			sceneList = tombLogs[currentTomb.dbid].sceneinfos;
 		}
+
+		currentTomb.sceneList = sceneList;
 
 		if (haveLog) {
 			tombIn.transform.FindChild ("Log").gameObject.SetActive (true);
@@ -76,14 +72,12 @@ public class UI_Map : MonoBehaviour
 
 	public void goTomb (string type)
 	{
-		if (type.Equals ("new")) {
-			gData.currentTomb = currentTomb;
-
-			DontDestroyOnLoad (gData);
-			Application.LoadLevel ("main");
-
-		} else if (type.Equals ("log")) {
-
+		if(type.Equals("new")){
+			currentTomb.sceneList = new List<SceneInfo>();
 		}
+
+		gData.currentTomb = currentTomb;
+		DontDestroyOnLoad (gData);
+		Application.LoadLevel ("main");
 	}
 }

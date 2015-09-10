@@ -47,7 +47,7 @@ public class UI_Login : MonoBehaviour
 
 	}
 
-	public void ItemDown (Dictionary<UInt64, Dictionary<string, object>> itemList, List<object> itemshop, List<object> assistshop, List<object> equipshop)
+	public void ItemDown (Dictionary<UInt64, Dictionary<string, object>> itemList, List<object> itemshop, List<object> assistshop, List<object> equipshop,List<object> tombs)
 	{
 
 		Dictionary<int, ServerItemData> siList = new Dictionary<int, ServerItemData> ();
@@ -139,17 +139,15 @@ public class UI_Login : MonoBehaviour
             
 		}
 
-
 		gData.siList = siList;
 		gData.itemShopConten = itemShopContent;
 		gData.assistShopContent = assistShopContent;
 		gData.equipShopContent = equipShopContent;
-		gData.account = (Account)KBEngineApp.app.player();
+		gData.account = (Account)KBEngineApp.app.player ();
+		gData.tombs = DataHelper.getTombInfoFromServer(tombs);
 
 		if (roleList != null && roleList.Count > 0) {
 			Dictionary<string, object> uinfo = roleList [0];
-
-			Dictionary<string, object> playerInfo = (Dictionary<string, object>)uinfo ["info"];
 
 			//从服务器端获取玩家数据初始化
 			gData.isPlayer = false; //初始的时候总是佣兵模式，玩家在线后与其他玩家组队，才会变成联机模式

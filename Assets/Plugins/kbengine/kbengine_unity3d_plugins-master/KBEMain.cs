@@ -57,6 +57,8 @@ public class KBEMain : MonoBehaviour
 		
 		args.syncPlayer = syncPlayer;
 		args.threadUpdateHZ = threadUpdateHZ;
+
+		Debug.Log("***********************************"+SEND_BUFFER_MAX);
 		
 		args.SEND_BUFFER_MAX = (UInt32)SEND_BUFFER_MAX;
 		args.RECV_BUFFER_MAX = (UInt32)RECV_BUFFER_MAX;

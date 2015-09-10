@@ -32,6 +32,7 @@ public class Character:BattleObj
 	public string mnote;
 	public int dbid = 0;
 	public int iid = 0;
+	public Dictionary<int,TombLog> tombLogs;
 
 	public Character ()
 	{

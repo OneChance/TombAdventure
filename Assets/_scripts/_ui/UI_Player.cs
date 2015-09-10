@@ -31,10 +31,7 @@ public class UI_Player : MonoBehaviour
 
 			} else if (gData.currentItem.Item.ct == (int)Item.CommonType.MERCENARY) {
 				if (gameObject.transform.parent.name.Contains ("Ass")) {
-					//更换助手
-					Mercenary m = (Mercenary)(gData.currentItem.Item);
-
-					//如果点击的位置上有助手,替换,否则直接参战
+					//更换助手,如果点击的位置上有助手,替换,否则直接参战
 					if (GetComponent<Image> ().sprite.name.Equals ("no_ass")) {
 						gData.account.AssistOper (gData.currentItem.dbid, 0);			
 					} else {

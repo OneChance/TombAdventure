@@ -19,7 +19,7 @@ public class StringCollection
 	public static string DIGNOTHING = "挖到底了,什么也发现";
 	public static string NOSTAMINA = "没有体能挖掘了,大家需要休息一会";
 	public static string ALONGWALL = "靠着墙的位置不太好挖啊，换个地方试试吧";
-	public static string CANNOTDIG = "此地貌似有坚硬的石块，换个地方试试吧";
+	public static string CANNOTDIG = "此处无法挖掘，换个地方试试吧";
 	public static string DIGOVER = "这里已经挖过了,换一个地方吧";
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
 	public static string ITEMGET = "获得";
@@ -78,5 +78,10 @@ public class StringCollection
 	public static string ITEMTOFRIEND = "该道具只能被用于队友";
 	public static string INVALIDTARGET = "无效的目标";
 	public static string ITEMTOENEMY = "该道具只能被用于敌人";
-	public static Dictionary<string, string> stringDict_CN = new Dictionary<string, string> (){{"NUMOVER","超出背包空间"},{"NOMATCHITEM","抱歉,没有这种商品"},{"NOTENOUGHMONEY","没钱了"}};
+	public static Dictionary<string, string> stringDict_CN = new Dictionary<string, string> (){
+		{"NUMOVER","超出背包空间"},
+		{"NOMATCHITEM","抱歉,没有这种商品"},
+		{"NOTENOUGHMONEY","没钱了"},
+		{"KINGOFLU","明鲁王墓"}
+	};
 }

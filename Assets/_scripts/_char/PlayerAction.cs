@@ -63,9 +63,6 @@ public class PlayerAction : MonoBehaviour
 			
 			stepCounter++;
 
-			//通知UI更新
-			uiInput.SendMessage ("UpdateUIInfo");
-
 			//队长移动一次，减少一个体能；成员移动三次，减少一个体能
 			gData.characterList [0].Stamina = Mathf.Max (0, gData.characterList [0].Stamina - 1);
 			
@@ -75,6 +72,10 @@ public class PlayerAction : MonoBehaviour
 				}
 				stepCounter = 0;
 			}
+
+			//通知UI更新
+			uiInput.SendMessage ("UpdateUIInfo");
+
 		} else {
 			Debug.Log (StringCollection.LEADERNOSTAMINA);
 		}

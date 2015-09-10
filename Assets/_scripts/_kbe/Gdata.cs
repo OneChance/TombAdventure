@@ -20,7 +20,7 @@
 			baseCall ("reqItemList", 0);     
 		}
 		
-		public void onReqItemList (Dictionary<string, object> itemList, Dictionary<string, object> itemshop, Dictionary<string, object> assistshop, Dictionary<string, object> equipshop)
+		public void onReqItemList (Dictionary<string, object> itemList, Dictionary<string, object> itemshop, Dictionary<string, object> assistshop, Dictionary<string, object> equipshop,Dictionary<string, object> tombs)
 		{
 			
 			items.Clear ();
@@ -29,7 +29,8 @@
 			List<object> itemshopList = (List<object>)itemshop ["values"];
 			List<object> assshopList = (List<object>)assistshop ["values"];
 			List<object> equipshopList = (List<object>)equipshop ["values"];
-			
+			List<object> tombList = (List<object>)tombs ["values"];
+
 			for (int i = 0; i < listinfos.Count; i++) {
 				Dictionary<string, object> info = (Dictionary<string, object>)listinfos [i];
 				items.Add ((UInt64)info ["dbid"], info);
@@ -41,7 +42,8 @@
 				iList,
 				itemshopList,
 				assshopList,
-				equipshopList
+				equipshopList,
+				tombList
 			});
 		}
 	}

@@ -256,8 +256,6 @@ public class UI_Bag : MonoBehaviour
 		Item item = bg.Item;
 		item.useable = true;
 
-		List<Baggrid> bgList = gData.characterList [0].BgList;
-
 		//如果是商店模式，购买售出逻辑
 		if (gData.isShop) {
 			InputField tradeNum = itemInfo.transform.FindChild ("TradeNum").GetComponent<InputField> ();
@@ -266,8 +264,6 @@ public class UI_Bag : MonoBehaviour
 				ShowHint.Hint (StringCollection.NOTRADENUM);
 				return;
 			}
-
-			int tradeMoney = int.Parse (tradeNum.text) * item.price;
 
 			//获得道具ID
 			string iid = item.prefabName.Split (new char[]{'/'}) [2].Split (new char[]{'_'}) [1];

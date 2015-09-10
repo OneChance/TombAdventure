@@ -21,4 +21,5 @@ public class GlobalData : MonoBehaviour
 	public List<int> assistShopContent;
 	public List<int> equipShopContent;
 	public Account account;
+	public List<Tomb> tombs;
 }

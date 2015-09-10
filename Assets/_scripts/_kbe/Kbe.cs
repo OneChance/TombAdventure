@@ -44,6 +44,8 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("onUseItemOver", this, "onUseItemOver");
 		//assist
 		KBEngine.Event.registerOut ("onAssistOperOver", this, "onAssistOperOver");
+		//dig upadte
+		KBEngine.Event.registerOut ("onDigUpdated", this, "onDigUpdated");
 	}
 
 	void OnDestroy ()
@@ -109,9 +111,9 @@ public class Kbe : MonoBehaviour
 	}
 
 	/*请求道具信息callback*/
-	public void onReqItemList (Dictionary<UInt64, Dictionary<string, object>> itemList, List<object> itemshop, List<object> assistshop, List<object> equipshop)
+	public void onReqItemList (Dictionary<UInt64, Dictionary<string, object>> itemList, List<object> itemshop, List<object> assistshop, List<object> equipshop, List<object> tombs)
 	{
-		loginUI.ItemDown (itemList, itemshop, assistshop, equipshop);
+		loginUI.ItemDown (itemList, itemshop, assistshop, equipshop, tombs);
 	}
 
 	/*创建角色callback*/
@@ -122,30 +124,37 @@ public class Kbe : MonoBehaviour
 	}
 
 	/*交易callback*/
-	public void onTradeOver (Dictionary<string, object> role,string msg)
+	public void onTradeOver (Dictionary<string, object> role, string msg)
 	{
 		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-		bagUI.TradeOver (role,msg);
+		bagUI.TradeOver (role, msg);
 	}
 
 	/*装备操作callback*/
-	public void onEquipOperOver (Dictionary<string, object> role,string msg)
+	public void onEquipOperOver (Dictionary<string, object> role, string msg)
 	{
 		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-		bagUI.onEquipOperOver (role,msg);
+		bagUI.onEquipOperOver (role, msg);
 	}
 
 	/*使用道具callback*/
-	public void onUseItemOver (Dictionary<string, object> role,string msg)
+	public void onUseItemOver (Dictionary<string, object> role, string msg)
 	{
 		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-		bagUI.onUseItemOver (role,msg);
+		bagUI.onUseItemOver (role, msg);
 	}
 
 	/*装备雇佣兵 callback*/
-	public void onAssistOperOver (Dictionary<string, object> role,string msg)
+	public void onAssistOperOver (Dictionary<string, object> role, string msg)
 	{
 		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-		bagUI.onAssistOperOver (role,msg);
+		bagUI.onAssistOperOver (role, msg);
+	}
+
+	/*Dig信息update callback*/
+	public void onDigUpdated (Dictionary<string, object> digInfo, Dictionary<string, object> role, string msg)
+	{
+		SceneGen sceneGen = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<SceneGen> ();
+		sceneGen.OnDigUpdated (digInfo, role, msg);
 	}
 }

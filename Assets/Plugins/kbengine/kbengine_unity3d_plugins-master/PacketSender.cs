@@ -36,7 +36,7 @@
 			_networkInterface = networkInterface;
 			
 			_buffer = new byte[KBEngineApp.app.getInitArgs().SEND_BUFFER_MAX];
-			
+
 			_wpos = 0; 
 			_spos = 0;
 			_sending = 0;

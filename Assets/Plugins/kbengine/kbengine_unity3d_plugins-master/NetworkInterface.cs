@@ -19,7 +19,7 @@
 	*/
     public class NetworkInterface 
     {
-    	public const int TCP_PACKET_MAX = 1460;
+		public const int TCP_PACKET_MAX = 1460;
     	public delegate void ConnectCallback(string ip, int port, bool success, object userData);
     	
         Socket _socket = null;

@@ -38,6 +38,7 @@ public class DataHelper : MonoBehaviour
 
 		Character c = new Character (money, health, maxhealth, strength, archeology, def, dodge, name, true, stamina, maxstamina, pro, level, exp, eList, -1);
 
+		c.tombLogs = getAdventureLog (role);
 		c.BgList = bgList;
 		c.dbid = 1; //玩家是1,雇佣兵为2,3,4
 		
@@ -47,7 +48,228 @@ public class DataHelper : MonoBehaviour
 
 		getAssistsFromServer (role, siList, characterList);
 
+
+
 		return characterList;
+	}
+	
+	public static Dictionary<string, object> BaseSceneInfoToServer (SceneInfo sceneInfo, int currentFloor)
+	{
+		Dictionary<string, object> scene = new Dictionary<string, object> ();
+		
+		List<object> blockData = transElementDataListFromClient (sceneInfo.blockData);
+		List<object> itemData = transElementDataListFromClient (sceneInfo.itemData);
+		List<object> enemyData = transElementDataListFromClient (sceneInfo.enemyData);
+
+		scene.Add ("dbid", currentFloor);
+		scene.Add ("grounds", blockData);
+		scene.Add ("gitems", itemData);
+		scene.Add ("genemys", enemyData);
+		scene.Add ("gdigs", emptyElementDataList ());
+
+		List<object> entrys = new List<object> ();
+
+		ElementData nextEntry = sceneInfo.nextEntry;
+		nextEntry.dbid = 1;
+
+		entrys.Add (transElementDataFromClient (nextEntry));//nextentry
+		entrys.Add (emptyElementData ());//preentry 这个变量原来是用于保存通往上一级的出口的,不过好像这个位置都是在0,0处，所以没有用了
+
+		scene.Add ("entrys", entrys);
+
+		scene.Add ("digtonextpos", emptyVector3 ());
+		int isTomb = sceneInfo.isTomb ? 1 : 0;
+		
+		scene.Add ("istomb", isTomb);
+
+		return scene;
+	}
+
+	public static Dictionary<int,TombLog> getAdventureLog (Dictionary<string, object> role)
+	{
+
+		Dictionary<int,TombLog> tombLogs = new Dictionary<int,TombLog> ();
+
+		List<object> tombs = (List<object>)role ["tombs"];
+
+		for (int i = 0; i < tombs.Count; i++) {
+			TombLog tombLog = new TombLog ();
+			Dictionary<string, object> tombInfo = (Dictionary<string, object>)tombs [i];
+			tombLog.dbid = int.Parse (tombInfo ["dbid"].ToString ());
+
+			List<object> floors = (List<object>)tombInfo ["floors"];
+
+			List<SceneInfo> sceneinfos = new List<SceneInfo> ();
+
+			for (int j = 0; j < floors.Count; j++) {
+				Dictionary<string, object> floorInfo = (Dictionary<string, object>)floors [i];
+
+				SceneInfo sceneInfo = new SceneInfo ();
+
+				List<ElementData> blockData = transElementDataListFromServer ((List<object>)floorInfo ["grounds"]);
+				List<ElementData> itemData = transElementDataListFromServer ((List<object>)floorInfo ["gitems"]);
+				List<ElementData> enemyData = transElementDataListFromServer ((List<object>)floorInfo ["genemys"]);
+				List<ElementData> digData = transElementDataListFromServer ((List<object>)floorInfo ["gdigs"]);
+
+				sceneInfo.blockData = blockData;
+				sceneInfo.itemData = itemData;
+				sceneInfo.enemyData = enemyData;
+				sceneInfo.digData = digData;
+
+				List<object> entrys = (List<object>)floorInfo ["entrys"];
+
+				sceneInfo.nextEntry = transElementDataFromServer (entrys [0]);
+				sceneInfo.preEntry = transElementDataFromServer (entrys [1]);
+				sceneInfo.digToNextPos = transVector3FromServer (floorInfo ["digtonextpos"]);
+
+				int isTombInt = int.Parse (floorInfo ["istomb"].ToString ());
+
+				sceneInfo.isTomb = (isTombInt == 0 ? false : true);
+
+				sceneinfos.Add (sceneInfo);
+			}
+
+			tombLog.sceneinfos = sceneinfos;
+			tombLogs.Add (tombLog.dbid, tombLog);
+		}
+
+		return tombLogs;
+	}
+	
+	public static Vector3 transVector3FromServer (object v3)
+	{
+		Dictionary<string, object> pos = (Dictionary<string, object>)v3;
+		return new Vector3 (float.Parse (pos ["x"].ToString ()), float.Parse (pos ["y"].ToString ()), float.Parse (pos ["z"].ToString ()));
+	}
+
+	public static Dictionary<string, object> emptyVector3 ()
+	{
+		Dictionary<string, object> v3d = new Dictionary<string, object> ();
+		v3d.Add ("x", 0d);
+		v3d.Add ("y", 0d);
+		v3d.Add ("z", 0d);
+		return v3d;
+	}
+	
+	public static Dictionary<string, object> transVector3FromClient (Vector3 v3)
+	{
+		Dictionary<string, object> v3d = new Dictionary<string, object> ();
+
+		v3d.Add ("x", v3.x);
+		v3d.Add ("y", v3.y);
+		v3d.Add ("z", v3.z);
+
+		return v3d;
+	}
+
+	public static ElementData transElementDataFromServer (object elementServer)
+	{
+
+		ElementData element = new ElementData ();
+
+		Dictionary<string, object> elementInfo = (Dictionary<string, object>)elementServer;
+		element.dbid = int.Parse (elementInfo ["dbid"].ToString ());
+
+		List<object> vecs = (List<object>)elementInfo ["vecs"];
+
+		element.pos = transVector3FromServer (vecs [0]);
+		element.objName = elementInfo ["objname"].ToString ();
+		element.eulerAngles = transVector3FromServer (vecs [1]);
+		element.order = int.Parse (elementInfo ["order"].ToString ());
+
+		if (int.Parse (elementInfo ["dig_deep"].ToString ()) > 0) {
+
+			DigData digData = new DigData (element);
+
+			digData.deep = int.Parse (elementInfo ["dig_deep"].ToString ());
+			digData.currentDeep = int.Parse (elementInfo ["dig_currentDeep"].ToString ());
+			digData.texType = int.Parse (elementInfo ["dig_texture"].ToString ());
+
+			element = digData;
+		}
+
+		return element;
+	}
+
+	public static Dictionary<string, object> emptyElementData ()
+	{
+		Dictionary<string, object> elementServer = new Dictionary<string, object> ();
+		
+		elementServer.Add ("dbid", 0);
+
+		List<object> vecs = new List<object> ();
+
+		vecs.Add (emptyVector3 ());
+		vecs.Add (emptyVector3 ());
+
+		elementServer.Add ("vecs", vecs);
+		elementServer.Add ("objname", "");
+		elementServer.Add ("order", 0);
+		elementServer.Add ("dig_deep", 0);
+		elementServer.Add ("dig_currentDeep", 0);
+		elementServer.Add ("dig_texture", 0);
+		
+		return elementServer;
+	}
+	
+	public static Dictionary<string, object> transElementDataFromClient (ElementData element)
+	{
+		Dictionary<string, object> elementServer = new Dictionary<string, object> ();
+
+		elementServer.Add ("dbid", element.dbid);
+
+		List<object> vecs = new List<object> ();
+		
+		vecs.Add (transVector3FromClient (element.pos));
+		vecs.Add (transVector3FromClient (element.eulerAngles));
+
+		elementServer.Add ("vecs", vecs);
+		elementServer.Add ("objname", element.objName);
+		elementServer.Add ("order", element.order);
+
+		if (element is DigData) {
+			DigData digData = (DigData)element;
+			elementServer.Add ("dig_deep", digData.deep);
+			elementServer.Add ("dig_currentDeep", digData.currentDeep);
+			elementServer.Add ("dig_texture", digData.texType);
+		} else {
+			elementServer.Add ("dig_deep", 0);
+			elementServer.Add ("dig_currentDeep", 0);
+			elementServer.Add ("dig_texture", 0);
+		}
+
+		return elementServer;
+	}
+	
+	public static List<ElementData> transElementDataListFromServer (List<object> elements)
+	{
+		List<ElementData> elementsData = new List<ElementData> ();
+
+		for (int k=0; k<elements.Count; k++) {
+			elementsData.Add (transElementDataFromServer (elements [k]));
+		}
+
+		return elementsData;
+	}
+
+	public static List<object> emptyElementDataList ()
+	{
+		List<object> elementsData = new List<object> ();
+		
+		return elementsData;
+	}
+	
+	public static List<object> transElementDataListFromClient (List<ElementData> elements)
+	{
+		List<object> elementsData = new List<object> ();
+		
+		for (int k=0; k<elements.Count; k++) {
+			ElementData e = elements [k];
+			e.dbid = k + 1;
+			elementsData.Add (transElementDataFromClient (e));
+		}
+		
+		return elementsData;
 	}
 
 	public static void getAssistsFromServer (Dictionary<string, object> role, Dictionary<int, ServerItemData> siList, List<Character> characterList)
@@ -58,7 +280,6 @@ public class DataHelper : MonoBehaviour
 			int iid = int.Parse (assistInfo ["iid"].ToString ());
 			int dbid = int.Parse (assistInfo ["dbid"].ToString ());
 			int level = int.Parse (assistInfo ["level"].ToString ());
-			int commontype = int.Parse (assistInfo ["commontype"].ToString ());
 			int stamina = int.Parse (assistInfo ["stamina"].ToString ());
 			int maxstamina = int.Parse (assistInfo ["maxstamina"].ToString ());
 			int health = int.Parse (assistInfo ["health"].ToString ());
@@ -68,7 +289,6 @@ public class DataHelper : MonoBehaviour
 			int def = int.Parse (assistInfo ["def"].ToString ());
 			int dodge = int.Parse (assistInfo ["dodge"].ToString ());
 			int exp = int.Parse (assistInfo ["exp"].ToString ());
-			int attack = int.Parse (assistInfo ["attack"].ToString ());
 
 			ServerItemData assistProInfo = siList [iid];
 
@@ -127,4 +347,20 @@ public class DataHelper : MonoBehaviour
 
 		c.money = int.Parse (((UInt32)role ["money"]).ToString ());
 	}
+
+	public static List<Tomb> getTombInfoFromServer (List<object> tombs)
+	{
+
+		List<Tomb> tombList = new List<Tomb> ();
+		for (int i=0; i<tombs.Count; i++) {
+			Tomb tomb = new Tomb ();
+			Dictionary<string, object> tombInfo = (Dictionary<string, object>)tombs [i];
+			tomb.tombLevel = int.Parse (tombInfo ["level"].ToString ());
+			tomb.tombName = tombInfo ["name"].ToString ();
+			tomb.dbid = int.Parse (tombInfo ["dbid"].ToString ());
+			tombList.Add (tomb);
+		}
+		return tombList;
+	}
+
 }

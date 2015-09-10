@@ -57,6 +57,7 @@ public class SceneGen: MonoBehaviour
 	private float digTimer;
 	private UI_Input uiInput;
 	private Dictionary<string,List<FallItem>> fallList;
+	private UI_Bag uiBag;
 
 	void Start ()
 	{
@@ -83,8 +84,11 @@ public class SceneGen: MonoBehaviour
 		digData = new List<ElementData> ();
 		genPos = new Vector3 (0, 0, 0);
 
+
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.currentTomb.sceneList.Count;
+
+	
 
 		//根据KEY从服务器加载物品掉落列表
 		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
@@ -95,6 +99,7 @@ public class SceneGen: MonoBehaviour
 		digSide = digPrefab.GetComponent<SpriteRenderer> ().bounds.size.x;
 		playerSide = player.GetComponent<SpriteRenderer> ().bounds.size.x;
 		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();
+		uiBag = GameObject.FindGameObjectWithTag("GameController").GetComponent<UI_Bag>();
 
 		preEntryPrefab = Resources.Load ("PreEntry", typeof(GameObject)) as GameObject;
 		coffinPrefab = Resources.Load ("Coffin", typeof(GameObject)) as GameObject;
@@ -151,8 +156,51 @@ public class SceneGen: MonoBehaviour
 		return fallList;
 	}
 
+	//Dig更新 服务器callback
+	public void OnDigUpdated (Dictionary<string, object> digInfo, Dictionary<string, object> role, string msg)
+	{
+		if (!msg.Equals ("ok")) {
+			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
+			uiInput.SendMessage ("DigStop");
+		} else {
+			DigData digData = (DigData)DataHelper.transElementDataFromServer (digInfo);
+
+			DigInfo.updateDigInDigList (digData, digList);
+
+			gData.characterList = DataHelper.GetCharacterFromServer (role, gData.siList);
+
+			Debug.Log(digData.currentDeep+"/"+digData.deep);
+
+			//更新体能
+			uiBag.SendMessage("UpdateUIInfo");
+
+			/*
+			//如果这个坑已经挖完
+			DigInfo di = dig.GetComponent<DigInfo> ();
+			if (di.currentDeep >= di.deep) {
+				ShowHint.Hint (StringCollection.DIGOVER);
+
+			} else {
+				//开始挖掘
+				currentDigging = dig;
+				digging = true;
+			}*/
+		}
+	}
+
 	public GameObject getDig (Vector3 playerPos)
 	{
+
+		//0,0,0 为出口，无效挖掘位置
+		float dXE = Mathf.Abs (playerPos.x - 0);
+		float dYE = Mathf.Abs (playerPos.y - 0);
+		
+		//如果所在位置为出口,返回空
+		if (dXE < digSide * 0.5 + playerSide * 0.5 && dYE < digSide * 0.5 + playerSide * 0.5) {
+			return null;
+		}
+
+
 
 		for (int i=0; i<digList.Count; i++) {
 			float dX = Mathf.Abs (playerPos.x - digList [i].transform.position.x);
@@ -172,12 +220,14 @@ public class SceneGen: MonoBehaviour
 		GameObject dig = Instantiate (digPrefab, player.position, Quaternion.identity) as GameObject;
 		dig.transform.SetParent (digs);
 		//生成挖掘点信息
-		DigInfo di = dig.GetComponent<DigInfo> ();
-		di.currentDeep = 0;
-		di.texType = 0;
-		//根据当前层数,随机生成深度
-		di.deep = Random.Range (gData.currentFloor * digDeepMin, gData.currentFloor * digDeepMax);
 		digList.Add (dig);
+
+		//将digObj转换为digData添加到列表
+		int dig_dbid = digList.Count;
+
+		DigInfo di = dig.GetComponent<DigInfo> ();
+		di.dbid = dig_dbid;
+
 		return dig;
 	}
 
@@ -194,17 +244,9 @@ public class SceneGen: MonoBehaviour
 			if (dig == null) {
 				ShowHint.Hint (StringCollection.CANNOTDIG);
 				uiInput.SendMessage ("DigStop");
-			} else {
-				//如果这个坑已经挖完
-				DigInfo di = dig.GetComponent<DigInfo> ();
-				if (di.currentDeep >= di.deep) {
-					ShowHint.Hint (StringCollection.DIGOVER);
-					uiInput.SendMessage ("DigStop");
-				} else {
-					//开始挖掘
-					currentDigging = dig;
-					digging = true;
-				}
+			}else{
+				currentDigging = dig;
+				digging = true;
 			}
 		} else {
 			ShowHint.Hint (StringCollection.ALONGWALL);
@@ -253,7 +295,7 @@ public class SceneGen: MonoBehaviour
 					di.texType = 3;
 					currentDigging.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/dig_" + di.texType); //换成下层入口贴图
 					currentSceneInfo.digToNextPos = player.position;//记录位置
-					RecScene ();
+					//RecScene ();
 					gData.currentFloor++;
 					Application.LoadLevel ("main");
 				} else {
@@ -277,7 +319,7 @@ public class SceneGen: MonoBehaviour
 				int num = Random.Range (itemList [i].minNum, itemList [i].maxNum + 1);						
 				itemGet = itemGet + " " + itemList [i].item.name + "x" + num;
 				
-				Baggrid baggrid = new Baggrid (itemList [i].item, num,-1);
+				Baggrid baggrid = new Baggrid (itemList [i].item, num, -1);
 				
 				
 				//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)
@@ -311,9 +353,16 @@ public class SceneGen: MonoBehaviour
 
 	void Update ()
 	{
-		digTimer += Time.deltaTime;
-		if (digging && digTimer > 3) {
-			Digging ();
+		if(digging){
+			digTimer += Time.deltaTime;
+
+			if (digTimer > 3) {
+				//Digging ();			
+				DigData digInfo = TransDigObjToElementData (currentDigging);
+				gData.account.StartDig (gData.currentTomb.dbid, gData.currentFloor, DataHelper.transElementDataFromClient (digInfo));				
+				digTimer = 0;
+			}
+		}else{
 			digTimer = 0;
 		}
 	}
@@ -411,6 +460,9 @@ public class SceneGen: MonoBehaviour
 		GenerateElements ();
 		//添加场景信息到全局数据对象
 		gData.currentTomb.sceneList.Add (currentSceneInfo);
+
+		//将场景提交到服务器
+		RecScene ();
 	}
 
 	void GeneraterTomb ()
@@ -504,24 +556,19 @@ public class SceneGen: MonoBehaviour
 			currentSceneInfo.EnemyData = enemyData;
 		}
 
-		//挖掘点数据在从主场景切换到战斗场景的过程中,贴图会发生变动，所以每次记录场景时都要更新
-		//先清除原数据(由于digList和digData之间没有关联，所以不方便在更新dig贴图时，同时更新digData的数据，这里在保存场景时全部重新保存)
-		digData.Clear ();
-		for (int i=0; i<digList.Count; i++) {
-			GameObject digO = digList [i];
-			AddNewDigData (digO);
-		}
 
-		currentSceneInfo.DigData = digData;
 
 		gData.currentTomb.sceneList [gData.currentFloor - 1] = currentSceneInfo;
-	}
 
-	void AddNewDigData (GameObject digO)
+		gData.account.RecordSceneToServer (gData.currentTomb.dbid, gData.currentFloor, DataHelper.BaseSceneInfoToServer (currentSceneInfo, gData.currentFloor));
+	}
+	
+	DigData TransDigObjToElementData (GameObject digO)
 	{
 		DigInfo di = digO.GetComponent<DigInfo> ();
 		DigData dd = new DigData (digO.transform.position, digO.name, digO.transform.eulerAngles, digO.GetComponent<SpriteRenderer> ().sortingOrder, di.deep, di.currentDeep, di.texType);
-		digData.Add (dd);
+		dd.dbid = di.dbid;
+		return dd;
 	}
 
 	private Vector3 getRandomPos (Vector3 blockPos, GameObject element)
@@ -869,7 +916,7 @@ public class SceneGen: MonoBehaviour
 
 	public void ToPreFloor ()
 	{
-		RecScene ();
+		//RecScene ();
 		if (gData.currentFloor == 1) {
 			//如果是第一层,回到城市
 			Application.LoadLevel ("city");
@@ -884,7 +931,7 @@ public class SceneGen: MonoBehaviour
 	public void ToNextFloor (Vector3 pos)
 	{
 		gData.currentTomb.sceneList [gData.currentFloor - 1].digToNextPos = pos;
-		RecScene ();
+		//RecScene ();
 		gData.currentFloor++;
 		Application.LoadLevel ("main");
 	}
