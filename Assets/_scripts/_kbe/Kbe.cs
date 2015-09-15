@@ -46,6 +46,8 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("onAssistOperOver", this, "onAssistOperOver");
 		//dig upadte
 		KBEngine.Event.registerOut ("onDigUpdated", this, "onDigUpdated");
+		//player move upadte
+		KBEngine.Event.registerOut ("onPlayerMove", this, "onPlayerMove");
 	}
 
 	void OnDestroy ()
@@ -156,5 +158,12 @@ public class Kbe : MonoBehaviour
 	{
 		SceneGen sceneGen = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<SceneGen> ();
 		sceneGen.OnDigUpdated (digInfo, role, msg);
+	}
+
+	/*玩家移动 callback*/
+	public void onPlayerMove (Dictionary<string, object> role)
+	{
+		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
+		bagUI.OnPlayerMove (role);
 	}
 }

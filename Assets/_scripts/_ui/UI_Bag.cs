@@ -116,21 +116,21 @@ public class UI_Bag : MonoBehaviour
 		
 		return eP;
 	}
-
 	
-	public void DestroyIfNotNull(Transform trans){
-		if(trans!=null){
-			Destroy(trans.gameObject);
+	public void DestroyIfNotNull (Transform trans)
+	{
+		if (trans != null) {
+			Destroy (trans.gameObject);
 		}
 	}
 
 	public void UpdateUIEquip ()
 	{
 		//先清除所有装备
-		DestroyIfNotNull(clothes.transform.FindChild("UIEquip(Clone)"));
-		DestroyIfNotNull(hand.transform.FindChild("UIEquip(Clone)"));
-		DestroyIfNotNull(head.transform.FindChild("UIEquip(Clone)"));
-		DestroyIfNotNull(foot.transform.FindChild("UIEquip(Clone)"));
+		DestroyIfNotNull (clothes.transform.FindChild ("UIEquip(Clone)"));
+		DestroyIfNotNull (hand.transform.FindChild ("UIEquip(Clone)"));
+		DestroyIfNotNull (head.transform.FindChild ("UIEquip(Clone)"));
+		DestroyIfNotNull (foot.transform.FindChild ("UIEquip(Clone)"));
 
 
 		for (int i=0; i<eList.Count; i++) {			
@@ -143,11 +143,13 @@ public class UI_Bag : MonoBehaviour
 
 	}
 
-	public void InitCharInfo ()
+	public void ShowCharInfo ()
 	{
 		if (!charInfoInit) {
 
 			charInfoInit = true;
+
+			cList = gData.characterList;
 
 			//生成玩家
 			GameObject uiCharAvatar = Instantiate (uiCharP, new Vector3 (avatar.transform.position.x, avatar.transform.position.y, 0), Quaternion.identity) as GameObject;
@@ -164,9 +166,9 @@ public class UI_Bag : MonoBehaviour
 				GameObject uiCharAss = Instantiate (uiCharP, new Vector3 (ass.transform.position.x, ass.transform.position.y, 0), Quaternion.identity) as GameObject;
 				uiCharAss.transform.SetParent (ass.transform);
 			}
-			
-			UpdateUIInfo ();
 		}
+
+		UpdateUIInfo ();
 	}
 
 	public void CloseWindow (Button button)
@@ -178,7 +180,7 @@ public class UI_Bag : MonoBehaviour
 	{
 		charInfo.SetActive (!charInfo.activeInHierarchy);
 		if (charInfo.activeInHierarchy) {
-			InitCharInfo ();
+			ShowCharInfo ();
 		}
 	}
 
@@ -198,7 +200,8 @@ public class UI_Bag : MonoBehaviour
 	}
 
 	//更新玩家数据
-	public void refreshCharacterData(Dictionary<string, object> role){
+	public void refreshCharacterData (Dictionary<string, object> role)
+	{
 		gData.characterList = DataHelper.GetCharacterFromServer (role, gData.siList);
 		cList = gData.characterList;
 		eList = cList [0].EquipList;
@@ -211,7 +214,7 @@ public class UI_Bag : MonoBehaviour
 			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
 		} else {
 			//更新背包
-			refreshCharacterData(role);
+			refreshCharacterData (role);
 			ItemUseComplete ();
 		}
 	}
@@ -222,7 +225,7 @@ public class UI_Bag : MonoBehaviour
 		if (!msg.Equals ("ok")) {
 			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
 		} else {
-			refreshCharacterData(role);
+			refreshCharacterData (role);
 			UpdateUIEquip ();
 			ItemUseComplete ();
 		}
@@ -234,7 +237,7 @@ public class UI_Bag : MonoBehaviour
 		if (!msg.Equals ("ok")) {
 			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
 		} else {
-			refreshCharacterData(role);
+			refreshCharacterData (role);
 			ItemUseComplete ();
 		}
 	}
@@ -245,9 +248,16 @@ public class UI_Bag : MonoBehaviour
 		if (!msg.Equals ("ok")) {
 			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
 		} else {
-			refreshCharacterData(role);
+			refreshCharacterData (role);
 			ItemUseComplete ();
 		}
+	}
+
+	//玩家移动 callback
+	public void OnPlayerMove (Dictionary<string, object> role)
+	{
+		refreshCharacterData (role);
+		UpdateUIInfo ();
 	}
 
 	public void UseItem (Button button)
@@ -277,17 +287,17 @@ public class UI_Bag : MonoBehaviour
 		} else {
 			//打开人物属性面板
 			charInfo.SetActive (true);
-			InitCharInfo ();
+			ShowCharInfo ();
 			//获取道具信息
 
 			if (item.ct == (int)global::Item.CommonType.CONSUME) {
 				//如果是群体道具，直接应用，否则等待点击玩家后使用
 
-				Debug.Log("sdfasdfafasdf  "+item.rt);
+				Debug.Log ("sdfasdfafasdf  " + item.rt);
 
 				if (item.rt == (int)global::Item.RangeType.MULTI) {
-					gData.account.UseItem(cList [0].ObjName, "ALLTEAM",bg.dbid);
-				}else{
+					gData.account.UseItem (cList [0].ObjName, "ALLTEAM", bg.dbid);
+				} else {
 					//人物格闪动
 					GameUtil.UnFocus (focusList);
 					focusList.Add (avatar.transform.FindChild ("UIChar(Clone)").gameObject);
@@ -307,7 +317,7 @@ public class UI_Bag : MonoBehaviour
 				}
 			} else if (item.ct == (int)global::Item.CommonType.MERCENARY) {
 				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.LEAVETEAM)) {//离队
-					gData.account.AssistOper(0,((Mercenary)item).c.dbid);
+					gData.account.AssistOper (0, ((Mercenary)item).c.dbid);
 				} else {
 					//助手格闪动
 					GameUtil.UnFocus (focusList);

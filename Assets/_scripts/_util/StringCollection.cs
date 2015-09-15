@@ -17,10 +17,10 @@ public class StringCollection
 	public static string POSHINT = "入口大概位置:";
 	public static string STEP = "步";
 	public static string DIGNOTHING = "挖到底了,什么也发现";
+	public static string DIGOVER = "这里已经挖过了,换一个地方吧";
 	public static string NOSTAMINA = "没有体能挖掘了,大家需要休息一会";
 	public static string ALONGWALL = "靠着墙的位置不太好挖啊，换个地方试试吧";
 	public static string CANNOTDIG = "此处无法挖掘，换个地方试试吧";
-	public static string DIGOVER = "这里已经挖过了,换一个地方吧";
 	public static string ISTOMB = "棺材就在这一层了，仔细找找吧";
 	public static string ITEMGET = "获得";
 	public static string NOTRADENUM = "请输入交易数量";
@@ -82,6 +82,9 @@ public class StringCollection
 		{"NUMOVER","超出背包空间"},
 		{"NOMATCHITEM","抱歉,没有这种商品"},
 		{"NOTENOUGHMONEY","没钱了"},
-		{"KINGOFLU","明鲁王墓"}
+		{"KINGOFLU","明鲁王墓"},
+		{"NOSTAMINA","没有体能挖掘了,大家需要休息一会"},
+		{"DIGNOTHING","挖到底了,什么也发现"},
+		{"DIGOVER","这里已经挖过了,换一个地方吧"}
 	};
 }

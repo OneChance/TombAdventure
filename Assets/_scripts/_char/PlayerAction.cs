@@ -13,10 +13,10 @@ public class PlayerAction : MonoBehaviour
 
 	public enum MOVEDIRECTION
 	{
-		LEFT,
-		RIGHT,
-		UP,
-		DOWN
+		LEFT = 1,
+		RIGHT = 2,
+		UP = 3,
+		DOWN = 4
 	}
 	;
 
@@ -60,21 +60,8 @@ public class PlayerAction : MonoBehaviour
 				transform.Translate (Vector2.down * moveDistance);
 				break;
 			}
-			
-			stepCounter++;
 
-			//队长移动一次，减少一个体能；成员移动三次，减少一个体能
-			gData.characterList [0].Stamina = Mathf.Max (0, gData.characterList [0].Stamina - 1);
-			
-			if (stepCounter == 3) {
-				for (int i=1; i<gData.characterList.Count; i++) {
-					gData.characterList [i].Stamina = Mathf.Max (0, gData.characterList [i].Stamina - 1);
-				}
-				stepCounter = 0;
-			}
-
-			//通知UI更新
-			uiInput.SendMessage ("UpdateUIInfo");
+			gData.account.PlayerMove ((int)dir);
 
 		} else {
 			Debug.Log (StringCollection.LEADERNOSTAMINA);
@@ -110,6 +97,10 @@ public class PlayerAction : MonoBehaviour
 				sumArcheology += gData.characterList [i].archeology;
 			}
 		}
+
+		//测试
+		//sumArcheology = 900;
+		//haveGeomancer = true;
 
 		if (!haveGeomancer) {
 			ShowHint.Hint (StringCollection.NOGEO);

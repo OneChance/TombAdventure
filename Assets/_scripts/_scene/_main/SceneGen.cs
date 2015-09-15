@@ -56,7 +56,6 @@ public class SceneGen: MonoBehaviour
 	private bool digging;
 	private float digTimer;
 	private UI_Input uiInput;
-	private Dictionary<string,List<FallItem>> fallList;
 	private UI_Bag uiBag;
 
 	void Start ()
@@ -88,18 +87,14 @@ public class SceneGen: MonoBehaviour
 		int currentFloor = gData.currentFloor;
 		int scenesNum = gData.currentTomb.sceneList.Count;
 
-	
 
-		//根据KEY从服务器加载物品掉落列表
-		//返回挖掘掉落,敌人掉落,棺材掉落列表(key: tombLevel_currentFloor) 
-		fallList = getFallList (gData.currentTomb.tombLevel + "_" + gData.currentFloor);
 		getEnemyTypes (gData.currentTomb.tombLevel + "_" + gData.currentFloor);
 
 		digPrefab = Resources.Load ("Dig", typeof(GameObject)) as GameObject;
 		digSide = digPrefab.GetComponent<SpriteRenderer> ().bounds.size.x;
 		playerSide = player.GetComponent<SpriteRenderer> ().bounds.size.x;
 		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();
-		uiBag = GameObject.FindGameObjectWithTag("GameController").GetComponent<UI_Bag>();
+		uiBag = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
 
 		preEntryPrefab = Resources.Load ("PreEntry", typeof(GameObject)) as GameObject;
 		coffinPrefab = Resources.Load ("Coffin", typeof(GameObject)) as GameObject;
@@ -118,7 +113,7 @@ public class SceneGen: MonoBehaviour
 
 		//场景信息
 		Transform sceneInfoUI = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("SceneInfo");
-		sceneInfoUI.FindChild ("TombName").GetComponent<Text> ().text = gData.currentTomb.tombName;
+		sceneInfoUI.FindChild ("TombName").GetComponent<Text> ().text = StringCollection.stringDict_CN [gData.currentTomb.tombName];
 		sceneInfoUI.FindChild ("FloorLable").GetComponent<Text> ().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild ("Floor").GetComponent<Text> ().text = gData.currentFloor.ToString ();
 
@@ -135,58 +130,43 @@ public class SceneGen: MonoBehaviour
 		enemyTypes.Add (e2);
 	}
 
-	Dictionary<string,List<FallItem>> getFallList (string key)
-	{
-
-		//此处请求服务器
-
-		Dictionary<string,List<FallItem>> fallList = new Dictionary<string,List<FallItem>> ();
-		List<FallItem> itemList = new List<FallItem> ();
-		FallItem fi = new FallItem ();
-		fi.item = new HealthItem ((int)Item.RangeType.SINGLE, 10, "1", "单体治疗药剂", 50);
-		fi.minNum = 1;
-		fi.maxNum = 3;
-		fi.probability = 90;
-		itemList.Add (fi);
-
-		fallList.Add ("dig", itemList);
-		fallList.Add ("enemy_1", itemList);
-		fallList.Add ("enemy_2", itemList);
-
-		return fallList;
-	}
-
 	//Dig更新 服务器callback
 	public void OnDigUpdated (Dictionary<string, object> digInfo, Dictionary<string, object> role, string msg)
 	{
 		if (!msg.Equals ("ok")) {
-			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
-			uiInput.SendMessage ("DigStop");
-		} else {
-			DigData digData = (DigData)DataHelper.transElementDataFromServer (digInfo);
 
-			DigInfo.updateDigInDigList (digData, digList);
+			string showMsg = "";
 
-			gData.characterList = DataHelper.GetCharacterFromServer (role, gData.siList);
+			if (msg.Contains (".")) {
 
-			Debug.Log(digData.currentDeep+"/"+digData.deep);
-
-			//更新体能
-			uiBag.SendMessage("UpdateUIInfo");
-
-			/*
-			//如果这个坑已经挖完
-			DigInfo di = dig.GetComponent<DigInfo> ();
-			if (di.currentDeep >= di.deep) {
-				ShowHint.Hint (StringCollection.DIGOVER);
-
+				string[] itemList = msg.Split (new char[]{'.'});
+				for (int i=0; i<itemList.Length; i++) {
+					if (!itemList [i].Equals ("")) {
+						int itemId = int.Parse (itemList [i].Split (new char[]{'@'}) [0]);
+						int itemNum = int.Parse (itemList [i].Split (new char[]{'@'}) [1]);					
+						showMsg = showMsg + gData.siList [itemId].name + " * " + itemNum + "\n";
+					}
+				}
 			} else {
-				//开始挖掘
-				currentDigging = dig;
-				digging = true;
-			}*/
+				showMsg = StringCollection.stringDict_CN [msg];
+			}
+
+			ShowHint.Hint (showMsg);
+			uiInput.SendMessage ("DigStop");
+		}
+
+		DigData digData = (DigData)DataHelper.transElementDataFromServer (digInfo);
+		DigInfo.updateDigInDigList (digData, digList);
+
+		gData.characterList = DataHelper.GetCharacterFromServer (role, gData.siList);
+		
+		if (digData.texType == 3) {
+			uiInput.SendMessage ("DigStop");
+			gData.currentFloor++;
+			Application.LoadLevel ("main");
 		}
 	}
+
 
 	public GameObject getDig (Vector3 playerPos)
 	{
@@ -219,6 +199,7 @@ public class SceneGen: MonoBehaviour
 		//如果位置不违反规则，返回新的坑对象
 		GameObject dig = Instantiate (digPrefab, player.position, Quaternion.identity) as GameObject;
 		dig.transform.SetParent (digs);
+
 		//生成挖掘点信息
 		digList.Add (dig);
 
@@ -244,7 +225,7 @@ public class SceneGen: MonoBehaviour
 			if (dig == null) {
 				ShowHint.Hint (StringCollection.CANNOTDIG);
 				uiInput.SendMessage ("DigStop");
-			}else{
+			} else {		
 				currentDigging = dig;
 				digging = true;
 			}
@@ -252,97 +233,6 @@ public class SceneGen: MonoBehaviour
 			ShowHint.Hint (StringCollection.ALONGWALL);
 			uiInput.SendMessage ("DigStop");
 		}
-	}
-
-	public void Digging ()
-	{
-		int sumDigPower = 0;
-
-		for (int i=0; i<cList.Count; i++) {
-			if (cList [i].Stamina > 0) {
-				sumDigPower += cList [i].digPower;
-			}
-		}
-
-		if (sumDigPower == 0) {
-			ShowHint.Hint (StringCollection.NOSTAMINA);
-			digging = false;
-		} else {
-			DigInfo di = currentDigging.GetComponent<DigInfo> ();
-			di.currentDeep += sumDigPower;    //一点力量挖掘一个深度
-			if (di.currentDeep > (di.texType + 1) * (di.deep * 0.3333)) {
-				di.texType++;
-				currentDigging.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/dig_" + Mathf.Min (2, di.texType));
-			}
-			
-			//一次挖掘扣除3点体能
-			for (int i=0; i<cList.Count; i++) {
-				if (cList [i].Stamina > 0) {
-					cList [i].Stamina = Mathf.Max (0, cList [i].Stamina - 3);
-				}
-			}
-			
-			if (di.currentDeep >= di.deep) {
-
-				digging = false;
-				
-				float digPosX = currentDigging.transform.position.x;
-				float digPosY = currentDigging.transform.position.y;
-				
-				if (digPosX < (currentSceneInfo.nextEntry.pos.x + entryRadius) && digPosX > (currentSceneInfo.nextEntry.pos.x - entryRadius) &&
-					digPosY < (currentSceneInfo.nextEntry.pos.y + entryRadius) && digPosY > (currentSceneInfo.nextEntry.pos.y - entryRadius)) {
-					//挖掘地点在入口半径之内
-					di.texType = 3;
-					currentDigging.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/dig_" + di.texType); //换成下层入口贴图
-					currentSceneInfo.digToNextPos = player.position;//记录位置
-					//RecScene ();
-					gData.currentFloor++;
-					Application.LoadLevel ("main");
-				} else {
-					ItemFall ("dig");
-				}
-				uiInput.SendMessage ("DigStop");
-			}
-
-			//更新耐力变化
-			uiInput.SendMessage ("UpdateUIInfo");
-		}
-	}
-
-	void ItemFall (string key)
-	{
-		//掉落******************************************************************************************
-		List<FallItem> itemList = fallList [key];		
-		string itemGet = "";				
-		for (int i=0; i<itemList.Count; i++) {
-			if (GameUtil.RandomHappen (itemList [i].probability, 101)) {					
-				int num = Random.Range (itemList [i].minNum, itemList [i].maxNum + 1);						
-				itemGet = itemGet + " " + itemList [i].item.name + "x" + num;
-				
-				Baggrid baggrid = new Baggrid (itemList [i].item, num, -1);
-				
-				
-				//加入背包(如果是雇佣兵模式，道具由玩家获得，如果是玩家最对模式，道具将roll获取)
-				bool get = false;
-				if (gData.isPlayer) {
-					//弹出面板，roll
-					//服务器返回队内其他玩家的roll值，判定
-					//如果roll 到 get设置为true
-				} else {
-					get = true;
-				}
-				
-				if (get) {
-					BagUtil.AddItem (gData.characterList [0].BgList, baggrid);
-				}
-			}
-		}				
-		if (itemGet.Equals ("")) {
-			ShowHint.Hint (StringCollection.DIGNOTHING);
-		} else {
-			ShowHint.Hint (StringCollection.ITEMGET + ":" + itemGet);
-		}
-		//***********************************************************************************************
 	}
 
 	//UI点击停止挖掘，传递给这个函数
@@ -353,7 +243,7 @@ public class SceneGen: MonoBehaviour
 
 	void Update ()
 	{
-		if(digging){
+		if (digging) {
 			digTimer += Time.deltaTime;
 
 			if (digTimer > 3) {
@@ -362,7 +252,7 @@ public class SceneGen: MonoBehaviour
 				gData.account.StartDig (gData.currentTomb.dbid, gData.currentFloor, DataHelper.transElementDataFromClient (digInfo));				
 				digTimer = 0;
 			}
-		}else{
+		} else {
 			digTimer = 0;
 		}
 	}
@@ -419,7 +309,6 @@ public class SceneGen: MonoBehaviour
 
 		if (enemyNeedToRemove != null) {
 			//敌人掉落
-			ItemFall (enemyNeedToRemove.objName.Replace ("(Clone)", "").Split (new char[]{'@'}) [0]);
 			enemyData.Remove (enemyNeedToRemove);
 		}
 

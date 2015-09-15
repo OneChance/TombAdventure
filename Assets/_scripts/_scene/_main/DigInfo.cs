@@ -14,15 +14,12 @@ public class DigInfo : MonoBehaviour
 		for (int i=0; i<digList.Count; i++) {
 			DigInfo digInfo = digList [i].GetComponent<DigInfo> ();
 
-			Debug.Log(digInfo.dbid + " xxx " + digData.dbid);
-
 			if (digInfo.dbid == digData.dbid) {
 
 				digInfo.deep = digData.deep;
 				digInfo.currentDeep = digData.currentDeep;
 				digInfo.texType = digData.texType;
 
-				Debug.Log("tex value = " + digInfo.texType);
 				digList [i].GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/dig_" + Mathf.Min (2, digInfo.texType));
 			}
 		}
