@@ -8,5 +8,6 @@ public class WaitItem : Item
 	public WaitItem ():base("noprefab","noname")
 	{
 		this.name = "WaitItem";
+		this.dbid = 9000;
 	}
 }

@@ -11,6 +11,7 @@ public class BattleObj
 	private int def = 0;
 	private int attack = 5;
 	public int dodge = 0;
+	public int dbid;//战斗中与服务器对象的对应关系
 
 	public int MaxHealth {
 		get {

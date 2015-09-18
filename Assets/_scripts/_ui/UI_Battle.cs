@@ -17,17 +17,21 @@ public class UI_Battle : MonoBehaviour
 
 	public enum Op
 	{
-		NOACT,
-		ATTACK,
-		ITEM,
-		WAIT,
-		PRO
+		NOACT=1,
+		ATTACK=2,
+		ITEM=3,
+		WAIT=4,
+		PRO=5
 	}
 
 	public void closeBag ()
 	{
-		itemInfo.SetActive (false);
-		bag.SetActive (false);
+		if(itemInfo.activeInHierarchy){
+			itemInfo.SetActive (false);
+		}
+		if(bag.activeInHierarchy){
+			bag.SetActive (false);
+		}
 	}
 
 	public void UseItem ()
@@ -75,5 +79,10 @@ public class UI_Battle : MonoBehaviour
 	public void UndoClick ()
 	{
 		battle.SendMessage ("Undo");
+	}
+
+	public void CloseWindow (Button button)
+	{
+		button.transform.parent.gameObject.SetActive (false);
 	}
 }

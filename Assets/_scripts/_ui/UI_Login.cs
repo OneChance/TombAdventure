@@ -84,7 +84,8 @@ public class UI_Login : MonoBehaviour
 				int levelexpadd = int.Parse (((UInt16)info ["levelexpadd"]).ToString ());
 				int attack = int.Parse (((UInt16)info ["attack"]).ToString ());
 				int health = int.Parse (((UInt16)info ["health"]).ToString ());
- 
+ 				
+				sid.dbid = dbid;
 				sid.name = name;
 				sid.usetype = usetype;
 				sid.rangetype = rangetype;

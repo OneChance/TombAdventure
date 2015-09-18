@@ -31,6 +31,7 @@ public class PlayerAction : MonoBehaviour
 	void OnCollisionEnter2D (Collision2D coll)
 	{
 		if (coll.gameObject.tag.Equals ("Enemy")) {
+
 			gData.currentEnemy = coll.gameObject.GetComponent<EnemyAI> ().enemy;
 			gData.currentEnemyName = coll.gameObject.name;
 			gData.playerPos = transform.position;

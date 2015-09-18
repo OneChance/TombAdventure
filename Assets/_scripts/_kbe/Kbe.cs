@@ -48,6 +48,18 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("onDigUpdated", this, "onDigUpdated");
 		//player move upadte
 		KBEngine.Event.registerOut ("onPlayerMove", this, "onPlayerMove");
+		//get scene data
+		KBEngine.Event.registerOut ("OnGetSceneData", this, "OnGetSceneData");
+
+		KBEngine.Event.registerOut ("OnGetBattleData", this, "OnGetBattleData");
+
+		KBEngine.Event.registerOut ("onAddOp", this, "onAddOp");
+
+		KBEngine.Event.registerOut ("OnBattleAnim", this, "OnBattleAnim");
+
+		KBEngine.Event.registerOut ("onUndoOp", this, "onUndoOp");
+
+		KBEngine.Event.registerOut ("battleOver", this, "battleOver");
 	}
 
 	void OnDestroy ()
@@ -164,6 +176,45 @@ public class Kbe : MonoBehaviour
 	public void onPlayerMove (Dictionary<string, object> role)
 	{
 		UI_Bag bagUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-		bagUI.OnPlayerMove (role);
+		//可能在快速移动的某个时间点，碰到了敌人，导致场景跳转，那么此时就找不到bagUI了
+		if (bagUI != null) {
+			bagUI.OnPlayerMove (role);
+		}
+	}
+	
+	public void OnGetSceneData (List<object> enemyTypeList)
+	{
+		SceneGen sceneGen = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<SceneGen> ();
+		sceneGen.OnGetSceneData (enemyTypeList);
+	}
+
+	public void OnGetBattleData (Dictionary<string, object> role, List<object> bag)
+	{
+		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
+		battle.OnGetBattleData (role,bag);
+	}
+
+	public void onAddOp (int opCount)
+	{
+		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
+		battle.OnAddOp (opCount);
+	}
+
+	public void OnBattleAnim (int itemid)
+	{
+		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
+		battle.OnBattleAnim (itemid);
+	}
+
+	public void onUndoOp (string from_tag)
+	{
+		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
+		battle.OnUndoOp (from_tag);
+	}
+
+	public void battleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList)
+	{
+		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
+		battle.BattleOver (battle_res, playerInfo, assistList);
 	}
 }

@@ -58,17 +58,18 @@ public class SceneGen: MonoBehaviour
 	private UI_Input uiInput;
 	private UI_Bag uiBag;
 
+	public void OnGetSceneData(List<object> enemyTypeList){
+		getEnemyTypes (enemyTypeList);
+		GenerateSceneRandom ();
+	}
+
 	void Start ()
 	{
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 
-		if (!gData.victory) {
-
-		}
-
 		blockX = groundPrefabs [0].GetComponent<SpriteRenderer> ().bounds.size.x * 15 / 16;
 		blockY = groundPrefabs [0].GetComponent<SpriteRenderer> ().bounds.size.y * 15 / 16;
-
+		
 		enemyTypes = new List<Enemy> ();
 		currentSceneInfo = new SceneInfo ();
 		ablePos = new List<Vector3> ();
@@ -81,35 +82,18 @@ public class SceneGen: MonoBehaviour
 		itemData = new List<ElementData> ();
 		enemyData = new List<ElementData> ();
 		digData = new List<ElementData> ();
-		genPos = new Vector3 (0, 0, 0);
-
-
-		int currentFloor = gData.currentFloor;
-		int scenesNum = gData.currentTomb.sceneList.Count;
-
-
-		getEnemyTypes (gData.currentTomb.tombLevel + "_" + gData.currentFloor);
-
+		genPos = new Vector3 (0, 0, 0);	
 		digPrefab = Resources.Load ("Dig", typeof(GameObject)) as GameObject;
 		digSide = digPrefab.GetComponent<SpriteRenderer> ().bounds.size.x;
 		playerSide = player.GetComponent<SpriteRenderer> ().bounds.size.x;
 		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();
 		uiBag = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-
+		
 		preEntryPrefab = Resources.Load ("PreEntry", typeof(GameObject)) as GameObject;
 		coffinPrefab = Resources.Load ("Coffin", typeof(GameObject)) as GameObject;
 
-		//不论是新的场景或是原来保存的场景，通往上一层的入口的位置总是在玩家(0,0,0)的位置，所以这个数据不用保存到全局数据的场景数据里
-		//在玩家位置生成上一层入口,由于该位置处不应该有敌人或场景物品，所以放在其他元素之前生成
-		Instantiate (preEntryPrefab, player.position, Quaternion.identity);
-
-		if (scenesNum >= currentFloor) {
-			GenerateSceneFromSceneInfo (gData.currentTomb.sceneList [currentFloor - 1]);
-		} else {
-			//生成场景
-			GenerateSceneRandom ();
-		}
-
+		int scenesNum = gData.currentTomb.sceneList.Count;
+		int currentFloor = gData.currentFloor;
 
 		//场景信息
 		Transform sceneInfoUI = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("SceneInfo");
@@ -117,17 +101,32 @@ public class SceneGen: MonoBehaviour
 		sceneInfoUI.FindChild ("FloorLable").GetComponent<Text> ().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild ("Floor").GetComponent<Text> ().text = gData.currentFloor.ToString ();
 
-		//自动上传当前记录
+		//不论是新的场景或是原来保存的场景，通往上一层的入口的位置总是在玩家(0,0,0)的位置，所以这个数据不用保存到全局数据的场景数据里
+		//在玩家位置生成上一层入口,由于该位置处不应该有敌人或场景物品，所以放在其他元素之前生成
+		Instantiate (preEntryPrefab, player.position, Quaternion.identity);
+
+		if (scenesNum >= currentFloor) {
+			if(gData.victory){
+				GenerateSceneFromSceneInfo (gData.currentTomb.sceneList [currentFloor - 1]);
+			}else{
+				//死亡，回城（如果有道具，可原地复活）	
+
+			}
+		} else {
+			//生成场景
+			gData.account.getSceneData(gData.currentTomb.dbid + "@" + gData.currentFloor);
+		}
 	}
-
-	//根据场景key去服务获取当前场景敌人类别
-	void getEnemyTypes (string key)
+	
+	void getEnemyTypes (List<object> enemyTypeList)
 	{
-		Enemy e1 = new Enemy (100, 20, 0, 0, StringCollection.E_1, "enemy_1", 300);
-		Enemy e2 = new Enemy (30, 5, 0, 0, StringCollection.E_2, "enemy_2", 300);
-
-		enemyTypes.Add (e1);
-		enemyTypes.Add (e2);
+		for(int i=0;i<enemyTypeList.Count;i++){
+			ServerItemData sid = gData.siList[int.Parse(enemyTypeList[i].ToString())];
+			Enemy e = new Enemy ();
+			e.PrefabName = "enemy_"+sid.dbid;
+			e.enemyid = sid.dbid; //enemy的道具表id
+			enemyTypes.Add(e);
+		}
 	}
 
 	//Dig更新 服务器callback
@@ -147,6 +146,7 @@ public class SceneGen: MonoBehaviour
 						showMsg = showMsg + gData.siList [itemId].name + " * " + itemNum + "\n";
 					}
 				}
+
 			} else {
 				showMsg = StringCollection.stringDict_CN [msg];
 			}
@@ -155,18 +155,17 @@ public class SceneGen: MonoBehaviour
 			uiInput.SendMessage ("DigStop");
 		}
 
-		DigData digData = (DigData)DataHelper.transElementDataFromServer (digInfo);
-		DigInfo.updateDigInDigList (digData, digList);
+		DigData digDataInfo = (DigData)DataHelper.transElementDataFromServer (digInfo);
+		DigInfo.updateDigInDigList (digDataInfo, digList);
 
 		gData.characterList = DataHelper.GetCharacterFromServer (role, gData.siList);
 		
-		if (digData.texType == 3) {
+		if (digDataInfo.texType == 3) {
 			uiInput.SendMessage ("DigStop");
 			gData.currentFloor++;
 			Application.LoadLevel ("main");
 		}
 	}
-
 
 	public GameObject getDig (Vector3 playerPos)
 	{
@@ -179,8 +178,6 @@ public class SceneGen: MonoBehaviour
 		if (dXE < digSide * 0.5 + playerSide * 0.5 && dYE < digSide * 0.5 + playerSide * 0.5) {
 			return null;
 		}
-
-
 
 		for (int i=0; i<digList.Count; i++) {
 			float dX = Mathf.Abs (playerPos.x - digList [i].transform.position.x);
@@ -300,7 +297,7 @@ public class SceneGen: MonoBehaviour
 				GameObject enemy = Instantiate (enemyPrefab, enemyData [i].pos, Quaternion.identity) as GameObject;
 				enemy.name = enemyData [i].objName;
 				enemy.GetComponent<SpriteRenderer> ().sortingOrder = enemyData [i].order;
-				enemy.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + enemyData [i].objName.Split (new char[]{'@'}) [0]);
+				enemy.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + enemyData [i].objName);  //.Split (new char[]{'@'}) [0]
 				enemy.transform.parent = enemys;
 			} else if (gData.victory && gData.currentEnemyName.Equals (enemyData [i].objName)) {
 				enemyNeedToRemove = enemyData [i];
@@ -407,10 +404,13 @@ public class SceneGen: MonoBehaviour
 				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				enemyO.transform.parent = enemys;
 				Enemy e = enemyTypes [Random.Range (0, enemyTypes.Count)];
-				enemyO.name = e.PrefabName + "@" + num;
+				enemyO.name = e.PrefabName;
 				enemyO.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + e.PrefabName);
 				enemyO.GetComponent<EnemyAI> ().enemy = e;
+				enemyO.GetComponent<EnemyAI> ().dbid = num + 1;
+
 				enemyList.Add (enemyO);
+
 				num++;
 			}
 		}
@@ -440,12 +440,13 @@ public class SceneGen: MonoBehaviour
 			for (int i=0; i<enemyList.Count; i++) {
 				GameObject enemyO = enemyList [i];
 				ElementData ed = new ElementData (enemyO.transform.position, enemyO.name, enemyO.transform.eulerAngles, enemyO.GetComponent<SpriteRenderer> ().sortingOrder);
+				ed.dbid = enemyO.GetComponent<EnemyAI>().dbid;
 				enemyData.Add (ed);
 			}
 			currentSceneInfo.EnemyData = enemyData;
 		}
 
-
+		currentSceneInfo.digData = new List<ElementData>();
 
 		gData.currentTomb.sceneList [gData.currentFloor - 1] = currentSceneInfo;
 

@@ -18,31 +18,46 @@ public class Battle : MonoBehaviour
 	private List<BattleOp> opList;
 	private Enemy currentEnemy;
 	private Action currentAct;
-	private bool newTurnInit = false;
 	private List<Baggrid> enemyAttackTypeList;
-	private bool battleStart = false;
-	private bool battleIng = false;
 	private bool dead;
 	private bool victory;
 	private GameObject canvas;
-	private int battleExp = 0;
 
-	void Awake ()
+	public void OnBattleAnim (int itemid)
+	{
+		Debug.Log ("item anim:" + itemid);
+	}
+
+	public void OnGetBattleData (Dictionary<string, object> role,List<object> bag)
+	{
+
+		int opCount = DataHelper.UpdatePlayerInfo_Battle (role, gData, enemyPos, enemySprite);
+
+		if(bag.Count>0){		
+			//更新背包
+			DataHelper.UpdateBag (gData.characterList [0], bag,gData.siList);
+		}
+
+		UpdateUI ();
+
+		if (opCount == 0) {	
+			NewTurn ();
+		} 
+	}
+	
+	void Start ()
 	{
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		canvas = GameObject.FindGameObjectWithTag ("UI");
-		currentEnemy = gData.currentEnemy;
-		enemySprite = Resources.Load <Sprite> ("_images/_game/" + currentEnemy.PrefabName);
 
-		characterList = gData.characterList;
+		currentEnemy = gData.currentEnemy;
 
 		waitForAttack = new List<GameObject> ();
 		focusList = new List<GameObject> ();
 		opList = new List<BattleOp> ();
 		enemyAttackTypeList = new List<Baggrid> ();
 
-		//敌人攻击类型列表，此处只添加额普通单体攻击
-		enemyAttackTypeList.Add (new Baggrid (new AttackItem (), 1,-1));
+		enemySprite = Resources.Load <Sprite> ("_images/_game/" + currentEnemy.PrefabName);
 
 		//初始化按钮文本
 		Transform buttons = canvas.transform.FindChild ("Button").transform;
@@ -51,120 +66,25 @@ public class Battle : MonoBehaviour
 		buttons.FindChild ("Wait_B").FindChild ("Text").GetComponent<Text> ().text = StringCollection.WAIT;
 		buttons.FindChild ("Ok_B").FindChild ("Text").GetComponent<Text> ().text = StringCollection.CONFIRM;
 		buttons.FindChild ("Undo_B").FindChild ("Text").GetComponent<Text> ().text = StringCollection.CANCEL;
-	}
-	
-	void Start ()
-	{
-		int enemyNum = Random.Range (minEnemyNum, maxEnemyNum + 1);
 
-		battleExp = enemyNum * currentEnemy.exp;
-
-		//初始化敌人和玩家
-		for (int i=0; i<enemyNum; i++) {
-			enemyPos [i].SetActive (true);
-			enemyPos [i].GetComponent<Image> ().sprite = enemySprite;
-			enemyPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = currentEnemy.Health.ToString ();
-			//new instance for every enemy copy from currentEnemy
-			Enemy enemy = new Enemy (currentEnemy);
-			enemyPos [i].GetComponent<PosChar> ().battleObj = enemy;
-		}
+		characterList = gData.characterList;
+		
 		for (int i=0; i<characterList.Count; i++) {
 			characterPos [i].SetActive (true);
 			Character character = characterList [i];
 			characterPos [i].GetComponent<Image> ().sprite = Resources.Load<Sprite> (character.PrefabName);
-			characterPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = character.Health.ToString ();
 			characterPos [i].transform.FindChild ("Name").GetComponent<Text> ().text = character.ObjName;
 			characterPos [i].GetComponent<PosChar> ().battleObj = character;
 		}
+
+		gData.account.getBattleData (currentEnemy.enemyid);
 	}
 
 	void Update ()
-	{
-		//如果战斗未开始且战斗指令数量已经等于玩家数量了，即战斗开始
-		if (opList.Count == characterList.Count && !battleStart) {
-			battleStart = true;
-		}
-
-
-		//所有指令执行完毕
-		if (opList.Count == 0 && !newTurnInit) {
-			//battle not over
-			NewTurn ();
-		}
-
+	{	
 		for (int i=0; i<focusList.Count; i++) {
 			GameUtil.Focus (focusList [i]);
 		}
-
-		if (battleStart && !battleIng) {
-
-			for (int i=0; i<enemyPos.Length; i++) {
-				if (enemyPos [i].activeInHierarchy && enemyPos [i].GetComponent<PosChar> ().battleObj.Health > 0) {
-					EnemyAttack (enemyPos [i]);
-				}
-			}
-
-			StartCoroutine (BattleProcess ());
-		}
-	}
-
-	IEnumerator BattleProcess ()
-	{
-
-		//战斗开始时,隐藏按钮
-		actionButton.SetActive (false);			
-
-		battleIng = true;
-
-		for (int i=0; i<opList.Count; i++) {
-
-			// this 2s for simulate battle animation
-			yield return new WaitForSeconds (2.0f);
-
-			if (opList [i].From.GetComponent<PosChar> ().battleObj.Health > 0) {
-
-				Baggrid bg = opList [i].Bg;
-				
-				List<BattleObj> toList = new List<BattleObj> ();
-
-				//获取位置上挂载的battleObj
-				for (int j=0; j<opList[i].To.Count; j++) {
-					//如果选择的目标已经给上一个玩家打死,不添加
-					if (opList [i].To [j].GetComponent<PosChar> ().battleObj.Health > 0) {
-						toList.Add (opList [i].To [j].GetComponent<PosChar> ().battleObj);
-					}
-				}
-
-				if (toList.Count > 0) {
-					//bg.Item.doSth (opList [i].From.GetComponent<PosChar> ().battleObj, toList);	
-				}
-			
-
-				bg.Num = bg.Num - 1;
-				
-				UpdateUI ();
-			}
-
-			opList.Remove (opList [i]);
-			i--;
-		}
-
-		dead = Dead ();
-		victory = Victory ();
-
-		if (victory) {
-			gData.victory = true;
-			Application.LoadLevel ("main");
-		} else if (dead) {
-			gData.victory = false;
-			Application.LoadLevel ("main");
-		}
-
-		battleIng = false; // this turn is over
-		newTurnInit = false;//tell to init a new turn
-				
-		//联机模式下,如果玩家死了,就不再显示按钮了(如果战斗过程中被人复活,则再显示)
-		actionButton.SetActive (true);	
 	}
 
 	void NewTurn ()
@@ -180,8 +100,8 @@ public class Battle : MonoBehaviour
 
 		focusList.Add (waitForAttack [0]);
 
-		newTurnInit = true;
-		battleStart = false;
+		//新一轮重新显示指令按钮(如果在组队模式下,玩家死亡但队友存活的情况下,隐藏玩家按钮)
+		actionButton.SetActive (true);
 	}
 
 	void UpdateUI ()
@@ -205,10 +125,10 @@ public class Battle : MonoBehaviour
 		RecoverFocusList ();
 
 		//等待道具无聚焦列表
-		if (act.Op != UI_Battle.Op.WAIT) {
+		if (act.op != UI_Battle.Op.WAIT) {
 			//判断道具属性，使用于敌方还是友方，单体还是多体
-			if (act.Bg.Item.ot == (int)Item.ObjType.Enemy) {
-				if (act.Bg.Item.rt == (int)Item.RangeType.SINGLE) {
+			if (act.bg.Item.ot == (int)Item.ObjType.Enemy) {
+				if (act.bg.Item.rt == (int)Item.RangeType.SINGLE) {
 					
 					//如果是单体，选择第一个活着的敌人
 					for (int i=0; i<enemyPos.Length; i++) {
@@ -226,7 +146,7 @@ public class Battle : MonoBehaviour
 					}
 				}
 			} else {
-				if (act.Bg.Item.rt == (int)Item.RangeType.SINGLE) {
+				if (act.bg.Item.rt == (int)Item.RangeType.SINGLE) {
 					focusList.Add (characterPos [0]);
 				} else {
 					for (int i=0; i<characterPos.Length; i++) {
@@ -245,8 +165,7 @@ public class Battle : MonoBehaviour
 		if (currentAct == null) {
 			return;
 		} else {
-			Item item = currentAct.Bg.Item;
-
+			Item item = currentAct.bg.Item;
 			//if choose the target can not be apply the item,return
 			if (target.name.Contains ("EPos")) {
 				if (item.ot == (int)Item.ObjType.Friend) {
@@ -296,106 +215,90 @@ public class Battle : MonoBehaviour
 			return;
 		}
 
-		GameObject from = waitForAttack [0];
+		int from = waitForAttack [0].GetComponent<PosChar> ().battleObj.dbid;
 
-		List<GameObject> to = new List<GameObject> (); 
-		
-		for (int i=0; i<focusList.Count; i++) {
-			to.Add (focusList [i]);
+		string to_tag = ""; 
+
+		if (focusList.Count == 1) {
+			to_tag = focusList [0].GetComponent<PosChar> ().battleObj.dbid.ToString ();
+		} else  if (focusList.Count > 0) {
+			int dbid = focusList [0].GetComponent<PosChar> ().battleObj.dbid;
+			if (dbid > 4) {
+				//所有敌人
+				to_tag = "ALLENEMY";
+			} else {
+				to_tag = "ALLTEAM";
+			}
 		}
-		
-		BattleOp bo = new BattleOp (from, to, currentAct.Bg);
-		opList.Add (bo);
+
+		int itemId = currentAct.bg.Item.dbid;
+
+		if (itemId < 9000) {
+			itemId = currentAct.bg.dbid;
+		}
+		gData.account.addOp (from.ToString (), to_tag, itemId);
+	}
+
+	public void OnAddOp (int opCount)
+	{
+
 		RecoverFocusList ();
 		waitForAttack.Remove (waitForAttack [0]);
-
+		
 		if (waitForAttack.Count > 0) {
 			focusList.Add (waitForAttack [0]);
 		}
-
+		
 		currentAct = null;
-	}
 
-
-
-	//enemy attack ai in battle
-	void EnemyAttack (GameObject from)
-	{
-		//choose a type of attack in a random way
-		Baggrid bg = enemyAttackTypeList [Random.Range (0, enemyAttackTypeList.Count)];
-		List<GameObject> attackList = new List<GameObject> ();
-
-		if (bg.Item.rt == (int)Item.RangeType.SINGLE) {
-			//choose a player with the min health
-			GameObject minHealthChar = characterPos [0];
-
-			for (int i=1; i<characterList.Count; i++) {
-				int thisHealth = characterPos [i].GetComponent<PosChar> ().battleObj.Health;
-				int currentHealth = minHealthChar.GetComponent<PosChar> ().battleObj.Health;
-
-				if (characterPos [i].activeInHierarchy && thisHealth < currentHealth) {
-					minHealthChar = characterPos [i];
-				}
-			}
-
-			attackList.Add (minHealthChar);
-		} else {
-
-			for (int i=1; i<characterPos.Length; i++) {
-				if (characterPos [i].activeInHierarchy) {
-					attackList.Add (characterPos [i]);
-				}
-			}
+		if (opCount == gData.characterList.Count) {
+			actionButton.SetActive (false);			
 		}
-
-		BattleOp bo = new BattleOp (from, attackList, bg);
-		opList.Add (bo);
 	}
 
+	public void OnUndoOp (string from_tag)
+	{
+
+		if (!from_tag.Equals ("")) {
+			RecoverFocusList ();
+			GameObject fromObj = characterPos [int.Parse (from_tag) - 1];
+			focusList.Add (fromObj);
+			waitForAttack.Insert (0, fromObj);
+		}
+	}
+	
 	public void Undo ()
 	{
-		if (opList.Count > 0) {
-			BattleOp op = opList [opList.Count - 1];
-			RecoverFocusList ();
-			focusList.Add (op.From);
-			waitForAttack.Insert (0, op.From);
-			opList.Remove (op);
-		}
+		gData.account.undoOp ();
 	}
 
-	bool Victory ()
+	public void BattleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList)
 	{
-		bool victory = true;
-		for (int i=0; i<enemyPos.Length; i++) {
-			if (enemyPos [i].activeInHierarchy) {
-				if (enemyPos [i].GetComponent<PosChar> ().battleObj.Health > 0) {
-					victory = false;
-					break;
+		if (battle_res.Equals ("win")) {
+
+			//跟新属性
+			Debug.Log (playerInfo ["exp"] + " :add exp");
+			DataHelper.UpdatePlayerAttr (gData.characterList [0], playerInfo);
+			Debug.Log (gData.characterList [0].exp + " :after upate");
+
+			for (int i=1; i<gData.characterList.Count; i++) {
+				for (int j=0; j<assistList.Count; j++) {
+
+					Dictionary<string,object> assitInfo = (Dictionary<string,object>)assistList [j];
+
+					if (gData.characterList [i].dbid == int.Parse (assitInfo ["dbid"].ToString ())) {
+						DataHelper.UpdatePlayerAttr (gData.characterList [i], assitInfo);
+						break;
+					}
 				}
 			}
-		}
 
-
-		if (victory) {
-			//获得经验
-			for (int i=0; i<characterList.Count; i++) {
-				//characterList [i].AddExp (battleExp);
-			}
+			gData.victory = true;
+			Application.LoadLevel ("main");
+		} else if (battle_res.Equals ("loose")) {
+			gData.victory = false;
+			Application.LoadLevel ("main");
 		}
-		return victory;
 	}
 
-	bool Dead ()
-	{
-		bool dead = true;
-		for (int i=0; i<characterPos.Length; i++) {
-			if (characterPos [i].activeInHierarchy) {
-				if (characterPos [i].GetComponent<PosChar> ().battleObj.Health > 0) {
-					dead = false;
-					break;
-				}
-			}
-		}
-		return dead;
-	}
 }

@@ -11,6 +11,7 @@ public class AttackItem : Item
 		this.rt = (int)RangeType.SINGLE;
 		this.ct = (int)CommonType.CONSUME;
 		this.ot = (int)ObjType.Enemy;
+		this.dbid = 9001;
 	}
 
 

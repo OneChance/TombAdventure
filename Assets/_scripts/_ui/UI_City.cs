@@ -56,7 +56,7 @@ public class UI_City : MonoBehaviour
 		if (!charInfo.activeInHierarchy) {
 			itemInfo.SetActive (false);
 		} else {
-			gameObject.SendMessage ("InitCharInfo");
+			gameObject.SendMessage ("ShowCharInfo");
 		}
 	}
 

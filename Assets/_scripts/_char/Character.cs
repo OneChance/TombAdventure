@@ -30,7 +30,6 @@ public class Character:BattleObj
 	private string charInfo;
 	public int digPower;
 	public string mnote;
-	public int dbid = 0;
 	public int iid = 0;
 	public Dictionary<int,TombLog> tombLogs;
 
@@ -143,7 +142,7 @@ public class Character:BattleObj
 			this.charInfo = 
 				StringCollection.NAME + ":" + this.ObjName + "\n" + 
 				StringCollection.PRO + ":" + this.Pro.proname + "[" + this.level + "]" + "\n" + 
-				StringCollection.EXP + ":" + this.exp + "/" + this.nextLevelExp + "\n" + 
+				StringCollection.EXP + ":" + this.exp + "/" + (this.level * 50) + "\n" + 
 				StringCollection.HEALTH + ":" + this.Health + "/" + this.MaxHealth + "\n" + 
 				StringCollection.STAMINA + ":" + this.stamina + "/" + this.maxStamina + "\n" + 
 				StringCollection.STRENGTH + ":" + this.strength + "\n" + 

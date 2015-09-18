@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine.UI;
 
 public class DataHelper : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class DataHelper : MonoBehaviour
 		string name = (string)player ["name"];
 
 		int money = int.Parse (((UInt32)role ["money"]).ToString ());
+
+		/*
 		int level = int.Parse (((UInt16)player ["level"]).ToString ());
 		int exp = int.Parse (((UInt16)player ["exp"]).ToString ());
 		int health = int.Parse (((UInt16)player ["health"]).ToString ());
@@ -25,7 +28,7 @@ public class DataHelper : MonoBehaviour
 		int strength = int.Parse (((UInt16)player ["strength"]).ToString ());
 		int archeology = int.Parse (((UInt16)player ["archeology"]).ToString ());
 		int def = int.Parse (((UInt16)player ["def"]).ToString ());
-		int dodge = int.Parse (((UInt16)player ["dodge"]).ToString ());
+		int dodge = int.Parse (((UInt16)player ["dodge"]).ToString ());*/
 
 		string proname = player ["pro"].ToString ();
 		int img = int.Parse (player ["img"].ToString ());
@@ -36,7 +39,9 @@ public class DataHelper : MonoBehaviour
 
 		List<Baggrid> bgList = new List<Baggrid> ();
 
-		Character c = new Character (money, health, maxhealth, strength, archeology, def, dodge, name, true, stamina, maxstamina, pro, level, exp, eList, -1);
+		Character c = new Character (money, 0, 0, 0, 0, 0, 0, name, true, 0, 0, pro, 0, 0, eList, -1);
+
+		UpdatePlayerAttr(c,player);
 
 		c.tombLogs = getAdventureLog (role);
 		c.BgList = bgList;
@@ -48,9 +53,68 @@ public class DataHelper : MonoBehaviour
 
 		getAssistsFromServer (role, siList, characterList);
 
-
-
 		return characterList;
+	}
+
+	public static void UpdatePlayerAttr(Character c,Dictionary<string,object> playerInfo){
+		c.level = int.Parse (((UInt16)playerInfo ["level"]).ToString ());
+		c.exp = int.Parse (((UInt16)playerInfo ["exp"]).ToString ());
+		c.Health = int.Parse (((UInt16)playerInfo ["health"]).ToString ());
+		c.MaxHealth = int.Parse (((UInt16)playerInfo ["maxhealth"]).ToString ());
+		c.stamina = int.Parse (((UInt16)playerInfo ["stamina"]).ToString ());
+		c.maxStamina = int.Parse (((UInt16)playerInfo ["maxstamina"]).ToString ());
+		
+		c.strength= int.Parse (((UInt16)playerInfo ["strength"]).ToString ());
+		c.archeology = int.Parse (((UInt16)playerInfo ["archeology"]).ToString ());
+		c.def = int.Parse (((UInt16)playerInfo ["def"]).ToString ());
+		c.dodge= int.Parse (((UInt16)playerInfo ["dodge"]).ToString ());
+	}
+
+	public static int UpdatePlayerInfo_Battle (Dictionary<string, object> role, GlobalData gdata, GameObject[] enemyPos, Sprite enemySprite)
+	{
+		Dictionary<string, object> player = (Dictionary<string, object>)role ["info"];
+		int health_me = int.Parse (((UInt16)player ["health"]).ToString ());
+
+		//更新玩家的血量
+		gdata.characterList [0].Health = health_me;
+
+		List<object> assistL = (List<object>)role ["assists"];
+		for (int i = 0; i < assistL.Count; i++) {
+			Dictionary<string, object> assistInfo = (Dictionary<string, object>)assistL [i];
+			int health_assist = int.Parse (assistInfo ["health"].ToString ());
+
+			//更新佣兵(组队玩家)的血量
+			for (int j=1; j<gdata.characterList.Count; j++) {
+				if (gdata.characterList [j].dbid == int.Parse (assistInfo ["dbid"].ToString ())) {
+					gdata.characterList [j].Health = health_assist;
+					break;
+				}
+			}
+		}
+
+		List<object> enemyList = (List<object>)role ["battle_enemys"];
+
+		if (enemyList != null) {
+			for (int i=0; i<enemyList.Count; i++) {
+
+				Dictionary<string, object> enemyInfo = (Dictionary<string, object>)enemyList [i];
+
+				if (!enemyPos [i].activeInHierarchy) {
+					enemyPos [i].SetActive (true);
+					enemyPos [i].GetComponent<Image> ().sprite = enemySprite;
+					Enemy enemy = new Enemy ();
+					enemy.dbid = int.Parse (enemyInfo ["dbid"].ToString ());
+					enemy.Health = int.Parse (enemyInfo ["health"].ToString ());
+					enemyPos [i].GetComponent<PosChar> ().battleObj = enemy;
+				} else {
+					if (enemyPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse (enemyInfo ["dbid"].ToString ())) {
+						enemyPos [i].GetComponent<PosChar> ().battleObj.Health = int.Parse (enemyInfo ["health"].ToString ());
+					}
+				}
+			}
+		}
+
+		return ((List<object>)role ["battle_ops"]).Count;
 	}
 	
 	public static Dictionary<string, object> BaseSceneInfoToServer (SceneInfo sceneInfo, int currentFloor)
@@ -265,7 +329,6 @@ public class DataHelper : MonoBehaviour
 		
 		for (int k=0; k<elements.Count; k++) {
 			ElementData e = elements [k];
-			e.dbid = k + 1;
 			elementsData.Add (transElementDataFromClient (e));
 		}
 		
@@ -279,6 +342,8 @@ public class DataHelper : MonoBehaviour
 			Dictionary<string, object> assistInfo = (Dictionary<string, object>)assistL [i];
 			int iid = int.Parse (assistInfo ["iid"].ToString ());
 			int dbid = int.Parse (assistInfo ["dbid"].ToString ());
+
+			/*
 			int level = int.Parse (assistInfo ["level"].ToString ());
 			int stamina = int.Parse (assistInfo ["stamina"].ToString ());
 			int maxstamina = int.Parse (assistInfo ["maxstamina"].ToString ());
@@ -288,14 +353,17 @@ public class DataHelper : MonoBehaviour
 			int archeology = int.Parse (assistInfo ["archeology"].ToString ());
 			int def = int.Parse (assistInfo ["def"].ToString ());
 			int dodge = int.Parse (assistInfo ["dodge"].ToString ());
-			int exp = int.Parse (assistInfo ["exp"].ToString ());
+			int exp = int.Parse (assistInfo ["exp"].ToString ());*/
 
 			ServerItemData assistProInfo = siList [iid];
 
 			Pro pro = ProFactory.getPro (assistProInfo.pro, assistProInfo.prefabname);
 
 			if (assistProInfo != null) {
-				Character c = new Character (0, health, maxhealth, strength, archeology, def, dodge, assistProInfo.name, false, stamina, maxstamina, pro, level, exp, null, -1);
+				Character c = new Character (0, 0, 0, 0, 0, 0, 0, assistProInfo.name, false, 0, 0, pro, 0, 0, null, -1);
+
+				UpdatePlayerAttr(c,assistInfo);
+
 				c.dbid = dbid;
 				c.iid = iid;
 				characterList.Add (c);
@@ -321,29 +389,34 @@ public class DataHelper : MonoBehaviour
 		return eList;
 	}
 
+	public static void UpdateBag(Character c, List<object> bag, Dictionary<int, ServerItemData> siList){
+
+		c.BgList.Clear ();
+
+		for (int i=0; i<bag.Count; i++) {
+			
+			Dictionary<string, object> bg_server = (Dictionary<string, object>)bag [i];
+			
+			int itemid = int.Parse (((UInt16)bg_server ["iid"]).ToString ());
+			
+			ServerItemData sid = siList [itemid];
+			
+			int num = int.Parse (bg_server ["num"].ToString ());
+
+			int bgDBID = int.Parse (bg_server ["dbid"].ToString ());
+			
+			Baggrid bg = new Baggrid (ItemFactory.getItemFromSID (sid, bg_server), num, bgDBID);
+			
+			c.BgList.Add (bg);
+		}
+	}
+
 	public static void BagDataBind (Character c, Dictionary<string, object> role, Dictionary<int, ServerItemData> siList)
 	{
 
 		List<object> bgList_server = (List<object>)role ["bggrids"];
 
-		c.BgList.Clear ();
-		
-		for (int i=0; i<bgList_server.Count; i++) {
-			
-			Dictionary<string, object> bg_server = (Dictionary<string, object>)bgList_server [i];
-			
-			int itemid = int.Parse (((UInt16)bg_server ["iid"]).ToString ());
-
-			ServerItemData sid = siList [itemid];
-			
-			int num = int.Parse (((UInt16)bg_server ["num"]).ToString ());
-
-			int bgDBID = int.Parse (bg_server ["dbid"].ToString ());
-
-			Baggrid bg = new Baggrid (ItemFactory.getItemFromSID (sid, bg_server), num, bgDBID);
-			
-			c.BgList.Add (bg);
-		}
+		UpdateBag(c,bgList_server,siList);
 
 		c.money = int.Parse (((UInt32)role ["money"]).ToString ());
 	}
