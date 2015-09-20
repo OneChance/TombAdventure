@@ -23,26 +23,80 @@ public class Battle : MonoBehaviour
 	private bool victory;
 	private GameObject canvas;
 
-	public void OnBattleAnim (int itemid)
+	private Sprite attack_s;
+	private Sprite heal_s;
+	private Dictionary<int,Sprite> spriteDic;
+	private int animScope = 5;
+
+	private Dictionary<string,GameObject> posDic;
+
+	IEnumerator PlayActAnim(int itemid,GameObject fromBO)  
+	{  
+		if(spriteDic.ContainsKey(gData.siList[itemid].commontype)){
+			Sprite s = fromBO.GetComponent<Image> ().sprite;
+			
+			fromBO.GetComponent<Image> ().sprite = spriteDic[gData.siList[itemid].commontype];
+			
+			yield return new WaitForSeconds(1.0f);
+			
+			fromBO.GetComponent<Image> ().sprite = s;
+		}
+	}  
+
+	public void OnBattleAnim (int itemid,string from)
 	{
-		Debug.Log ("item anim:" + itemid);
+
+		GameObject fromBO = null;
+
+		if(int.Parse(from)<5){
+			for(int i=0;i<characterPos.Length;i++){
+				if(characterPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse(from)){
+					fromBO = characterPos [i];
+					break;
+				}
+			}
+		}else{
+			for(int i=0;i<enemyPos.Length;i++){
+				if(enemyPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse(from)){
+					fromBO = enemyPos [i];
+					break;
+				}
+			}
+		}
+
+		if(fromBO!=null){
+			//根据ITEMID决定播放动画
+			StartCoroutine(PlayActAnim(itemid,fromBO));  
+		}
 	}
 
-	public void OnGetBattleData (Dictionary<string, object> role,List<object> bag)
-	{
+	public void OnOpExe(List<object> toBos,List<object> bag,int itemid){
 
-		int opCount = DataHelper.UpdatePlayerInfo_Battle (role, gData, enemyPos, enemySprite);
+		for(int i=0;i<toBos.Count;i++){
+			Dictionary<string,object> boInfo = (Dictionary<string,object>)toBos[i];
+			UpdateUIWithTarget (boInfo["dbid"].ToString(),boInfo["health"].ToString(),itemid);
+		}
 
 		if(bag.Count>0){		
 			//更新背包
 			DataHelper.UpdateBag (gData.characterList [0], bag,gData.siList);
 		}
+	}
 
-		UpdateUI ();
+	public void OnGetBattleData (List<object> enemyList)
+	{
+		for (int i=0; i<enemyList.Count; i++) {		
+			Dictionary<string, object> enemyInfo = (Dictionary<string, object>)enemyList [i];
+			enemyPos [i].SetActive (true);
+			enemyPos [i].GetComponent<Image> ().sprite = enemySprite;
+			Enemy enemy = new Enemy ();
+			enemy.dbid = int.Parse (enemyInfo ["dbid"].ToString ());
+			enemy.Health = int.Parse (enemyInfo ["health"].ToString ());
+			enemyPos [i].GetComponent<PosChar> ().battleObj = enemy;
+		}
 
-		if (opCount == 0) {	
-			NewTurn ();
-		} 
+		UpdateUIAll ();
+		NewTurn();
 	}
 	
 	void Start ()
@@ -56,8 +110,16 @@ public class Battle : MonoBehaviour
 		focusList = new List<GameObject> ();
 		opList = new List<BattleOp> ();
 		enemyAttackTypeList = new List<Baggrid> ();
+		posDic = new Dictionary<string, GameObject>();
 
 		enemySprite = Resources.Load <Sprite> ("_images/_game/" + currentEnemy.PrefabName);
+
+		spriteDic = new Dictionary<int, Sprite>();
+		attack_s = Resources.Load<Sprite> ("_images/_game/act_5");
+		spriteDic.Add(5,attack_s);
+		heal_s = Resources.Load<Sprite> ("_images/_game/act_3");
+		spriteDic.Add(3,heal_s);
+
 
 		//初始化按钮文本
 		Transform buttons = canvas.transform.FindChild ("Button").transform;
@@ -104,19 +166,83 @@ public class Battle : MonoBehaviour
 		actionButton.SetActive (true);
 	}
 
-	void UpdateUI ()
+	void UpdateUIAll ()
 	{
 		for (int i=0; i<enemyPos.Length; i++) {
 			if (enemyPos [i].activeInHierarchy) {
 				enemyPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = enemyPos [i].GetComponent<PosChar> ().battleObj.Health.ToString ();
+				posDic.Add(enemyPos [i].GetComponent<PosChar> ().battleObj.dbid.ToString(),enemyPos [i]);
 			}
 		}
 		for (int i=0; i<characterPos.Length; i++) {
 			if (characterPos [i].activeInHierarchy) {
 				characterPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = characterPos [i].GetComponent<PosChar> ().battleObj.Health.ToString ();
+				posDic.Add(characterPos [i].GetComponent<PosChar> ().battleObj.dbid.ToString(),characterPos [i]);
 			}
 		}
 	}
+
+	void UpdateUIWithTarget(string to,string newHealth,int itemid){
+
+		int dir = 1;
+
+		if(int.Parse(to)<5){
+			dir = -1;
+		}
+
+		GameObject posGo =  posDic[to];
+
+		ServerItemData sid = gData.siList[itemid];
+
+		posGo.GetComponent<PosChar> ().battleObj.Health = int.Parse(newHealth); 
+		HealthChangeAnim(posGo,posGo.transform.FindChild ("Health").GetComponent<Text> ().text,newHealth,dir,sid);
+		posGo.transform.FindChild ("Health").GetComponent<Text> ().text = newHealth;
+
+		if(newHealth.Equals("0")){
+			Color c = posGo.GetComponent<Image> ().color;
+			posGo.GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 0.1f);
+		}
+	}
+
+	void HealthChangeAnim(GameObject go,string pre_health,string now_health,int dir,ServerItemData sid){
+		int pre_health_int = int.Parse(pre_health);
+		int now_health_int = int.Parse(now_health);
+
+		if(pre_health_int > now_health_int){
+			StartCoroutine(PlayAttackedAnim(go,dir));
+		}else if(pre_health_int < now_health_int){
+			StartCoroutine(PlayHealedAnim(go));
+		}else{
+			if(sid.commontype==3){
+				StartCoroutine(PlayHealedAnim(go));
+			}else{
+				StartCoroutine(PlayDefAnim(go,dir));
+			}
+		}
+	}	
+
+	IEnumerator PlayAttackedAnim(GameObject go,int dir)  
+	{  
+		go.transform.Translate (Vector2.left * animScope * dir);
+		yield return new WaitForSeconds(0.1f);
+		go.transform.Translate (Vector2.right * (animScope*2) * dir);
+		yield return new WaitForSeconds(0.1f);
+		go.transform.Translate (Vector2.left * animScope * dir);
+	}  
+
+	IEnumerator PlayDefAnim(GameObject go,int dir)  
+	{  
+		go.transform.Translate (Vector2.left * animScope * dir);
+		yield return new WaitForSeconds(0.1f);
+		go.transform.Translate (Vector2.right * animScope * dir);
+	}  
+
+	IEnumerator PlayHealedAnim(GameObject go)  
+	{  
+		go.transform.localScale = new Vector3(1.3f,1.3f,1f);
+		yield return new WaitForSeconds(0.3f);
+		go.transform.localScale = new Vector3(1,1,1);
+	}  
 
 	//玩家动作,根据道具类型，设置聚焦列表
 	void Act (Action act)
@@ -239,19 +365,18 @@ public class Battle : MonoBehaviour
 		gData.account.addOp (from.ToString (), to_tag, itemId);
 	}
 
-	public void OnAddOp (int opCount)
+	public void OnAddOp (int isBattleStart)
 	{
-
 		RecoverFocusList ();
 		waitForAttack.Remove (waitForAttack [0]);
-		
+
 		if (waitForAttack.Count > 0) {
 			focusList.Add (waitForAttack [0]);
 		}
 		
 		currentAct = null;
 
-		if (opCount == gData.characterList.Count) {
+		if (isBattleStart==1) {
 			actionButton.SetActive (false);			
 		}
 	}
@@ -272,7 +397,7 @@ public class Battle : MonoBehaviour
 		gData.account.undoOp ();
 	}
 
-	public void BattleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList)
+	public void BattleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList,int battleOver)
 	{
 		if (battle_res.Equals ("win")) {
 
@@ -298,6 +423,10 @@ public class Battle : MonoBehaviour
 		} else if (battle_res.Equals ("loose")) {
 			gData.victory = false;
 			Application.LoadLevel ("main");
+		}else if (battle_res.Equals ("goon")){
+			if(battleOver==0){
+				NewTurn ();
+			}
 		}
 	}
 

@@ -48,7 +48,7 @@ public class BagInit : MonoBehaviour
 
 		List<Baggrid> bgList = c.BgList;
 
-		if (Application.loadedLevelName.Equals ("city")) {
+		if (Application.loadedLevelName.Equals ("city") || Application.loadedLevelName.Equals ("main")) {
 			transform.FindChild ("Money").FindChild ("Text").GetComponent<Text> ().text = c.money.ToString ();
 		}
 

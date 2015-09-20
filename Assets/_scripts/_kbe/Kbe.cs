@@ -60,6 +60,9 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("onUndoOp", this, "onUndoOp");
 
 		KBEngine.Event.registerOut ("battleOver", this, "battleOver");
+
+		KBEngine.Event.registerOut ("OnOpExe", this, "OnOpExe");
+
 	}
 
 	void OnDestroy ()
@@ -188,22 +191,28 @@ public class Kbe : MonoBehaviour
 		sceneGen.OnGetSceneData (enemyTypeList);
 	}
 
-	public void OnGetBattleData (Dictionary<string, object> role, List<object> bag)
+	public void OnGetBattleData (List<object> enemyList)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.OnGetBattleData (role,bag);
+		battle.OnGetBattleData (enemyList);
 	}
 
-	public void onAddOp (int opCount)
+	public void OnOpExe (List<object> toBos, List<object> bag,int itemid)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.OnAddOp (opCount);
+		battle.OnOpExe (toBos,bag,itemid);
 	}
 
-	public void OnBattleAnim (int itemid)
+	public void onAddOp (int isBattleStart)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.OnBattleAnim (itemid);
+		battle.OnAddOp (isBattleStart);
+	}
+
+	public void OnBattleAnim (int itemid,string from)
+	{
+		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
+		battle.OnBattleAnim (itemid,from);
 	}
 
 	public void onUndoOp (string from_tag)
@@ -212,9 +221,9 @@ public class Kbe : MonoBehaviour
 		battle.OnUndoOp (from_tag);
 	}
 
-	public void battleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList)
+	public void battleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList,int battleOver)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.BattleOver (battle_res, playerInfo, assistList);
+		battle.BattleOver (battle_res, playerInfo, assistList,battleOver);
 	}
 }

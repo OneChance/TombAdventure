@@ -70,53 +70,6 @@ public class DataHelper : MonoBehaviour
 		c.dodge= int.Parse (((UInt16)playerInfo ["dodge"]).ToString ());
 	}
 
-	public static int UpdatePlayerInfo_Battle (Dictionary<string, object> role, GlobalData gdata, GameObject[] enemyPos, Sprite enemySprite)
-	{
-		Dictionary<string, object> player = (Dictionary<string, object>)role ["info"];
-		int health_me = int.Parse (((UInt16)player ["health"]).ToString ());
-
-		//更新玩家的血量
-		gdata.characterList [0].Health = health_me;
-
-		List<object> assistL = (List<object>)role ["assists"];
-		for (int i = 0; i < assistL.Count; i++) {
-			Dictionary<string, object> assistInfo = (Dictionary<string, object>)assistL [i];
-			int health_assist = int.Parse (assistInfo ["health"].ToString ());
-
-			//更新佣兵(组队玩家)的血量
-			for (int j=1; j<gdata.characterList.Count; j++) {
-				if (gdata.characterList [j].dbid == int.Parse (assistInfo ["dbid"].ToString ())) {
-					gdata.characterList [j].Health = health_assist;
-					break;
-				}
-			}
-		}
-
-		List<object> enemyList = (List<object>)role ["battle_enemys"];
-
-		if (enemyList != null) {
-			for (int i=0; i<enemyList.Count; i++) {
-
-				Dictionary<string, object> enemyInfo = (Dictionary<string, object>)enemyList [i];
-
-				if (!enemyPos [i].activeInHierarchy) {
-					enemyPos [i].SetActive (true);
-					enemyPos [i].GetComponent<Image> ().sprite = enemySprite;
-					Enemy enemy = new Enemy ();
-					enemy.dbid = int.Parse (enemyInfo ["dbid"].ToString ());
-					enemy.Health = int.Parse (enemyInfo ["health"].ToString ());
-					enemyPos [i].GetComponent<PosChar> ().battleObj = enemy;
-				} else {
-					if (enemyPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse (enemyInfo ["dbid"].ToString ())) {
-						enemyPos [i].GetComponent<PosChar> ().battleObj.Health = int.Parse (enemyInfo ["health"].ToString ());
-					}
-				}
-			}
-		}
-
-		return ((List<object>)role ["battle_ops"]).Count;
-	}
-	
 	public static Dictionary<string, object> BaseSceneInfoToServer (SceneInfo sceneInfo, int currentFloor)
 	{
 		Dictionary<string, object> scene = new Dictionary<string, object> ();
