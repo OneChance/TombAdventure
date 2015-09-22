@@ -12,6 +12,8 @@ public class UI_City : MonoBehaviour
 	private GlobalData gData;
 	private Transform buttons;
 	private GameObject exitButton;
+	public GameObject playerFinder;
+	private bool finderInit = false;
 
 	void Start ()
 	{
@@ -20,6 +22,7 @@ public class UI_City : MonoBehaviour
 		buttons = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("Buttons");
 		buttons.FindChild ("Bag_B").FindChild ("Text").GetComponent<Text> ().text = StringCollection.BAG;
 		buttons.FindChild ("Equip_B").FindChild ("Text").GetComponent<Text> ().text = StringCollection.EQUIPMENT;
+		buttons.FindChild ("FindPlayer_B").FindChild ("Text").GetComponent<Text> ().text = StringCollection.FINDPLAYER;
 		GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("ShopBag").FindChild ("Leave").FindChild ("Text").GetComponent<Text> ().text = StringCollection.LEAVESHOP;
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 	}
@@ -70,6 +73,24 @@ public class UI_City : MonoBehaviour
 		exitButton.SetActive (true);
 		itemInfo.transform.FindChild ("TradeNum").gameObject.SetActive (false);
 		gData.isShop = false;
+	}
+
+	public void FindPlayer ()
+	{
+
+		playerFinder.SetActive (!playerFinder.activeInHierarchy);
+
+		if (playerFinder.activeInHierarchy) {
+			if (!finderInit) {
+				
+				playerFinder.transform.FindChild ("FindPlayer_NameLable").GetComponent<Text> ().text = StringCollection.NAME;
+				playerFinder.transform.FindChild ("FindPlayer_Query").FindChild ("Text").GetComponent<Text> ().text = StringCollection.QUERYPLAYER;
+				
+				finderInit = true;
+			}
+
+			gData.account.queryOtherPlayer ();
+		}
 	}
 
 	public void WorldMap ()

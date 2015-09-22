@@ -58,7 +58,8 @@ public class SceneGen: MonoBehaviour
 	private UI_Input uiInput;
 	private UI_Bag uiBag;
 
-	public void OnGetSceneData(List<object> enemyTypeList){
+	public void OnGetSceneData (List<object> enemyTypeList)
+	{
 		getEnemyTypes (enemyTypeList);
 		GenerateSceneRandom ();
 	}
@@ -97,7 +98,7 @@ public class SceneGen: MonoBehaviour
 
 		//场景信息
 		Transform sceneInfoUI = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("SceneInfo");
-		sceneInfoUI.FindChild ("TombName").GetComponent<Text> ().text = StringCollection.stringDict_CN [gData.currentTomb.tombName];
+		sceneInfoUI.FindChild ("TombName").GetComponent<Text> ().text = StringCollection.stringDict_CN ["tomb_" + gData.currentTomb.dbid];
 		sceneInfoUI.FindChild ("FloorLable").GetComponent<Text> ().text = StringCollection.FLOOR;
 		sceneInfoUI.FindChild ("Floor").GetComponent<Text> ().text = gData.currentFloor.ToString ();
 
@@ -106,26 +107,26 @@ public class SceneGen: MonoBehaviour
 		Instantiate (preEntryPrefab, player.position, Quaternion.identity);
 
 		if (scenesNum >= currentFloor) {
-			if(gData.victory){
+			if (gData.victory) {
 				GenerateSceneFromSceneInfo (gData.currentTomb.sceneList [currentFloor - 1]);
-			}else{
+			} else {
 				//死亡，回城（如果有道具，可原地复活）	
 
 			}
 		} else {
 			//生成场景
-			gData.account.getSceneData(gData.currentTomb.dbid + "@" + gData.currentFloor);
+			gData.account.getSceneData (gData.currentTomb.dbid + "@" + gData.currentFloor);
 		}
 	}
 	
 	void getEnemyTypes (List<object> enemyTypeList)
 	{
-		for(int i=0;i<enemyTypeList.Count;i++){
-			ServerItemData sid = gData.siList[int.Parse(enemyTypeList[i].ToString())];
+		for (int i=0; i<enemyTypeList.Count; i++) {
+			ServerItemData sid = gData.siList [int.Parse (enemyTypeList [i].ToString ())];
 			Enemy e = new Enemy ();
-			e.PrefabName = "enemy_"+sid.dbid;
+			e.PrefabName = "enemy_" + sid.dbid;
 			e.enemyid = sid.dbid; //enemy的道具表id
-			enemyTypes.Add(e);
+			enemyTypes.Add (e);
 		}
 	}
 
@@ -162,6 +163,7 @@ public class SceneGen: MonoBehaviour
 		
 		if (digDataInfo.texType == 3) {
 			uiInput.SendMessage ("DigStop");
+			gData.account.toNextFloor ();
 			gData.currentFloor++;
 			Application.LoadLevel ("main");
 		}
@@ -246,7 +248,7 @@ public class SceneGen: MonoBehaviour
 			if (digTimer > 3) {
 				//Digging ();			
 				DigData digInfo = TransDigObjToElementData (currentDigging);
-				gData.account.StartDig (gData.currentTomb.dbid, gData.currentFloor, DataHelper.transElementDataFromClient (digInfo));				
+				gData.account.StartDig (DataHelper.transElementDataFromClient (digInfo));				
 				digTimer = 0;
 			}
 		} else {
@@ -289,25 +291,22 @@ public class SceneGen: MonoBehaviour
 			item.transform.parent = groundItem;
 		}
 
-		//如果是从战斗场景回来,如果胜利,则移除敌人
-		ElementData enemyNeedToRemove = null; 
-
 		for (int i=0; i<enemyData.Count; i++) {
-			if (!gData.victory || !gData.currentEnemyName.Equals (enemyData [i].objName)) {
+			if (enemyData [i].dbid != gData.enemyNeedRemove) {
 				GameObject enemy = Instantiate (enemyPrefab, enemyData [i].pos, Quaternion.identity) as GameObject;
 				enemy.name = enemyData [i].objName;
 				enemy.GetComponent<SpriteRenderer> ().sortingOrder = enemyData [i].order;
-				enemy.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + enemyData [i].objName);  //.Split (new char[]{'@'}) [0]
+				enemy.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + enemyData [i].objName); 
+				Enemy e = new Enemy ();
+				e.PrefabName = enemyData [i].objName;
+				e.enemyid = int.Parse (enemyData [i].objName.Split (new char[]{'_'}) [1]);
+				e.dbid = enemyData [i].dbid;
+				enemy.GetComponent<EnemyAI> ().enemy = e;
 				enemy.transform.parent = enemys;
-			} else if (gData.victory && gData.currentEnemyName.Equals (enemyData [i].objName)) {
-				enemyNeedToRemove = enemyData [i];
 			}
 		}
 
-		if (enemyNeedToRemove != null) {
-			//敌人掉落
-			enemyData.Remove (enemyNeedToRemove);
-		}
+		gData.enemyNeedRemove = 0;
 
 		//加载挖掘点		
 		for (int i=0; i<digData.Count; i++) {
@@ -403,12 +402,11 @@ public class SceneGen: MonoBehaviour
 				GameObject enemyO = Instantiate (enemyPrefab, enemyPos, Quaternion.identity) as GameObject;
 				enemyO.GetComponent<SpriteRenderer> ().sortingOrder = 5;
 				enemyO.transform.parent = enemys;
-				Enemy e = enemyTypes [Random.Range (0, enemyTypes.Count)];
+				Enemy e = new Enemy (enemyTypes [Random.Range (0, enemyTypes.Count)]);
+				e.dbid = num + 1;
 				enemyO.name = e.PrefabName;
 				enemyO.GetComponent<SpriteRenderer> ().sprite = Resources.Load <Sprite> ("_images/_game/" + e.PrefabName);
 				enemyO.GetComponent<EnemyAI> ().enemy = e;
-				enemyO.GetComponent<EnemyAI> ().dbid = num + 1;
-
 				enemyList.Add (enemyO);
 
 				num++;
@@ -440,13 +438,13 @@ public class SceneGen: MonoBehaviour
 			for (int i=0; i<enemyList.Count; i++) {
 				GameObject enemyO = enemyList [i];
 				ElementData ed = new ElementData (enemyO.transform.position, enemyO.name, enemyO.transform.eulerAngles, enemyO.GetComponent<SpriteRenderer> ().sortingOrder);
-				ed.dbid = enemyO.GetComponent<EnemyAI>().dbid;
+				ed.dbid = enemyO.GetComponent<EnemyAI> ().enemy.dbid;
 				enemyData.Add (ed);
 			}
 			currentSceneInfo.EnemyData = enemyData;
 		}
 
-		currentSceneInfo.digData = new List<ElementData>();
+		currentSceneInfo.digData = new List<ElementData> ();
 
 		gData.currentTomb.sceneList [gData.currentFloor - 1] = currentSceneInfo;
 
@@ -806,11 +804,11 @@ public class SceneGen: MonoBehaviour
 
 	public void ToPreFloor ()
 	{
-		//RecScene ();
 		if (gData.currentFloor == 1) {
 			//如果是第一层,回到城市
 			Application.LoadLevel ("city");
 		} else {
+			gData.account.toPreFloor ();
 			gData.currentFloor--;
 			Vector3 preFloorNextEntryPos = gData.currentTomb.sceneList [gData.currentFloor - 1].digToNextPos;
 			gData.playerPos = preFloorNextEntryPos;
@@ -821,7 +819,7 @@ public class SceneGen: MonoBehaviour
 	public void ToNextFloor (Vector3 pos)
 	{
 		gData.currentTomb.sceneList [gData.currentFloor - 1].digToNextPos = pos;
-		//RecScene ();
+		gData.account.toNextFloor ();
 		gData.currentFloor++;
 		Application.LoadLevel ("main");
 	}

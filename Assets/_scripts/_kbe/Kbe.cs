@@ -63,6 +63,8 @@ public class Kbe : MonoBehaviour
 
 		KBEngine.Event.registerOut ("OnOpExe", this, "OnOpExe");
 
+		KBEngine.Event.registerOut ("onEnterTomb", this, "onEnterTomb");
+
 	}
 
 	void OnDestroy ()
@@ -197,10 +199,10 @@ public class Kbe : MonoBehaviour
 		battle.OnGetBattleData (enemyList);
 	}
 
-	public void OnOpExe (List<object> toBos, List<object> bag,int itemid)
+	public void OnOpExe (List<object> toBos, List<object> bag, int itemid)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.OnOpExe (toBos,bag,itemid);
+		battle.OnOpExe (toBos, bag, itemid);
 	}
 
 	public void onAddOp (int isBattleStart)
@@ -209,10 +211,10 @@ public class Kbe : MonoBehaviour
 		battle.OnAddOp (isBattleStart);
 	}
 
-	public void OnBattleAnim (int itemid,string from)
+	public void OnBattleAnim (int itemid, string from)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.OnBattleAnim (itemid,from);
+		battle.OnBattleAnim (itemid, from);
 	}
 
 	public void onUndoOp (string from_tag)
@@ -221,9 +223,15 @@ public class Kbe : MonoBehaviour
 		battle.OnUndoOp (from_tag);
 	}
 
-	public void battleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList,int battleOver)
+	public void battleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList, int battleOver, List<object> bag, int enemy_dbid)
 	{
 		Battle battle = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<Battle> ();
-		battle.BattleOver (battle_res, playerInfo, assistList,battleOver);
+		battle.BattleOver (battle_res, playerInfo, assistList, battleOver, bag, enemy_dbid);
+	}
+
+	public void onEnterTomb (int tombid)
+	{
+		UI_Map mapUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Map> ();
+		mapUI.OnEnterTomb (tombid);
 	}
 }

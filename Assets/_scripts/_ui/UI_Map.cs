@@ -22,7 +22,7 @@ public class UI_Map : MonoBehaviour
 		Transform tombsO = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("Tombs");
 		for (int i=0; i<tombsO.childCount; i++) {
 			tombsO.GetChild (i).GetComponent<Image> ().sprite = Resources.Load <Sprite> ("_images/_game/tomb_" + tombs [i].tombLevel);
-			tombsO.GetChild (i).FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN[tombs [i].tombName];
+			tombsO.GetChild (i).FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN["tomb_"+tombs [i].dbid];
 			tombsO.GetChild (i).GetComponent<TombInfo> ().tomb = tombs [i];
 		}
 
@@ -75,7 +75,12 @@ public class UI_Map : MonoBehaviour
 		if(type.Equals("new")){
 			currentTomb.sceneList = new List<SceneInfo>();
 		}
+		gData.account.enterTomb(currentTomb.dbid);
+	}
 
+	public void OnEnterTomb(int tombid){
+		currentTomb.dbid = tombid;
+		currentTomb.tombName = StringCollection.stringDict_CN["tomb_"+tombid];
 		gData.currentTomb = currentTomb;
 		DontDestroyOnLoad (gData);
 		Application.LoadLevel ("main");

@@ -11,7 +11,6 @@ public class EnemyAI : MonoBehaviour
 	private StatusType currentStatus;
 	private GameObject target;
 	public Enemy enemy;
-	public int dbid;
 
 	private enum StatusType
 	{  

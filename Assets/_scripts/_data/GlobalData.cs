@@ -22,4 +22,5 @@ public class GlobalData : MonoBehaviour
 	public List<int> equipShopContent;
 	public Account account;
 	public List<Tomb> tombs;
+	public int enemyNeedRemove = 0;
 }

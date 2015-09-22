@@ -78,13 +78,18 @@ public class StringCollection
 	public static string ITEMTOFRIEND = "该道具只能被用于队友";
 	public static string INVALIDTARGET = "无效的目标";
 	public static string ITEMTOENEMY = "该道具只能被用于敌人";
+	public static string FINDPLAYER = "玩家";
+	public static string QUERYPLAYER = "查找";
+
+
 	public static Dictionary<string, string> stringDict_CN = new Dictionary<string, string> (){
 		{"NUMOVER","超出背包空间"},
 		{"NOMATCHITEM","抱歉,没有这种商品"},
 		{"NOTENOUGHMONEY","没钱了"},
-		{"KINGOFLU","明鲁王墓"},
+		{"tomb_1","明鲁王墓"},
 		{"NOSTAMINA","没有体能挖掘了,大家需要休息一会"},
 		{"DIGNOTHING","挖到底了,什么也发现"},
-		{"DIGOVER","这里已经挖过了,换一个地方吧"}
+		{"DIGOVER","这里已经挖过了,换一个地方吧"},
+		{"exp","经验值"}
 	};
 }

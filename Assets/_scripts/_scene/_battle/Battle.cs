@@ -22,64 +22,64 @@ public class Battle : MonoBehaviour
 	private bool dead;
 	private bool victory;
 	private GameObject canvas;
-
 	private Sprite attack_s;
 	private Sprite heal_s;
 	private Dictionary<int,Sprite> spriteDic;
 	private int animScope = 5;
-
 	private Dictionary<string,GameObject> posDic;
+	private bool backToMain = false;
 
-	IEnumerator PlayActAnim(int itemid,GameObject fromBO)  
+	IEnumerator PlayActAnim (int itemid, GameObject fromBO)
 	{  
-		if(spriteDic.ContainsKey(gData.siList[itemid].commontype)){
+		if (spriteDic.ContainsKey (gData.siList [itemid].commontype)) {
 			Sprite s = fromBO.GetComponent<Image> ().sprite;
 			
-			fromBO.GetComponent<Image> ().sprite = spriteDic[gData.siList[itemid].commontype];
+			fromBO.GetComponent<Image> ().sprite = spriteDic [gData.siList [itemid].commontype];
 			
-			yield return new WaitForSeconds(1.0f);
+			yield return new WaitForSeconds (0.5f);
 			
 			fromBO.GetComponent<Image> ().sprite = s;
 		}
-	}  
+	}
 
-	public void OnBattleAnim (int itemid,string from)
+	public void OnBattleAnim (int itemid, string from)
 	{
 
 		GameObject fromBO = null;
 
-		if(int.Parse(from)<5){
-			for(int i=0;i<characterPos.Length;i++){
-				if(characterPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse(from)){
+		if (int.Parse (from) < 5) {
+			for (int i=0; i<characterPos.Length; i++) {
+				if (characterPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse (from)) {
 					fromBO = characterPos [i];
 					break;
 				}
 			}
-		}else{
-			for(int i=0;i<enemyPos.Length;i++){
-				if(enemyPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse(from)){
+		} else {
+			for (int i=0; i<enemyPos.Length; i++) {
+				if (enemyPos [i].GetComponent<PosChar> ().battleObj.dbid == int.Parse (from)) {
 					fromBO = enemyPos [i];
 					break;
 				}
 			}
 		}
 
-		if(fromBO!=null){
+		if (fromBO != null) {
 			//根据ITEMID决定播放动画
-			StartCoroutine(PlayActAnim(itemid,fromBO));  
+			StartCoroutine (PlayActAnim (itemid, fromBO));  
 		}
 	}
 
-	public void OnOpExe(List<object> toBos,List<object> bag,int itemid){
+	public void OnOpExe (List<object> toBos, List<object> bag, int itemid)
+	{
 
-		for(int i=0;i<toBos.Count;i++){
-			Dictionary<string,object> boInfo = (Dictionary<string,object>)toBos[i];
-			UpdateUIWithTarget (boInfo["dbid"].ToString(),boInfo["health"].ToString(),itemid);
+		for (int i=0; i<toBos.Count; i++) {
+			Dictionary<string,object> boInfo = (Dictionary<string,object>)toBos [i];
+			UpdateUIWithTarget (boInfo ["dbid"].ToString (), boInfo ["health"].ToString (), itemid);
 		}
 
-		if(bag.Count>0){		
+		if (bag.Count > 0) {		
 			//更新背包
-			DataHelper.UpdateBag (gData.characterList [0], bag,gData.siList);
+			DataHelper.UpdateBag (gData.characterList [0], bag, gData.siList);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class Battle : MonoBehaviour
 		}
 
 		UpdateUIAll ();
-		NewTurn();
+		NewTurn ();
 	}
 	
 	void Start ()
@@ -110,15 +110,15 @@ public class Battle : MonoBehaviour
 		focusList = new List<GameObject> ();
 		opList = new List<BattleOp> ();
 		enemyAttackTypeList = new List<Baggrid> ();
-		posDic = new Dictionary<string, GameObject>();
+		posDic = new Dictionary<string, GameObject> ();
 
 		enemySprite = Resources.Load <Sprite> ("_images/_game/" + currentEnemy.PrefabName);
 
-		spriteDic = new Dictionary<int, Sprite>();
+		spriteDic = new Dictionary<int, Sprite> ();
 		attack_s = Resources.Load<Sprite> ("_images/_game/act_5");
-		spriteDic.Add(5,attack_s);
+		spriteDic.Add (5, attack_s);
 		heal_s = Resources.Load<Sprite> ("_images/_game/act_3");
-		spriteDic.Add(3,heal_s);
+		spriteDic.Add (3, heal_s);
 
 
 		//初始化按钮文本
@@ -139,7 +139,7 @@ public class Battle : MonoBehaviour
 			characterPos [i].GetComponent<PosChar> ().battleObj = character;
 		}
 
-		gData.account.getBattleData (currentEnemy.enemyid);
+		gData.account.getBattleData (currentEnemy.enemyid,currentEnemy.dbid);
 	}
 
 	void Update ()
@@ -171,77 +171,79 @@ public class Battle : MonoBehaviour
 		for (int i=0; i<enemyPos.Length; i++) {
 			if (enemyPos [i].activeInHierarchy) {
 				enemyPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = enemyPos [i].GetComponent<PosChar> ().battleObj.Health.ToString ();
-				posDic.Add(enemyPos [i].GetComponent<PosChar> ().battleObj.dbid.ToString(),enemyPos [i]);
+				posDic.Add (enemyPos [i].GetComponent<PosChar> ().battleObj.dbid.ToString (), enemyPos [i]);
 			}
 		}
 		for (int i=0; i<characterPos.Length; i++) {
 			if (characterPos [i].activeInHierarchy) {
 				characterPos [i].transform.FindChild ("Health").GetComponent<Text> ().text = characterPos [i].GetComponent<PosChar> ().battleObj.Health.ToString ();
-				posDic.Add(characterPos [i].GetComponent<PosChar> ().battleObj.dbid.ToString(),characterPos [i]);
+				posDic.Add (characterPos [i].GetComponent<PosChar> ().battleObj.dbid.ToString (), characterPos [i]);
 			}
 		}
 	}
 
-	void UpdateUIWithTarget(string to,string newHealth,int itemid){
+	void UpdateUIWithTarget (string to, string newHealth, int itemid)
+	{
 
 		int dir = 1;
 
-		if(int.Parse(to)<5){
+		if (int.Parse (to) < 5) {
 			dir = -1;
 		}
 
-		GameObject posGo =  posDic[to];
+		GameObject posGo = posDic [to];
 
-		ServerItemData sid = gData.siList[itemid];
+		ServerItemData sid = gData.siList [itemid];
 
-		posGo.GetComponent<PosChar> ().battleObj.Health = int.Parse(newHealth); 
-		HealthChangeAnim(posGo,posGo.transform.FindChild ("Health").GetComponent<Text> ().text,newHealth,dir,sid);
+		posGo.GetComponent<PosChar> ().battleObj.Health = int.Parse (newHealth); 
+		HealthChangeAnim (posGo, posGo.transform.FindChild ("Health").GetComponent<Text> ().text, newHealth, dir, sid);
 		posGo.transform.FindChild ("Health").GetComponent<Text> ().text = newHealth;
 
-		if(newHealth.Equals("0")){
+		if (newHealth.Equals ("0")) {
 			Color c = posGo.GetComponent<Image> ().color;
 			posGo.GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 0.1f);
 		}
 	}
 
-	void HealthChangeAnim(GameObject go,string pre_health,string now_health,int dir,ServerItemData sid){
-		int pre_health_int = int.Parse(pre_health);
-		int now_health_int = int.Parse(now_health);
+	void HealthChangeAnim (GameObject go, string pre_health, string now_health, int dir, ServerItemData sid)
+	{
+		int pre_health_int = int.Parse (pre_health);
+		int now_health_int = int.Parse (now_health);
 
-		if(pre_health_int > now_health_int){
-			StartCoroutine(PlayAttackedAnim(go,dir));
-		}else if(pre_health_int < now_health_int){
-			StartCoroutine(PlayHealedAnim(go));
-		}else{
-			if(sid.commontype==3){
-				StartCoroutine(PlayHealedAnim(go));
-			}else{
-				StartCoroutine(PlayDefAnim(go,dir));
+		if (pre_health_int > now_health_int) {
+			StartCoroutine (PlayAttackedAnim (go, dir));
+		} else if (pre_health_int < now_health_int) {
+			StartCoroutine (PlayHealedAnim (go));
+		} else {
+			if (sid.commontype == 3) {
+				StartCoroutine (PlayHealedAnim (go));
+			} else {
+				StartCoroutine (PlayDefAnim (go, dir));
 			}
 		}
-	}	
+	}
 
-	IEnumerator PlayAttackedAnim(GameObject go,int dir)  
+	IEnumerator PlayAttackedAnim (GameObject go, int dir)
 	{  
 		go.transform.Translate (Vector2.left * animScope * dir);
-		yield return new WaitForSeconds(0.1f);
-		go.transform.Translate (Vector2.right * (animScope*2) * dir);
-		yield return new WaitForSeconds(0.1f);
+		yield return new WaitForSeconds (0.1f);
+		go.transform.Translate (Vector2.right * (animScope * 2) * dir);
+		yield return new WaitForSeconds (0.1f);
 		go.transform.Translate (Vector2.left * animScope * dir);
-	}  
+	}
 
-	IEnumerator PlayDefAnim(GameObject go,int dir)  
+	IEnumerator PlayDefAnim (GameObject go, int dir)
 	{  
 		go.transform.Translate (Vector2.left * animScope * dir);
-		yield return new WaitForSeconds(0.1f);
+		yield return new WaitForSeconds (0.1f);
 		go.transform.Translate (Vector2.right * animScope * dir);
-	}  
+	}
 
-	IEnumerator PlayHealedAnim(GameObject go)  
+	IEnumerator PlayHealedAnim (GameObject go)
 	{  
-		go.transform.localScale = new Vector3(1.3f,1.3f,1f);
-		yield return new WaitForSeconds(0.3f);
-		go.transform.localScale = new Vector3(1,1,1);
+		go.transform.localScale = new Vector3 (1.3f, 1.3f, 1f);
+		yield return new WaitForSeconds (0.3f);
+		go.transform.localScale = new Vector3 (1, 1, 1);
 	}  
 
 	//玩家动作,根据道具类型，设置聚焦列表
@@ -376,7 +378,7 @@ public class Battle : MonoBehaviour
 		
 		currentAct = null;
 
-		if (isBattleStart==1) {
+		if (isBattleStart == 1) {
 			actionButton.SetActive (false);			
 		}
 	}
@@ -397,14 +399,34 @@ public class Battle : MonoBehaviour
 		gData.account.undoOp ();
 	}
 
-	public void BattleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList,int battleOver)
+	public void BattleOver (string battle_res, Dictionary<string,object> playerInfo, List<object> assistList, int battleOver,List<object> bag, int enemy_dbid)
 	{
-		if (battle_res.Equals ("win")) {
+		if (battle_res.Equals ("loose")) {
+			gData.victory = false;
+			Application.LoadLevel ("main");
+		} else if (battle_res.Equals ("goon")) {
+			if (battleOver == 0) {  //如果战斗没有结束，当前指令集已执行完毕，开始新的一轮
+				NewTurn ();
+			}
+		} else {
 
-			//跟新属性
-			Debug.Log (playerInfo ["exp"] + " :add exp");
+			string showMsg = "";
+
+			string[] itemList = battle_res.Split (new char[]{'.'});
+			for (int i=0; i<itemList.Length; i++) {
+				if (!itemList [i].Equals ("")) {
+					if (itemList [i].Split (new char[]{'@'}) [0].Equals ("exp")) {
+						int itemNum = int.Parse (itemList [i].Split (new char[]{'@'}) [1]);			
+						showMsg = showMsg + StringCollection.stringDict_CN ["exp"] + " : " + itemNum + "\n";
+					} else {
+						int itemId = int.Parse (itemList [i].Split (new char[]{'@'}) [0]);
+						int itemNum = int.Parse (itemList [i].Split (new char[]{'@'}) [1]);					
+						showMsg = showMsg + gData.siList [itemId].name + " * " + itemNum + "\n";
+					}
+				}
+			}
+
 			DataHelper.UpdatePlayerAttr (gData.characterList [0], playerInfo);
-			Debug.Log (gData.characterList [0].exp + " :after upate");
 
 			for (int i=1; i<gData.characterList.Count; i++) {
 				for (int j=0; j<assistList.Count; j++) {
@@ -416,17 +438,25 @@ public class Battle : MonoBehaviour
 						break;
 					}
 				}
-			}
+			}		
 
+			//更新背包
+			DataHelper.UpdateBag(gData.characterList[0],bag,gData.siList);
+
+			//标记删除敌人
+			gData.enemyNeedRemove = enemy_dbid;
+
+
+			ShowHint.Hint (showMsg);
+			backToMain = true;
+		}
+	}
+
+	public void HintBattleGet ()
+	{
+		if (backToMain) {
 			gData.victory = true;
-			Application.LoadLevel ("main");
-		} else if (battle_res.Equals ("loose")) {
-			gData.victory = false;
-			Application.LoadLevel ("main");
-		}else if (battle_res.Equals ("goon")){
-			if(battleOver==0){
-				NewTurn ();
-			}
+			Application.LoadLevel ("main");	
 		}
 	}
 
