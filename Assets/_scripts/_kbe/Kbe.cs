@@ -65,6 +65,7 @@ public class Kbe : MonoBehaviour
 
 		KBEngine.Event.registerOut ("onEnterTomb", this, "onEnterTomb");
 
+		KBEngine.Event.registerOut ("onQueryOtherPlayer", this, "onQueryOtherPlayer");
 	}
 
 	void OnDestroy ()
@@ -233,5 +234,11 @@ public class Kbe : MonoBehaviour
 	{
 		UI_Map mapUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Map> ();
 		mapUI.OnEnterTomb (tombid);
+	}
+
+	public void onQueryOtherPlayer (List<object> playerInfos,int maxPage,int currentPage)
+	{
+		UI_City cityUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_City> ();
+		cityUI.OnQueryOtherPlayer (playerInfos,maxPage,currentPage);
 	}
 }

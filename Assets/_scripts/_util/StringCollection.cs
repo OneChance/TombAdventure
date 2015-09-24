@@ -90,6 +90,15 @@ public class StringCollection
 		{"NOSTAMINA","没有体能挖掘了,大家需要休息一会"},
 		{"DIGNOTHING","挖到底了,什么也发现"},
 		{"DIGOVER","这里已经挖过了,换一个地方吧"},
-		{"exp","经验值"}
+		{"exp","经验值"},
+		{"Geomancer","风水师"},
+		{"Settler","拓荒者"},
+		{"Exorcist","驱魔师"},
+		{"Doctor","医师"},
+		{"Invite","邀请加入"},
+		{"Name","名字"},
+		{"Pro","职业"},
+		{"Level","等级"},
+		{"NoPlayer","人都去哪儿了?"}
 	};
 }
