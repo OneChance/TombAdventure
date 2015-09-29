@@ -17,19 +17,6 @@ public class DataHelper : MonoBehaviour
 
 		int money = int.Parse (((UInt32)role ["money"]).ToString ());
 
-		/*
-		int level = int.Parse (((UInt16)player ["level"]).ToString ());
-		int exp = int.Parse (((UInt16)player ["exp"]).ToString ());
-		int health = int.Parse (((UInt16)player ["health"]).ToString ());
-		int maxhealth = int.Parse (((UInt16)player ["maxhealth"]).ToString ());
-		int stamina = int.Parse (((UInt16)player ["stamina"]).ToString ());
-		int maxstamina = int.Parse (((UInt16)player ["maxstamina"]).ToString ());
-
-		int strength = int.Parse (((UInt16)player ["strength"]).ToString ());
-		int archeology = int.Parse (((UInt16)player ["archeology"]).ToString ());
-		int def = int.Parse (((UInt16)player ["def"]).ToString ());
-		int dodge = int.Parse (((UInt16)player ["dodge"]).ToString ());*/
-
 		string proname = player ["pro"].ToString ();
 		int img = int.Parse (player ["img"].ToString ());
 
@@ -41,7 +28,7 @@ public class DataHelper : MonoBehaviour
 
 		Character c = new Character (money, 0, 0, 0, 0, 0, 0, name, true, 0, 0, pro, 0, 0, eList, -1);
 
-		UpdatePlayerAttr(c,player);
+		UpdatePlayerAttr (c, player);
 
 		c.tombLogs = getAdventureLog (role);
 		c.BgList = bgList;
@@ -53,10 +40,13 @@ public class DataHelper : MonoBehaviour
 
 		getAssistsFromServer (role, siList, characterList);
 
+
+		
 		return characterList;
 	}
 
-	public static void UpdatePlayerAttr(Character c,Dictionary<string,object> playerInfo){
+	public static void UpdatePlayerAttr (Character c, Dictionary<string,object> playerInfo)
+	{
 		c.level = int.Parse (((UInt16)playerInfo ["level"]).ToString ());
 		c.exp = int.Parse (((UInt16)playerInfo ["exp"]).ToString ());
 		c.Health = int.Parse (((UInt16)playerInfo ["health"]).ToString ());
@@ -64,10 +54,10 @@ public class DataHelper : MonoBehaviour
 		c.stamina = int.Parse (((UInt16)playerInfo ["stamina"]).ToString ());
 		c.maxStamina = int.Parse (((UInt16)playerInfo ["maxstamina"]).ToString ());
 		
-		c.strength= int.Parse (((UInt16)playerInfo ["strength"]).ToString ());
+		c.strength = int.Parse (((UInt16)playerInfo ["strength"]).ToString ());
 		c.archeology = int.Parse (((UInt16)playerInfo ["archeology"]).ToString ());
 		c.def = int.Parse (((UInt16)playerInfo ["def"]).ToString ());
-		c.dodge= int.Parse (((UInt16)playerInfo ["dodge"]).ToString ());
+		c.dodge = int.Parse (((UInt16)playerInfo ["dodge"]).ToString ());
 	}
 
 	public static Dictionary<string, object> BaseSceneInfoToServer (SceneInfo sceneInfo, int currentFloor)
@@ -288,40 +278,55 @@ public class DataHelper : MonoBehaviour
 		return elementsData;
 	}
 
-	public static void getAssistsFromServer (Dictionary<string, object> role, Dictionary<int, ServerItemData> siList, List<Character> characterList)
+	public static void getAssistsFromAssistList (List<object> assistL, Dictionary<int, ServerItemData> siList, List<Character> characterList)
 	{
-		List<object> assistL = (List<object>)role ["assists"];
+
 		for (int i = 0; i < assistL.Count; i++) {
 			Dictionary<string, object> assistInfo = (Dictionary<string, object>)assistL [i];
 			int iid = int.Parse (assistInfo ["iid"].ToString ());
 			int dbid = int.Parse (assistInfo ["dbid"].ToString ());
+			int player = int.Parse (assistInfo ["player"].ToString ());
+			int onlineState = int.Parse (assistInfo ["onlinestate"].ToString ());
+			
+			ServerItemData assistProInfo = null;
 
-			/*
-			int level = int.Parse (assistInfo ["level"].ToString ());
-			int stamina = int.Parse (assistInfo ["stamina"].ToString ());
-			int maxstamina = int.Parse (assistInfo ["maxstamina"].ToString ());
-			int health = int.Parse (assistInfo ["health"].ToString ());
-			int maxhealth = int.Parse (assistInfo ["maxhealth"].ToString ());
-			int strength = int.Parse (assistInfo ["strength"].ToString ());
-			int archeology = int.Parse (assistInfo ["archeology"].ToString ());
-			int def = int.Parse (assistInfo ["def"].ToString ());
-			int dodge = int.Parse (assistInfo ["dodge"].ToString ());
-			int exp = int.Parse (assistInfo ["exp"].ToString ());*/
-
-			ServerItemData assistProInfo = siList [iid];
-
+			if (player == 0) {
+				assistProInfo = siList [iid];
+			} else {
+				assistProInfo = new ServerItemData ();
+				assistProInfo.pro = assistInfo ["playerpro"].ToString ();
+				assistProInfo.prefabname = assistInfo ["iid"].ToString ();
+				assistProInfo.name = assistInfo ["playername"].ToString ();
+			}
+			
 			Pro pro = ProFactory.getPro (assistProInfo.pro, assistProInfo.prefabname);
-
+			
 			if (assistProInfo != null) {
 				Character c = new Character (0, 0, 0, 0, 0, 0, 0, assistProInfo.name, false, 0, 0, pro, 0, 0, null, -1);
 
-				UpdatePlayerAttr(c,assistInfo);
-
+				UpdatePlayerAttr (c, assistInfo);
+				
 				c.dbid = dbid;
 				c.iid = iid;
+
+				if (player == 1) {
+					c.IsOnLinePlayer = true;
+					c.playerId = int.Parse(assistInfo ["playerid"].ToString ());
+
+					if (onlineState == 1) {
+						c.onLine = true;
+					}
+				}
+
 				characterList.Add (c);
 			}
 		}
+	}
+
+	public static void getAssistsFromServer (Dictionary<string, object> role, Dictionary<int, ServerItemData> siList, List<Character> characterList)
+	{
+		List<object> assistL = (List<object>)role ["assists"];
+		getAssistsFromAssistList (assistL, siList, characterList);
 	}
 
 	public static List<Equipment> getEquipsFromServer (Dictionary<string, object> role, Dictionary<int, ServerItemData> siList)
@@ -342,7 +347,8 @@ public class DataHelper : MonoBehaviour
 		return eList;
 	}
 
-	public static void UpdateBag(Character c, List<object> bag, Dictionary<int, ServerItemData> siList){
+	public static void UpdateBag (Character c, List<object> bag, Dictionary<int, ServerItemData> siList)
+	{
 
 		c.BgList.Clear ();
 
@@ -369,7 +375,7 @@ public class DataHelper : MonoBehaviour
 
 		List<object> bgList_server = (List<object>)role ["bggrids"];
 
-		UpdateBag(c,bgList_server,siList);
+		UpdateBag (c, bgList_server, siList);
 
 		c.money = int.Parse (((UInt32)role ["money"]).ToString ());
 	}
@@ -387,6 +393,41 @@ public class DataHelper : MonoBehaviour
 			tombList.Add (tomb);
 		}
 		return tombList;
+	}
+
+	public static void FillPlayerInfoRowTitle (GameObject panel)
+	{
+		panel.transform.FindChild ("NameLable").GetComponent<Text> ().text = StringCollection.NAME;
+		panel.transform.FindChild ("Query").FindChild ("Text").GetComponent<Text> ().text = StringCollection.QUERYPLAYER;
+		panel.transform.FindChild ("G_Choose").FindChild ("Label").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Geomancer"];
+		panel.transform.FindChild ("S_Choose").FindChild ("Label").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Settler"];
+		panel.transform.FindChild ("E_Choose").FindChild ("Label").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Exorcist"];
+		panel.transform.FindChild ("D_Choose").FindChild ("Label").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Doctor"];
+		
+		Transform title = panel.transform.FindChild ("Rows").FindChild ("Title");	
+		title.FindChild ("Name").FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Name"];
+		title.FindChild ("Pro").FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Pro"];
+		title.FindChild ("Level").FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Level"];
+	}
+
+	public static List<object> getProListByChooseFromPanel (GameObject panel)
+	{
+		List<object> proList = new List<object> ();
+		
+		if (panel.transform.FindChild ("G_Choose").GetComponent<Toggle> ().isOn) {
+			proList.Add ("Geomancer");
+		}
+		if (panel.transform.FindChild ("S_Choose").GetComponent<Toggle> ().isOn) {
+			proList.Add ("Settler");
+		}
+		if (panel.transform.FindChild ("E_Choose").GetComponent<Toggle> ().isOn) {
+			proList.Add ("Exorcist");
+		}
+		if (panel.transform.FindChild ("D_Choose").GetComponent<Toggle> ().isOn) {
+			proList.Add ("Doctor");
+		}
+		
+		return proList;
 	}
 
 }

@@ -99,6 +99,18 @@ public class StringCollection
 		{"Name","名字"},
 		{"Pro","职业"},
 		{"Level","等级"},
-		{"NoPlayer","人都去哪儿了?"}
+		{"NoPlayer","人都去哪儿了?"},
+		{"PLEASEREMOVEASSIST","请先移除你的雇佣兵"},
+		{"PLAYERTEAMED","这个玩家正在另一个队伍中"},
+		{"INVITED_IN","加入"},
+		{"INVITED_REJECT","拒绝"},
+		{"INVITEREJECT","拒绝了你的邀请"},
+		{"INVITEDBYPLAYER","该玩家已经向你发出邀请"},
+		{"NOPLAYER","该玩家已离线"},
+		{"NEEDBELEADER","只有队长才可以邀请队员"},
+		{"TEAMFULL","队伍已满"},
+		{"TEAMEDNOASSIST","你已经组队,无法使用雇佣兵"},
+		{"OFFLINE","失去联络"},
+		{"ONLINE","已归队"}
 	};
 }

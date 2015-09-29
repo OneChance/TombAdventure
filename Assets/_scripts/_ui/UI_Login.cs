@@ -160,4 +160,14 @@ public class UI_Login : MonoBehaviour
 			Application.LoadLevel ("create");
 		}
 	}
+
+	public bool isTeam(){
+		for (int i=1; i<gData.characterList.Count; i++) {
+			if (gData.characterList[i].IsOnLinePlayer) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

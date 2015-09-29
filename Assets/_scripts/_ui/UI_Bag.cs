@@ -84,8 +84,18 @@ public class UI_Bag : MonoBehaviour
 				GameObject ass = assList [i - 1];
 
 				if (i < cList.Count) {
-					ass.transform.FindChild ("UIChar(Clone)").GetComponent<Image> ().sprite = Resources.Load<Sprite> (cList [i].PrefabName);			
+					ass.transform.FindChild ("UIChar(Clone)").GetComponent<Image> ().sprite = Resources.Load<Sprite> (cList [i].PrefabName);	
 					ass.transform.FindChild ("UIChar(Clone)").GetComponent<UI_Player> ().c = cList [i];
+
+					Color c = ass.transform.FindChild ("UIChar(Clone)").GetComponent<Image> ().color;
+
+					if(!cList[i].onLine){
+						ass.transform.FindChild ("UIChar(Clone)").GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 0.5f);
+					}else{
+						ass.transform.FindChild ("UIChar(Clone)").GetComponent<Image> ().color = new Color (c.r, c.g, c.b, 1f);
+					}
+
+
 				} else {
 					ass.transform.FindChild ("UIChar(Clone)").GetComponent<Image> ().sprite = Resources.Load<Sprite> ("_images/_game/no_ass");
 					ass.transform.FindChild ("UIChar(Clone)").GetComponent<UI_Player> ().c = null;
@@ -247,6 +257,7 @@ public class UI_Bag : MonoBehaviour
 	{
 		if (!msg.Equals ("ok")) {
 			ShowHint.Hint (StringCollection.stringDict_CN [msg]);
+			GameUtil.UnFocus (focusList);
 		} else {
 			refreshCharacterData (role);
 			ItemUseComplete ();

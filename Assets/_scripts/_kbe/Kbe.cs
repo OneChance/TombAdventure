@@ -15,7 +15,6 @@ public class Kbe : MonoBehaviour
 	{
 
 		loginUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Login> ();
-
 		installEvents ();
 	}
 
@@ -66,6 +65,14 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("onEnterTomb", this, "onEnterTomb");
 
 		KBEngine.Event.registerOut ("onQueryOtherPlayer", this, "onQueryOtherPlayer");
+
+		KBEngine.Event.registerOut ("onInvitePlayer", this, "onInvitePlayer");
+
+		KBEngine.Event.registerOut ("onInvited", this, "onInvited");
+
+		KBEngine.Event.registerOut ("offLineNoti", this, "offLineNoti");
+
+		KBEngine.Event.registerOut ("onLineNoti", this, "onLineNoti");
 	}
 
 	void OnDestroy ()
@@ -236,9 +243,33 @@ public class Kbe : MonoBehaviour
 		mapUI.OnEnterTomb (tombid);
 	}
 
-	public void onQueryOtherPlayer (List<object> playerInfos,int maxPage,int currentPage)
+	public void onQueryOtherPlayer (List<object> playerInfos, int maxPage, int currentPage)
 	{
 		UI_City cityUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_City> ();
-		cityUI.OnQueryOtherPlayer (playerInfos,maxPage,currentPage);
+		cityUI.OnQueryOtherPlayer (playerInfos, maxPage, currentPage);
+	}
+
+	public void onInvitePlayer (string msg, List<object> playerList)
+	{
+		UI_City cityUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_City> ();
+		cityUI.OnInvitePlayer (msg, playerList);
+	}
+
+	public void onInvited (Dictionary<string,object> playerInfo)
+	{
+		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+		gdata.OnInvited (playerInfo);
+	}
+	
+	public void offLineNoti (int playerId)
+	{
+		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+		gdata.OffLineNoti (playerId);
+	}
+
+	public void onLineNoti (int playerId)
+	{
+		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+		gdata.OnLineNoti (playerId);
 	}
 }

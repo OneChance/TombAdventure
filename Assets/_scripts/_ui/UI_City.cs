@@ -13,9 +13,10 @@ public class UI_City : MonoBehaviour
 	private Transform buttons;
 	private GameObject exitButton;
 	public GameObject playerFinder;
+	public GameObject inviteFinder;
 	private bool finderInit = false;
 	public GameObject rowPrefab;
-	public GameObject rows;
+	private UnityEngine.GameObject[] rows;
 	private int page = 1;
 
 	void Start ()
@@ -62,7 +63,7 @@ public class UI_City : MonoBehaviour
 		if (!charInfo.activeInHierarchy) {
 			itemInfo.SetActive (false);
 		} else {
-			gameObject.SendMessage ("ShowCharInfo");
+			gameObject.SendMessage ("ShowCharInfo");  //UI_Bag
 		}
 	}
 
@@ -80,15 +81,12 @@ public class UI_City : MonoBehaviour
 
 	public void FindPlayer ()
 	{
-
 		playerFinder.SetActive (!playerFinder.activeInHierarchy);
 
 		if (playerFinder.activeInHierarchy) {
-			if (!finderInit) {
-				
-				playerFinder.transform.FindChild ("FindPlayer_NameLable").GetComponent<Text> ().text = StringCollection.NAME;
-				playerFinder.transform.FindChild ("FindPlayer_Query").FindChild ("Text").GetComponent<Text> ().text = StringCollection.QUERYPLAYER;
-
+			if (!finderInit) {				
+				playerFinder.transform.FindChild ("NameLable").GetComponent<Text> ().text = StringCollection.NAME;
+				playerFinder.transform.FindChild ("Query").FindChild ("Text").GetComponent<Text> ().text = StringCollection.QUERYPLAYER;
 				Transform title = playerFinder.transform.FindChild ("Rows").FindChild ("Title");
 
 				title.FindChild ("Name").FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Name"];
@@ -100,31 +98,18 @@ public class UI_City : MonoBehaviour
 				playerFinder.transform.FindChild ("E_Choose").FindChild ("Label").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Exorcist"];
 				playerFinder.transform.FindChild ("D_Choose").FindChild ("Label").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Doctor"];
 
+				rows = UnityEngine.GameObject.FindGameObjectsWithTag ("PlayerInfoRow");
+
 				finderInit = true;
 			}
-
+			ClearQueryList ();
 			gData.account.queryOtherPlayer ("", getProListByChoose (), 1);
 		}
 	}
 
 	public List<object> getProListByChoose ()
 	{
-		List<object> proList = new List<object> ();
-
-		if (playerFinder.transform.FindChild ("G_Choose").GetComponent<Toggle> ().isOn) {
-			proList.Add ("Geomancer");
-		}
-		if (playerFinder.transform.FindChild ("S_Choose").GetComponent<Toggle> ().isOn) {
-			proList.Add ("Settler");
-		}
-		if (playerFinder.transform.FindChild ("E_Choose").GetComponent<Toggle> ().isOn) {
-			proList.Add ("Exorcist");
-		}
-		if (playerFinder.transform.FindChild ("D_Choose").GetComponent<Toggle> ().isOn) {
-			proList.Add ("Doctor");
-		}
-
-		return proList;
+		return DataHelper.getProListByChooseFromPanel (playerFinder);
 	}
 
 	public void OnQueryOtherPlayer (List<object> playerInfos, int maxPage, int currentPage)
@@ -134,29 +119,51 @@ public class UI_City : MonoBehaviour
 
 		ClearQueryList ();
 
-		if(playerInfos.Count>0){
+		if (playerInfos.Count > 0) {
 
 			playerFinder.transform.FindChild ("NoPlayer").GetComponent<Text> ().text = "";
 
 			for (int i=0; i<playerInfos.Count; i++) {
+
+				GameObject infoRow = rows [i];
+
+				infoRow.SetActive (true);
+
 				Dictionary<string, object> info = (Dictionary<string, object>)playerInfos [i];
-				GameObject infoRow = Instantiate (rowPrefab, rows.transform.position, Quaternion.identity) as GameObject;
-				infoRow.transform.SetParent (rows.transform);
-				infoRow.GetComponent<RectTransform> ().anchoredPosition3D = new Vector3 (0, -1 * 42 * (i + 1), 0);
-				infoRow.GetComponent<RectTransform> ().localScale = new Vector3 (1, 1, 1);
-				
+
 				Transform it = infoRow.transform;
 				it.FindChild ("Name").FindChild ("Text").GetComponent<Text> ().text = info ["name"].ToString ();
 				it.FindChild ("Pro").FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN [info ["pro"].ToString ()];
 				it.FindChild ("Level").FindChild ("Text").GetComponent<Text> ().text = info ["level"].ToString ();
 				it.FindChild ("Invite").FindChild ("Button").FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN ["Invite"];
-				
+				it.FindChild ("Invite").FindChild ("Button").GetComponent<PlayerId> ().dbid = int.Parse (info ["attack"].ToString ());
+
+				Button btn = it.FindChild ("Invite").FindChild ("Button").GetComponent<Button> ();
+
+				btn.onClick.AddListener (delegate() {
+					//如果想邀请的玩家已近邀请了自己，就无法对他发起邀请
+					if (!CheckInvite (btn.GetComponent<PlayerId> ().dbid)) {
+						InvitePlayer (btn.GetComponent<PlayerId> ());
+					}
+				});
+
 			}
-		}else{
+		} else {
 			playerFinder.transform.FindChild ("NoPlayer").GetComponent<Text> ().text = StringCollection.stringDict_CN ["NoPlayer"];
 		}
 
 		playerFinder.transform.FindChild ("Page").FindChild ("Text").GetComponent<Text> ().text = currentPage.ToString () + "/" + maxPage;
+	}
+	
+	public bool CheckInvite (int dbid)
+	{
+		for (int i=0; i<gData.invitedList.Count; i++) {
+			if (gData.invitedList [i] ["attack"].ToString ().Equals (dbid.ToString ())) {
+				ShowHint.Hint (StringCollection.stringDict_CN ["INVITEDBYPLAYER"]);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void WorldMap ()
@@ -173,9 +180,10 @@ public class UI_City : MonoBehaviour
 
 	public void ClearQueryList ()
 	{
-		GameObject[] infoRows = GameObject.FindGameObjectsWithTag ("PlayerInfoRow");
-		for (int i=0; i<infoRows.Length; i++) {
-			Destroy (infoRows [i]);
+		if (rows != null) {
+			for (int i=0; i<rows.Length; i++) {
+				rows [i].SetActive (false);
+			}
 		}
 	}
 
@@ -190,4 +198,40 @@ public class UI_City : MonoBehaviour
 		page = page + 1;
 		QueryPlayer (page);
 	}
+
+	public void InvitePlayer (PlayerId playerId)
+	{
+		gData.account.invitePlayer (playerId.dbid);
+	}
+
+	//组队请求应答
+	public void OnInvitePlayer (string msg, List<object> assistList)
+	{
+		string showMsg = "";
+
+		if (!msg.Equals ("ok")) {
+
+			showMsg = StringCollection.stringDict_CN [msg];
+
+			if (msg.Equals ("INVITEREJECT")) {
+				//获得拒绝的玩家信息
+				Dictionary<string, object> info = (Dictionary<string, object>)assistList [0];
+				showMsg = "[" + info ["playername"] + "]" + showMsg;
+			}
+			if (msg.Equals ("NOPLAYER")) {
+				QueryPlayer (page);
+			}
+
+			ShowHint.Hint (showMsg);
+		} else {
+			//更新雇佣兵列表
+			//清空雇佣兵
+			while (gData.characterList.Count>1) {
+				gData.characterList.RemoveAt (1);
+			}
+
+			DataHelper.getAssistsFromAssistList (assistList, gData.siList, gData.characterList);
+		}
+	}
+
 }

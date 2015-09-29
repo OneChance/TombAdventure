@@ -27,7 +27,7 @@ public class UI_Player : MonoBehaviour
 
 			if (gData.currentItem.Item.ct == (int)Item.CommonType.CONSUME) {
 
-				gData.account.UseItem (gData.characterList [0].ObjName, c.dbid.ToString(), gData.currentItem.dbid);
+				gData.account.UseItem (gData.characterList [0].ObjName, c.dbid.ToString (), gData.currentItem.dbid);
 
 			} else if (gData.currentItem.Item.ct == (int)Item.CommonType.MERCENARY) {
 				if (gameObject.transform.parent.name.Contains ("Ass")) {
@@ -48,9 +48,20 @@ public class UI_Player : MonoBehaviour
 				itemInfo = GameObject.FindGameObjectWithTag ("UI").transform.FindChild ("ItemInfo").gameObject;
 				itemInfo.SetActive (true);
 				itemInfo.transform.FindChild ("Pic").GetComponent<Image> ().sprite = Resources.Load <Sprite> (m.prefabName);
-				itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = m.note + gData.siList [m.c.iid].note;
-				Text buttonText = itemInfo.transform.FindChild ("UseButton").FindChild ("Text").GetComponent<Text> ();
-				buttonText.text = StringCollection.LEAVETEAM;
+
+				Transform button = itemInfo.transform.FindChild ("UseButton");
+
+				string cNote = "";
+
+				if (m.c.IsOnLinePlayer) {
+					button.gameObject.SetActive (false);
+				} else {
+					cNote = gData.siList [m.c.iid].note;
+					button.FindChild ("Text").GetComponent<Text> ().text = StringCollection.LEAVETEAM;
+				}
+
+				itemInfo.transform.FindChild ("Note").GetComponent<Text> ().text = m.note + cNote;
+
 				gData.currentItem = new Baggrid (m, 1, 0);
 				gData.currentItem.Item.useable = false;
 			}
