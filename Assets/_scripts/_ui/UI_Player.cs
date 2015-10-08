@@ -8,13 +8,11 @@ public class UI_Player : MonoBehaviour
 
 	public Character c;
 	private GlobalData gData;
-	private UI_Bag uiBag;
 	private GameObject itemInfo;
 
 	void Awake ()
 	{
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
-		uiBag = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
 		Button btn = gameObject.GetComponent<Button> ();
 		btn.onClick.AddListener (delegate() {
 			this.OnClick (); 
@@ -54,7 +52,11 @@ public class UI_Player : MonoBehaviour
 				string cNote = "";
 
 				if (m.c.IsOnLinePlayer) {
-					button.gameObject.SetActive (false);
+					if (gData.characterList[0].isLeader) {
+						button.FindChild ("Text").GetComponent<Text> ().text = StringCollection.stringDict_CN ["REMOVEPLAYER"];
+					} else {
+						button.gameObject.SetActive (false);
+					}
 				} else {
 					cNote = gData.siList [m.c.iid].note;
 					button.FindChild ("Text").GetComponent<Text> ().text = StringCollection.LEAVETEAM;

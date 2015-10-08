@@ -7,9 +7,7 @@ public class PlayerAction : MonoBehaviour
 
 	private GlobalData gData;
 	private SceneGen sceneGen;
-	private int stepCounter;
 	public float moveDistance = 0.5f;
-	private UI_Input uiInput;
 
 	public enum MOVEDIRECTION
 	{
@@ -22,10 +20,8 @@ public class PlayerAction : MonoBehaviour
 
 	void Start ()
 	{
-		stepCounter = 0;
 		gData = GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		sceneGen = GameObject.FindGameObjectWithTag ("GameController").GetComponent<SceneGen> ();
-		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();
 	}
 
 	void OnCollisionEnter2D (Collision2D coll)

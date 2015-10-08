@@ -51,12 +51,10 @@ public class SceneGen: MonoBehaviour
 	private GameObject coffinPrefab;
 	private float digSide;
 	private float playerSide;
-	private List<Character> cList;
 	private GameObject currentDigging;
 	private bool digging;
 	private float digTimer;
 	private UI_Input uiInput;
-	private UI_Bag uiBag;
 
 	public void OnGetSceneData (List<object> enemyTypeList)
 	{
@@ -87,9 +85,7 @@ public class SceneGen: MonoBehaviour
 		digPrefab = Resources.Load ("Dig", typeof(GameObject)) as GameObject;
 		digSide = digPrefab.GetComponent<SpriteRenderer> ().bounds.size.x;
 		playerSide = player.GetComponent<SpriteRenderer> ().bounds.size.x;
-		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();
-		uiBag = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Bag> ();
-		
+		uiInput = GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_Input> ();	
 		preEntryPrefab = Resources.Load ("PreEntry", typeof(GameObject)) as GameObject;
 		coffinPrefab = Resources.Load ("Coffin", typeof(GameObject)) as GameObject;
 
@@ -216,8 +212,7 @@ public class SceneGen: MonoBehaviour
 	{
 
 		if (!checkBlockSide ()) {
-			this.cList = cList;
-			
+
 			//在当前位置开始挖掘
 			GameObject dig = getDig (player.transform.position);
 			

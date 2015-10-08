@@ -33,6 +33,7 @@ public class DataHelper : MonoBehaviour
 		c.tombLogs = getAdventureLog (role);
 		c.BgList = bgList;
 		c.dbid = 1; //玩家是1,雇佣兵为2,3,4
+		c.isLeader = (int.Parse(player ["isleader"].ToString ())==1?true:false);
 		
 		BagDataBind (c, role, siList);
 	
@@ -357,7 +358,7 @@ public class DataHelper : MonoBehaviour
 			Dictionary<string, object> bg_server = (Dictionary<string, object>)bag [i];
 			
 			int itemid = int.Parse (((UInt16)bg_server ["iid"]).ToString ());
-			
+
 			ServerItemData sid = siList [itemid];
 			
 			int num = int.Parse (bg_server ["num"].ToString ());

@@ -303,9 +303,6 @@ public class UI_Bag : MonoBehaviour
 
 			if (item.ct == (int)global::Item.CommonType.CONSUME) {
 				//如果是群体道具，直接应用，否则等待点击玩家后使用
-
-				Debug.Log ("sdfasdfafasdf  " + item.rt);
-
 				if (item.rt == (int)global::Item.RangeType.MULTI) {
 					gData.account.UseItem (cList [0].ObjName, "ALLTEAM", bg.dbid);
 				} else {
@@ -329,6 +326,8 @@ public class UI_Bag : MonoBehaviour
 			} else if (item.ct == (int)global::Item.CommonType.MERCENARY) {
 				if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.LEAVETEAM)) {//离队
 					gData.account.AssistOper (0, ((Mercenary)item).c.dbid);
+				} else if (button.transform.FindChild ("Text").GetComponent<Text> ().text.Equals (StringCollection.stringDict_CN["REMOVEPLAYER"])) {//移除玩家
+					gData.account.LeaveTeam (((Mercenary)item).c.playerId,1);
 				} else {
 					//助手格闪动
 					GameUtil.UnFocus (focusList);

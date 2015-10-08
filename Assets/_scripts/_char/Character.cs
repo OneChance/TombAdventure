@@ -34,6 +34,7 @@ public class Character:BattleObj
 	public Dictionary<int,TombLog> tombLogs;
 	public bool onLine;
 	public int playerId;
+	public bool isLeader;
 
 	public Character ()
 	{

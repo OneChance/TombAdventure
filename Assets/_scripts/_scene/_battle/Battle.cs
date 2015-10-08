@@ -15,10 +15,8 @@ public class Battle : MonoBehaviour
 	public List<Character> characterList;
 	public List<GameObject> waitForAttack;
 	private List<GameObject> focusList;
-	private List<BattleOp> opList;
 	private Enemy currentEnemy;
 	private Action currentAct;
-	private List<Baggrid> enemyAttackTypeList;
 	private bool dead;
 	private bool victory;
 	private GameObject canvas;
@@ -108,8 +106,6 @@ public class Battle : MonoBehaviour
 
 		waitForAttack = new List<GameObject> ();
 		focusList = new List<GameObject> ();
-		opList = new List<BattleOp> ();
-		enemyAttackTypeList = new List<Baggrid> ();
 		posDic = new Dictionary<string, GameObject> ();
 
 		enemySprite = Resources.Load <Sprite> ("_images/_game/" + currentEnemy.PrefabName);

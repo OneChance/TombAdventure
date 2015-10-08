@@ -110,8 +110,6 @@ public class UI_Login : MonoBehaviour
 				siList.Add (dbid, sid);
 			}
 
-
-			
 			//商店数据加载
 			if (itemshop != null && itemshop.Count > 0) {
 				for (int i=0; i<itemshop.Count; i++) {

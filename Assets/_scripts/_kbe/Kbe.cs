@@ -73,6 +73,10 @@ public class Kbe : MonoBehaviour
 		KBEngine.Event.registerOut ("offLineNoti", this, "offLineNoti");
 
 		KBEngine.Event.registerOut ("onLineNoti", this, "onLineNoti");
+
+		KBEngine.Event.registerOut ("LeaderChange", this, "LeaderChange");
+
+		KBEngine.Event.registerOut ("PlayerLeave", this, "PlayerLeave");
 	}
 
 	void OnDestroy ()
@@ -249,16 +253,20 @@ public class Kbe : MonoBehaviour
 		cityUI.OnQueryOtherPlayer (playerInfos, maxPage, currentPage);
 	}
 
-	public void onInvitePlayer (string msg, List<object> playerList)
+	public void onInvitePlayer (string msg, List<object> playerList,int leaderFlag)
 	{
 		UI_City cityUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_City> ();
-		cityUI.OnInvitePlayer (msg, playerList);
+		cityUI.OnInvitePlayer (msg, playerList,leaderFlag);
 	}
 
 	public void onInvited (Dictionary<string,object> playerInfo)
 	{
-		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
-		gdata.OnInvited (playerInfo);
+		if (UnityEngine.GameObject.FindGameObjectWithTag ("GameController") != null) {
+			UI_City cityUI = UnityEngine.GameObject.FindGameObjectWithTag ("GameController").GetComponent<UI_City> ();
+			if (cityUI != null) {
+				cityUI.OnInvited (playerInfo);
+			}
+		}
 	}
 	
 	public void offLineNoti (int playerId)
@@ -271,5 +279,17 @@ public class Kbe : MonoBehaviour
 	{
 		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
 		gdata.OnLineNoti (playerId);
+	}
+
+	public void LeaderChange (int leaderFlag)
+	{
+		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+		gdata.LeaderChange (leaderFlag);
+	}
+
+	public void PlayerLeave (int playerId,int type)
+	{
+		GlobalData gdata = UnityEngine.GameObject.FindGameObjectWithTag ("GlobalData").GetComponent<GlobalData> ();
+		gdata.PlayerLeave (playerId,type);
 	}
 }

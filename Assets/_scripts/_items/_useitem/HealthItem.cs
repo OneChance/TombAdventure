@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class HealthItem : Item
 {
-	private int heal;
+	public int heal;
 
 	public HealthItem (int range,int heal,string itemId,string name,int price):base(itemId,name)
 	{

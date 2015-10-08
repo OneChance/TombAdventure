@@ -111,6 +111,11 @@ public class StringCollection
 		{"TEAMFULL","队伍已满"},
 		{"TEAMEDNOASSIST","你已经组队,无法使用雇佣兵"},
 		{"OFFLINE","失去联络"},
-		{"ONLINE","已归队"}
+		{"ONLINE","已归队"},
+		{"REMOVEPLAYER","移除"},
+		{"PLAYEROUT","这个玩家当前不在城里"},
+		{"PLAYERIN","加入队伍"},
+		{"PLAYERLEAVE0","离开队伍"},
+		{"PLAYERLEAVE1","被移出队伍"}
 	};
 }
